@@ -4,10 +4,12 @@
 #include <sys/wait.h>
 #include <string.h>
 
+#define MAX_COMMAND_LENGTH 30
 
-
+//Doubly linked list for commands given by user.
 typedef struct _command {
-    char name[25];                          //Store the name of the command.
+    char name[MAX_COMMAND_LENGTH];        //Store the name of the command.
+    //char* name;                         //Store the name of the command.
     struct _command *next;                 //The next command.
     struct _command *prev;                 //The previous command.
 
@@ -20,16 +22,40 @@ typedef struct _command {
 //TODO: Make a function that appends to the list.
 //TODO: Make a function that reverses the list. [Read right to left].
 
+//TODO: RESOLVE CURRENT BUG WITH PRINTING NODES.
 
 //TODO: find a way to handle bad inputs
 //TODO: find a way to decern between executable programs and parameters.
 
+void setLastNode(Command *srcChain,Command *endNode)
+{
+    printf("Apprending to last: %s\n",endNode->name);
 
-int shellLoop()
+    Command *walker = srcChain;
+    while (walker->next != NULL) //Step to the end of the node-chain
+    {
+        walker = walker->next;
+    }
+    walker->next = endNode; // insert the new node at the end of the chain.
+}
+
+void printAllNodes(Command *srcChain)
+{
+    Command *walker = srcChain->next;
+    printf("%s: ",srcChain->name);
+    while (walker->next != NULL) //Step to the end of the node-chain
+    {
+        printf("%s, ",walker->name);
+        walker = walker->next;
+    }
+    printf("%s\n",walker->name);
+}
+
+
+int shellLoop(Command *cmd)
 {
     //printf("SHELL LOOP TRIGGERED.");
     printf("wrdsh> ");
-
     //Prepare to get user input, tokenized.
     char userInput[100];
     char buffer[100];
@@ -55,11 +81,17 @@ int shellLoop()
             return (0); //Try again.
         }
 
-        //Grab each word.
+        //Start parsing the input.
+
+        strncpy(cmd->name,token,sizeof(cmd->name));
         while (token)
         {
-            printf("Current token [loop]: %s\n",token);
+            Command *newcmd = calloc(1,sizeof(Command));
+            strncpy(newcmd->name,token,sizeof(newcmd->name)); //Store the token as the current command's name.
+            printf("cmdname: %s\n",cmd->name);
+            setLastNode(cmd,newcmd); //Append to the end of the list.
             token = strtok(NULL, " ");
+            free(newcmd);
         }
     }
     return (0);
@@ -74,8 +106,13 @@ int main(int argc, char *argv[])
     printf("\nShell first run:\n");
     while(shellStatus != 1)
     {
-        shellStatus = shellLoop();
-        //printf("Shell returned %d.\n",shellStatus);
+        Command *getCmd = calloc(1,sizeof(Command));
+        shellStatus = shellLoop(getCmd);
+        printAllNodes(getCmd);
+        // printf("cmd's next: %s",getCmd->next->name);
+        //free(givenCommand);
+        printf("Shell returned %d.\n",shellStatus);
+
     }
 
 
