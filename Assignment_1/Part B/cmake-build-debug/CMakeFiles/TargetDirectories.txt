@@ -1,0 +1,5 @@
+/mnt/c/Users/Spencer/My Drive/FALL 2021 CLASSES/CMPT 332.03/Assignments/CMPT_332/Assignment_1/Part B/cmake-build-debug/CMakeFiles/edit_cache.dir
+/mnt/c/Users/Spencer/My Drive/FALL 2021 CLASSES/CMPT 332.03/Assignments/CMPT_332/Assignment_1/Part B/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+/mnt/c/Users/Spencer/My Drive/FALL 2021 CLASSES/CMPT 332.03/Assignments/CMPT_332/Assignment_1/Part B/cmake-build-debug/CMakeFiles/wrdsh.dir
+/mnt/c/Users/Spencer/My Drive/FALL 2021 CLASSES/CMPT 332.03/Assignments/CMPT_332/Assignment_1/Part B/cmake-build-debug/CMakeFiles/usingpipes.dir
+/mnt/c/Users/Spencer/My Drive/FALL 2021 CLASSES/CMPT 332.03/Assignments/CMPT_332/Assignment_1/Part B/cmake-build-debug/CMakeFiles/pipeline.dir

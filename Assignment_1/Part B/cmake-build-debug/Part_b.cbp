@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6"/>
+	<Project>
+		<Option title="Part_b"/>
+		<Option makefile_is_custom="1"/>
+		<Option compiler="gcc"/>
+		<Option virtualFolders="CMake Files\;"/>
+		<Build>
+			<Target title="all">
+				<Option working_dir="/mnt/c/Users/Spencer/My Drive/FALL 2021 CLASSES/CMPT 332.03/Assignments/CMPT_332/Assignment_1/Part B/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j12 -f &quot;/mnt/c/Users/Spencer/My\ Drive/FALL\ 2021\ CLASSES/CMPT\ 332.03/Assignments/CMPT_332/Assignment_1/Part\ B/cmake-build-debug/Makefile&quot;  VERBOSE=1 all"/>
+					<CompileFile command="/usr/bin/make -j12 -f &quot;/mnt/c/Users/Spencer/My\ Drive/FALL\ 2021\ CLASSES/CMPT\ 332.03/Assignments/CMPT_332/Assignment_1/Part\ B/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j12 -f &quot;/mnt/c/Users/Spencer/My\ Drive/FALL\ 2021\ CLASSES/CMPT\ 332.03/Assignments/CMPT_332/Assignment_1/Part\ B/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j12 -f &quot;/mnt/c/Users/Spencer/My\ Drive/FALL\ 2021\ CLASSES/CMPT\ 332.03/Assignments/CMPT_332/Assignment_1/Part\ B/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="edit_cache">
+				<Option working_dir="/mnt/c/Users/Spencer/My Drive/FALL 2021 CLASSES/CMPT 332.03/Assignments/CMPT_332/Assignment_1/Part B/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j12 -f &quot;/mnt/c/Users/Spencer/My\ Drive/FALL\ 2021\ CLASSES/CMPT\ 332.03/Assignments/CMPT_332/Assignment_1/Part\ B/cmake-build-debug/Makefile&quot;  VERBOSE=1 edit_cache"/>
+					<CompileFile command="/usr/bin/make -j12 -f &quot;/mnt/c/Users/Spencer/My\ Drive/FALL\ 2021\ CLASSES/CMPT\ 332.03/Assignments/CMPT_332/Assignment_1/Part\ B/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j12 -f &quot;/mnt/c/Users/Spencer/My\ Drive/FALL\ 2021\ CLASSES/CMPT\ 332.03/Assignments/CMPT_332/Assignment_1/Part\ B/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j12 -f &quot;/mnt/c/Users/Spencer/My\ Drive/FALL\ 2021\ CLASSES/CMPT\ 332.03/Assignments/CMPT_332/Assignment_1/Part\ B/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="rebuild_cache">
+				<Option working_dir="/mnt/c/Users/Spencer/My Drive/FALL 2021 CLASSES/CMPT 332.03/Assignments/CMPT_332/Assignment_1/Part B/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j12 -f &quot;/mnt/c/Users/Spencer/My\ Drive/FALL\ 2021\ CLASSES/CMPT\ 332.03/Assignments/CMPT_332/Assignment_1/Part\ B/cmake-build-debug/Makefile&quot;  VERBOSE=1 rebuild_cache"/>
+					<CompileFile command="/usr/bin/make -j12 -f &quot;/mnt/c/Users/Spencer/My\ Drive/FALL\ 2021\ CLASSES/CMPT\ 332.03/Assignments/CMPT_332/Assignment_1/Part\ B/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j12 -f &quot;/mnt/c/Users/Spencer/My\ Drive/FALL\ 2021\ CLASSES/CMPT\ 332.03/Assignments/CMPT_332/Assignment_1/Part\ B/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j12 -f &quot;/mnt/c/Users/Spencer/My\ Drive/FALL\ 2021\ CLASSES/CMPT\ 332.03/Assignments/CMPT_332/Assignment_1/Part\ B/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="wrdsh">
+				<Option output="/mnt/c/Users/Spencer/My Drive/FALL 2021 CLASSES/CMPT 332.03/Assignments/CMPT_332/Assignment_1/Part B/cmake-build-debug/wrdsh" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/mnt/c/Users/Spencer/My Drive/FALL 2021 CLASSES/CMPT 332.03/Assignments/CMPT_332/Assignment_1/Part B/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/9/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j12 -f &quot;/mnt/c/Users/Spencer/My\ Drive/FALL\ 2021\ CLASSES/CMPT\ 332.03/Assignments/CMPT_332/Assignment_1/Part\ B/cmake-build-debug/Makefile&quot;  VERBOSE=1 wrdsh"/>
+					<CompileFile command="/usr/bin/make -j12 -f &quot;/mnt/c/Users/Spencer/My\ Drive/FALL\ 2021\ CLASSES/CMPT\ 332.03/Assignments/CMPT_332/Assignment_1/Part\ B/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j12 -f &quot;/mnt/c/Users/Spencer/My\ Drive/FALL\ 2021\ CLASSES/CMPT\ 332.03/Assignments/CMPT_332/Assignment_1/Part\ B/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j12 -f &quot;/mnt/c/Users/Spencer/My\ Drive/FALL\ 2021\ CLASSES/CMPT\ 332.03/Assignments/CMPT_332/Assignment_1/Part\ B/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="wrdsh/fast">
+				<Option output="/mnt/c/Users/Spencer/My Drive/FALL 2021 CLASSES/CMPT 332.03/Assignments/CMPT_332/Assignment_1/Part B/cmake-build-debug/wrdsh" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/mnt/c/Users/Spencer/My Drive/FALL 2021 CLASSES/CMPT 332.03/Assignments/CMPT_332/Assignment_1/Part B/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/9/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j12 -f &quot;/mnt/c/Users/Spencer/My\ Drive/FALL\ 2021\ CLASSES/CMPT\ 332.03/Assignments/CMPT_332/Assignment_1/Part\ B/cmake-build-debug/Makefile&quot;  VERBOSE=1 wrdsh/fast"/>
+					<CompileFile command="/usr/bin/make -j12 -f &quot;/mnt/c/Users/Spencer/My\ Drive/FALL\ 2021\ CLASSES/CMPT\ 332.03/Assignments/CMPT_332/Assignment_1/Part\ B/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j12 -f &quot;/mnt/c/Users/Spencer/My\ Drive/FALL\ 2021\ CLASSES/CMPT\ 332.03/Assignments/CMPT_332/Assignment_1/Part\ B/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j12 -f &quot;/mnt/c/Users/Spencer/My\ Drive/FALL\ 2021\ CLASSES/CMPT\ 332.03/Assignments/CMPT_332/Assignment_1/Part\ B/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="usingpipes">
+				<Option output="/mnt/c/Users/Spencer/My Drive/FALL 2021 CLASSES/CMPT 332.03/Assignments/CMPT_332/Assignment_1/Part B/cmake-build-debug/usingpipes" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/mnt/c/Users/Spencer/My Drive/FALL 2021 CLASSES/CMPT 332.03/Assignments/CMPT_332/Assignment_1/Part B/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/9/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j12 -f &quot;/mnt/c/Users/Spencer/My\ Drive/FALL\ 2021\ CLASSES/CMPT\ 332.03/Assignments/CMPT_332/Assignment_1/Part\ B/cmake-build-debug/Makefile&quot;  VERBOSE=1 usingpipes"/>
+					<CompileFile command="/usr/bin/make -j12 -f &quot;/mnt/c/Users/Spencer/My\ Drive/FALL\ 2021\ CLASSES/CMPT\ 332.03/Assignments/CMPT_332/Assignment_1/Part\ B/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j12 -f &quot;/mnt/c/Users/Spencer/My\ Drive/FALL\ 2021\ CLASSES/CMPT\ 332.03/Assignments/CMPT_332/Assignment_1/Part\ B/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j12 -f &quot;/mnt/c/Users/Spencer/My\ Drive/FALL\ 2021\ CLASSES/CMPT\ 332.03/Assignments/CMPT_332/Assignment_1/Part\ B/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="usingpipes/fast">
+				<Option output="/mnt/c/Users/Spencer/My Drive/FALL 2021 CLASSES/CMPT 332.03/Assignments/CMPT_332/Assignment_1/Part B/cmake-build-debug/usingpipes" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/mnt/c/Users/Spencer/My Drive/FALL 2021 CLASSES/CMPT 332.03/Assignments/CMPT_332/Assignment_1/Part B/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/9/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j12 -f &quot;/mnt/c/Users/Spencer/My\ Drive/FALL\ 2021\ CLASSES/CMPT\ 332.03/Assignments/CMPT_332/Assignment_1/Part\ B/cmake-build-debug/Makefile&quot;  VERBOSE=1 usingpipes/fast"/>
+					<CompileFile command="/usr/bin/make -j12 -f &quot;/mnt/c/Users/Spencer/My\ Drive/FALL\ 2021\ CLASSES/CMPT\ 332.03/Assignments/CMPT_332/Assignment_1/Part\ B/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j12 -f &quot;/mnt/c/Users/Spencer/My\ Drive/FALL\ 2021\ CLASSES/CMPT\ 332.03/Assignments/CMPT_332/Assignment_1/Part\ B/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j12 -f &quot;/mnt/c/Users/Spencer/My\ Drive/FALL\ 2021\ CLASSES/CMPT\ 332.03/Assignments/CMPT_332/Assignment_1/Part\ B/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="pipeline">
+				<Option output="/mnt/c/Users/Spencer/My Drive/FALL 2021 CLASSES/CMPT 332.03/Assignments/CMPT_332/Assignment_1/Part B/cmake-build-debug/pipeline" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/mnt/c/Users/Spencer/My Drive/FALL 2021 CLASSES/CMPT 332.03/Assignments/CMPT_332/Assignment_1/Part B/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/9/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j12 -f &quot;/mnt/c/Users/Spencer/My\ Drive/FALL\ 2021\ CLASSES/CMPT\ 332.03/Assignments/CMPT_332/Assignment_1/Part\ B/cmake-build-debug/Makefile&quot;  VERBOSE=1 pipeline"/>
+					<CompileFile command="/usr/bin/make -j12 -f &quot;/mnt/c/Users/Spencer/My\ Drive/FALL\ 2021\ CLASSES/CMPT\ 332.03/Assignments/CMPT_332/Assignment_1/Part\ B/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j12 -f &quot;/mnt/c/Users/Spencer/My\ Drive/FALL\ 2021\ CLASSES/CMPT\ 332.03/Assignments/CMPT_332/Assignment_1/Part\ B/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j12 -f &quot;/mnt/c/Users/Spencer/My\ Drive/FALL\ 2021\ CLASSES/CMPT\ 332.03/Assignments/CMPT_332/Assignment_1/Part\ B/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="pipeline/fast">
+				<Option output="/mnt/c/Users/Spencer/My Drive/FALL 2021 CLASSES/CMPT 332.03/Assignments/CMPT_332/Assignment_1/Part B/cmake-build-debug/pipeline" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/mnt/c/Users/Spencer/My Drive/FALL 2021 CLASSES/CMPT 332.03/Assignments/CMPT_332/Assignment_1/Part B/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/usr/lib/gcc/x86_64-linux-gnu/9/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/include/x86_64-linux-gnu"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/make -j12 -f &quot;/mnt/c/Users/Spencer/My\ Drive/FALL\ 2021\ CLASSES/CMPT\ 332.03/Assignments/CMPT_332/Assignment_1/Part\ B/cmake-build-debug/Makefile&quot;  VERBOSE=1 pipeline/fast"/>
+					<CompileFile command="/usr/bin/make -j12 -f &quot;/mnt/c/Users/Spencer/My\ Drive/FALL\ 2021\ CLASSES/CMPT\ 332.03/Assignments/CMPT_332/Assignment_1/Part\ B/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j12 -f &quot;/mnt/c/Users/Spencer/My\ Drive/FALL\ 2021\ CLASSES/CMPT\ 332.03/Assignments/CMPT_332/Assignment_1/Part\ B/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j12 -f &quot;/mnt/c/Users/Spencer/My\ Drive/FALL\ 2021\ CLASSES/CMPT\ 332.03/Assignments/CMPT_332/Assignment_1/Part\ B/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+		</Build>
+		<Unit filename="/mnt/c/Users/Spencer/My Drive/FALL 2021 CLASSES/CMPT 332.03/Assignments/CMPT_332/Assignment_1/Part B/pipeline.c">
+			<Option target="pipeline"/>
+		</Unit>
+		<Unit filename="/mnt/c/Users/Spencer/My Drive/FALL 2021 CLASSES/CMPT 332.03/Assignments/CMPT_332/Assignment_1/Part B/usingpipes.c">
+			<Option target="usingpipes"/>
+		</Unit>
+		<Unit filename="/mnt/c/Users/Spencer/My Drive/FALL 2021 CLASSES/CMPT 332.03/Assignments/CMPT_332/Assignment_1/Part B/wrdsh.c">
+			<Option target="wrdsh"/>
+		</Unit>
+		<Unit filename="/mnt/c/Users/Spencer/My Drive/FALL 2021 CLASSES/CMPT 332.03/Assignments/CMPT_332/Assignment_1/Part B/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\"/>
+		</Unit>
+	</Project>
+</CodeBlocks_project_file>

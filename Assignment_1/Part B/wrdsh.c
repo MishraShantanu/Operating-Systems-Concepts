@@ -10,9 +10,11 @@ int shellLoop() {
     while (1) {
         char userInput [100];
         printf("wrdsh> ");
-        //scanf("%s",userInput);
-        scanf("%[^\n]*s", userInput);
+        scanf("%s",userInput);
+        //scanf("%[^\n]*s", userInput);
         printf("You have entered: %s \n", userInput);
+
+        //TODO: Make the loop return all valid tokens -- looping through strtok.
 
 
         char *token;
@@ -23,6 +25,7 @@ int shellLoop() {
             printf("exit detected!");
             return (1);
         }
+        //free(userInput)
         return (0);
     }
 }
@@ -31,13 +34,14 @@ int main(int argc, char *argv[])
 {
     int fileDescriptors[2]; //File descriptors. fd[0] = read  |   fd[1] = write
 
-    int shellStatus = shellLoop();
+    //The following is the continuous input loop for the shell.
+    int shellStatus = 0;
     while(shellStatus != 1)
     {
-        printf("Shell returned: %d",shellStatus);
         shellStatus = shellLoop();
-        break;
     }
+
+
 
 
 
