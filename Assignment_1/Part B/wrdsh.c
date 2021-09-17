@@ -28,8 +28,6 @@ typedef struct _command
 //TODO: Make a function that reverses the list. [Read right to left].
         //Walk backwards from the end of the node chain?
         //Set to cmd.prev instead of cmd.next in shellLoop?
-//TODO: RESOLVE CURRENT BUG WITH PRINTING NODES.
-        //Causes undesired output.
 
 //TODO: find a way to handle bad inputs
         //[Currently handles redundant spaces, or user enters nothing into the shell]
@@ -55,23 +53,32 @@ void setLastNode(Command *srcChain,Command *endNode)
     walker->next = endNode; // insert the new node at the end of the chain.
 }
 
+
 /* PURPOSE: Prints all the tokens/items stored in the given node chain.
  * PRE-CONDITIONS: srcChain -- the first node in the node chain to print.
  * POST-CONDITIONS: Prints the entire chain to the console.
  * RETURN: None.
  */
-void printAllNodes(Command *srcChain)
+int printAllNodes(Command *srcChain)
 {
+    if (srcChain->cmdCount == 0) // Check if given an empty srcChain.
+    {
+        return (1);
+    }
+
     int count = 0;
-    Command *walker = srcChain->next;
-    while (walker->next != NULL) //Step to the end of the node-chain
+    Command *walker = srcChain;
+
+    while (walker->next != NULL) //Step to the end of the node-chain, printing each node.
     {
         count++;
         printf("cmd %d --> %s \n",count,walker->name);
         walker = walker->next;
     }
     printf("cmd %d --> %s \n",count,walker->name);
+    return (0);
 }
+
 
 /* PURPOSE: Reads and parses a line of user input into a node chain of commands.
  * PRE-CONDITIONS: cmd -- Empty Command struct.
@@ -93,28 +100,27 @@ int shellLoop(Command *cmd)
         strcpy(buffer, userInput);
         token = strtok(buffer, " ");
 
-        //TODO: a bug has appeared here! Comparing token to exit is not functioning as intended anymore.
-        printf("Current token: %s   compared to exit: %d\n",token,strcmp(userInput,"exit"));
-        //Special case: User is trying to exit the shell.
-        if (strcmp("exit",token) == 0)
-        {
-            return (1);
-        }
-
-        /* SANITIZATION OF INPUT */
-            //Did user just hit enter without input?
+        //Special case: Did user just hit enter without input?
         if (strcmp(token,"\n") == 0)
         {
             return (0); //Try again.
         }
 
+        //Special case: User is trying to exit the shell.
+        if (strcmp(token,"exit\n") == 0)
+        {
+            return (1);
+        }
+
         //Start parsing the input.
-        strncpy(cmd->name,token,sizeof(cmd->name));
+        strncpy(cmd->name,token,sizeof(cmd->name)); //Copy the first token's string to cmd->name.
+        token = strtok(NULL, " "); //Move to next token.
         while (token)
         {
-            Command *newcmd = calloc(1,sizeof(Command));
-            strncpy(newcmd->name,token,sizeof(newcmd->name)); //Store the token as the current command's name.
-            setLastNode(cmd,newcmd); //Append to the end of the list.
+            cmd->cmdCount++;
+            Command *newCmd = calloc(1,sizeof(Command));
+            strncpy(newCmd->name,token,sizeof(newCmd->name)); //Store the token as the current command's name.
+            setLastNode(cmd,newCmd); //Append to the end of the list.
             token = strtok(NULL, " "); //Move to next token.
         }
     }
@@ -131,12 +137,10 @@ int main(int argc, char *argv[])
     printf("\nShell first run:\n");
     while(shellStatus != 1)
     {
-        Command *getCmd = calloc(1,sizeof(Command)); //Allocate an empty Command to store the loop's output.
-        shellStatus = shellLoop(getCmd); //Trigger the get input loop.
-        printAllNodes(getCmd); //TESTING PURPOSES: Prints to console to confirm proper parsing of nodes.
         printf("Shell returned %d.\n",shellStatus);
+        Command *getCmd = calloc(1, sizeof(Command));//Allocate an empty Command to store the loop's output.
+        shellStatus = shellLoop(getCmd);//Trigger the 'get input' loop.
+        printAllNodes(getCmd);//TESTING PURPOSES: Prints to console to confirm proper parsing of nodes.
     }
     return 0;
 }
-
-//git issues resolved?
