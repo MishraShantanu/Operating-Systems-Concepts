@@ -6,27 +6,43 @@
 
 #define MAX_COMMAND_LENGTH 30
 
-//Doubly linked list for commands given by user.
-typedef struct _command {
-    char name[MAX_COMMAND_LENGTH];        //Store the name of the command.
-    //char* name;                         //Store the name of the command.
+
+/* PURPOSE:
+ * Stores the given input in a doubly linked list of commands.
+ */
+typedef struct _command
+{
+    char name[MAX_COMMAND_LENGTH];         //Store the name of the command.
+    //char* name;                          //Store the name of the command.
     struct _command *next;                 //The next command.
     struct _command *prev;                 //The previous command.
-
+    int cmdCount;
 } Command;
 
 
 //Typedef: Doubly linked list with element counter.
 //TODO: Write tokens to a doubly linked list.
+        //*Have it linking one way so far [cmd.next] -- cmd.prev not coded yet.
 //TODO: Make a function that steps through the list.
-//TODO: Make a function that appends to the list.
+        //Can use a function similar to setLastNode.
 //TODO: Make a function that reverses the list. [Read right to left].
-
+        //Walk backwards from the end of the node chain?
+        //Set to cmd.prev instead of cmd.next in shellLoop?
 //TODO: RESOLVE CURRENT BUG WITH PRINTING NODES.
+        //Causes undesired output.
 
 //TODO: find a way to handle bad inputs
-//TODO: find a way to decern between executable programs and parameters.
+        //[Currently handles redundant spaces, or user enters nothing into the shell]
+//TODO: find a way to discern between executable programs and parameters.
+        //Likely tokenize by " | " as delimiter first, then by " " after.
 
+
+/* PURPOSE: Appends a given token/command to the end of the node chain.
+ * PRE-CONDITIONS: srcChain -- the first node in the node chain to append to.
+ *                 endNode  -- the node to append at the end of the chain.
+ * POST-CONDITIONS: srcChain is modified to include endNode.
+ * RETURN: None.
+ */
 void setLastNode(Command *srcChain,Command *endNode)
 {
     printf("Apprending to last: %s\n",endNode->name);
@@ -39,6 +55,11 @@ void setLastNode(Command *srcChain,Command *endNode)
     walker->next = endNode; // insert the new node at the end of the chain.
 }
 
+/* PURPOSE: Prints all the tokens/items stored in the given node chain.
+ * PRE-CONDITIONS: srcChain -- the first node in the node chain to print.
+ * POST-CONDITIONS: Prints the entire chain to the console.
+ * RETURN: None.
+ */
 void printAllNodes(Command *srcChain)
 {
     Command *walker = srcChain->next;
@@ -51,10 +72,13 @@ void printAllNodes(Command *srcChain)
     printf("%s\n",walker->name);
 }
 
-
+/* PURPOSE: Reads and parses a line of user input into a node chain of commands.
+ * PRE-CONDITIONS: cmd -- Empty Command struct.
+ * POST-CONDITIONS: cmd is modified such that it contains the user's command.
+ * RETURN: 1 if user is trying to exit, 0 otherwise.
+ */
 int shellLoop(Command *cmd)
 {
-    //printf("SHELL LOOP TRIGGERED.");
     printf("wrdsh> ");
     //Prepare to get user input, tokenized.
     char userInput[100];
@@ -82,64 +106,34 @@ int shellLoop(Command *cmd)
         }
 
         //Start parsing the input.
-
         strncpy(cmd->name,token,sizeof(cmd->name));
         while (token)
         {
             Command *newcmd = calloc(1,sizeof(Command));
             strncpy(newcmd->name,token,sizeof(newcmd->name)); //Store the token as the current command's name.
-            printf("cmdname: %s\n",cmd->name);
             setLastNode(cmd,newcmd); //Append to the end of the list.
-            token = strtok(NULL, " ");
+            token = strtok(NULL, " "); //Move to next token.
             free(newcmd);
         }
     }
     return (0);
 }
 
+
 int main(int argc, char *argv[])
 {
-    //int fileDescriptors[2]; //File descriptors. fd[0] = read  |   fd[1] = write
+    int fileDescriptors[2]; //File descriptors. fd[0] = read  |   fd[1] = write
 
     //The following is the continuous input loop for the shell.
     int shellStatus = 0;
     printf("\nShell first run:\n");
     while(shellStatus != 1)
     {
-        Command *getCmd = calloc(1,sizeof(Command));
-        shellStatus = shellLoop(getCmd);
-        printAllNodes(getCmd);
-        // printf("cmd's next: %s",getCmd->next->name);
-        //free(givenCommand);
+        Command *getCmd = calloc(1,sizeof(Command)); //Allocate an empty Command to store the loop's output.
+        shellStatus = shellLoop(getCmd); //Trigger the get input loop.
+        //printAllNodes(getCmd); //TESTING PURPOSES: Prints to console to confirm proper parsing of nodes.
+        //free(getCmd);
         printf("Shell returned %d.\n",shellStatus);
-
     }
-
-
-
-
-
-    //pipe(fileDescriptors);
-    //int rc = fork(); // returns 0 to child, pid to parent
-
-        //getpid();
-
-    //Lets make a process via pipe.
-    //pid_t p;
-    //pipe(&p);   //FIFO
-    //Lets learn about fork.
-
-
-
-    //pipe(fd);   //FIFO
-
-
-
-
-    //p = fork();
-        //< 0 -> Fork failed.
-        //
-
-    //printf("%d\n", fd[1]);
     return 0;
 }
