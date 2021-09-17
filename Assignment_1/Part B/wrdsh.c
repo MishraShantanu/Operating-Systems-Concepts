@@ -18,18 +18,10 @@ typedef struct _command
     int cmdCount;
 } Command;
 
-
-
-//TODO: Write tokens to a doubly linked list.
-        //*Have it linking one way so far [cmd.next] -- cmd.prev not coded yet.
-//TODO: Make a function that steps through the list.
-        //Can use a function similar to setLastNode.
 //TODO: Make a function that reverses the list. [Read right to left].
         //Walk backwards from the end of the node chain?
         //Set to cmd.prev instead of cmd.next in shellLoop?
 
-//TODO: find a way to handle bad inputs
-        //[Currently handles redundant spaces, or user enters nothing into the shell]
 //TODO: find a way to discern between executable programs and parameters.
         //Likely tokenize by " | " as delimiter first, then by " " after.
 
