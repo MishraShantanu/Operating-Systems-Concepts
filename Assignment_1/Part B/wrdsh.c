@@ -110,14 +110,15 @@ int shellLoop(Command *cmd)
         //Start parsing the input.
         strncpy(cmd->name,token,sizeof(cmd->name)); //Copy the first token's string to cmd->name.
         token = strtok(NULL, "|"); //Move to next token.
-        while (token)
-        {
-            cmd->cmdCount++;
-            Command *newCmd = calloc(1,sizeof(Command));
-            strncpy(newCmd->name,token,sizeof(newCmd->name)); //Store the token as the current command's name.
-            setLastNode(cmd,newCmd); //Append to the end of the list.
-            token = strtok(NULL, " "); //Move to next token.
-        }
+        cmd->cmdCount++;
+            while (token) {
+                cmd->cmdCount++;
+                Command *newCmd = calloc(1, sizeof(Command));
+                strncpy(newCmd->name, token, sizeof(newCmd->name)); //Store the token as the current command's name.
+                setLastNode(cmd, newCmd); //Append to the end of the list.
+                token = strtok(NULL, " "); //Move to next token.
+            }
+
     }
     return (0);
 }
