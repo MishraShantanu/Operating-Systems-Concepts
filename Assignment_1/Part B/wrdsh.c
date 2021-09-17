@@ -62,14 +62,15 @@ void setLastNode(Command *srcChain,Command *endNode)
  */
 void printAllNodes(Command *srcChain)
 {
+    int count = 0;
     Command *walker = srcChain->next;
-    printf("%s: ",srcChain->name);
     while (walker->next != NULL) //Step to the end of the node-chain
     {
-        printf("%s, ",walker->name);
+        count++;
+        printf("cmd %d --> %s \n",count,walker->name);
         walker = walker->next;
     }
-    printf("%s\n",walker->name);
+    printf("cmd %d --> %s \n",count,walker->name);
 }
 
 /* PURPOSE: Reads and parses a line of user input into a node chain of commands.
@@ -92,6 +93,8 @@ int shellLoop(Command *cmd)
         strcpy(buffer, userInput);
         token = strtok(buffer, " ");
 
+        //TODO: a bug has appeared here! Comparing token to exit is not functioning as intended anymore.
+        printf("Current token: %s   compared to exit: %d\n",token,strcmp(userInput,"exit"));
         //Special case: User is trying to exit the shell.
         if (strcmp("exit",token) == 0)
         {
@@ -113,7 +116,6 @@ int shellLoop(Command *cmd)
             strncpy(newcmd->name,token,sizeof(newcmd->name)); //Store the token as the current command's name.
             setLastNode(cmd,newcmd); //Append to the end of the list.
             token = strtok(NULL, " "); //Move to next token.
-            free(newcmd);
         }
     }
     return (0);
@@ -131,8 +133,7 @@ int main(int argc, char *argv[])
     {
         Command *getCmd = calloc(1,sizeof(Command)); //Allocate an empty Command to store the loop's output.
         shellStatus = shellLoop(getCmd); //Trigger the get input loop.
-        //printAllNodes(getCmd); //TESTING PURPOSES: Prints to console to confirm proper parsing of nodes.
-        //free(getCmd);
+        printAllNodes(getCmd); //TESTING PURPOSES: Prints to console to confirm proper parsing of nodes.
         printf("Shell returned %d.\n",shellStatus);
     }
     return 0;
