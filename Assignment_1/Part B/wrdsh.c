@@ -116,7 +116,7 @@ int shellLoop(Command *cmd)
                 Command *newCmd = calloc(1, sizeof(Command));
                 strncpy(newCmd->name, token, sizeof(newCmd->name)); //Store the token as the current command's name.
                 setLastNode(cmd, newCmd); //Append to the end of the list.
-                token = strtok(NULL, " "); //Move to next token.
+                token = strtok(NULL, "|"); //Move to next token.
             }
 
     }
