@@ -4,7 +4,7 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_C
-  "/mnt/c/Users/Spencer/My Drive/FALL 2021 CLASSES/CMPT 332.03/Assignments/CMPT_332/Assignment_1/Part B/usingpipes.c" "/mnt/c/Users/Spencer/My Drive/FALL 2021 CLASSES/CMPT 332.03/Assignments/CMPT_332/Assignment_1/Part B/cmake-build-debug/CMakeFiles/usingpipes.dir/usingpipes.c.o"
+  "/mnt/c/Users/shant/CLionProjects/CMPT_332/Assignment_1/Part B/usingpipes.c" "/mnt/c/Users/shant/CLionProjects/CMPT_332/Assignment_1/Part B/cmake-build-debug/CMakeFiles/usingpipes.dir/usingpipes.c.o"
   )
 set(CMAKE_C_COMPILER_ID "GNU")
 

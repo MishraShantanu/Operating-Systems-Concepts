@@ -1,4 +1,4 @@
-# Install script for directory: /mnt/c/Users/Spencer/My Drive/FALL 2021 CLASSES/CMPT 332.03/Assignments/CMPT_332/Assignment_1/Part B
+# Install script for directory: /mnt/c/Users/shant/CLionProjects/CMPT_332/Assignment_1/Part B
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -45,5 +45,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "/mnt/c/Users/Spencer/My Drive/FALL 2021 CLASSES/CMPT 332.03/Assignments/CMPT_332/Assignment_1/Part B/cmake-build-debug/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "/mnt/c/Users/shant/CLionProjects/CMPT_332/Assignment_1/Part B/cmake-build-debug/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")
