@@ -13,14 +13,13 @@
 typedef struct _command
 {
     char name[MAX_COMMAND_LENGTH];         //Store the name of the command.
-    //char* name;                          //Store the name of the command.
     struct _command *next;                 //The next command.
     struct _command *prev;                 //The previous command.
     int cmdCount;
 } Command;
 
 
-//Typedef: Doubly linked list with element counter.
+
 //TODO: Write tokens to a doubly linked list.
         //*Have it linking one way so far [cmd.next] -- cmd.prev not coded yet.
 //TODO: Make a function that steps through the list.
@@ -33,6 +32,7 @@ typedef struct _command
         //[Currently handles redundant spaces, or user enters nothing into the shell]
 //TODO: find a way to discern between executable programs and parameters.
         //Likely tokenize by " | " as delimiter first, then by " " after.
+
 
 
 /* PURPOSE: Appends a given token/command to the end of the node chain.
@@ -48,6 +48,7 @@ void setLastNode(Command *srcChain,Command *endNode)
     Command *walker = srcChain;
     while (walker->next != NULL) //Step to the end of the node-chain
     {
+        walker->next->prev = walker; //backlink the node.
         walker = walker->next;
     }
     walker->next = endNode; // insert the new node at the end of the chain.
@@ -75,6 +76,7 @@ int printAllNodes(Command *srcChain)
         printf("cmd %d --> %s \n",count,walker->name);
         walker = walker->next;
     }
+    count++;
     printf("cmd %d --> %s \n",count,walker->name);
     return (0);
 }
