@@ -37,11 +37,12 @@ void setLastNode(Command *srcChain,Command *endNode)
 {
     printf("Apprending to last: %s\n",endNode->name);
 
+
     Command *walker = srcChain;
     while (walker->next != NULL) //Step to the end of the node-chain
     {
         walker->next->prev = walker; //backlink the node.
-        walker = walker->next;
+        walker = walker->next;printf("\nwalker name: %s\n",walker->name);
     }
     walker->next = endNode; // insert the new node at the end of the chain.
 }
@@ -92,7 +93,7 @@ int shellLoop(Command *cmd)
     {
         //Copy to a buffer for tokenization, so we don't overwrite the user's input.
         strcpy(buffer, userInput);
-        token = strtok(buffer, " ");
+        token = strtok(buffer, "|");
 
         //Special case: Did user just hit enter without input?
         if (strcmp(token,"\n") == 0)
@@ -108,7 +109,7 @@ int shellLoop(Command *cmd)
 
         //Start parsing the input.
         strncpy(cmd->name,token,sizeof(cmd->name)); //Copy the first token's string to cmd->name.
-        token = strtok(NULL, " "); //Move to next token.
+        token = strtok(NULL, "|"); //Move to next token.
         while (token)
         {
             cmd->cmdCount++;
