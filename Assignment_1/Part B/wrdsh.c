@@ -45,9 +45,8 @@ void runCommand(Command *command){
 
 
     while (token!=NULL){
-        if (token == '\n'){
-            token = '\0'; // replace last char by '\0' if it is new line char
-        }
+
+
         tokens[counter] = token;
         counter+=1;
         token = strtok(NULL," ");
@@ -147,6 +146,11 @@ int shellLoop(Command *cmd)
     {
         //Copy to a buffer for tokenization, so we don't overwrite the user's input.
         strcpy(buffer, userInput);
+        for(int i=0;i<= strlen(buffer);i++){
+            if(buffer[i]=='\n'){
+                buffer[i]='\0';
+            }
+        }
         token = strtok(buffer, "|");
 
         //Special case: Did user just hit enter without input?
