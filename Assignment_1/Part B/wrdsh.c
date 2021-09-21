@@ -46,14 +46,18 @@ void runCommand(Command *command){
 
     //forking to call the child process
     int rc= fork();
-    if(rc<0){
+    if(rc<0)
+    {
            //forking failed exit
         fprintf(stderr, "Fork failed \n");
         exit(1);
-    }else if(rc==0){
+    }
+    else if(rc==0)
+    {
         //child (new process)
         printf(tokens);
-        if (execvp(tokens[0], tokens) == -1) {
+        if (execvp(tokens[0], tokens) == -1)
+        {
             perror("wrdsh");
         }
     }else {
@@ -80,8 +84,8 @@ void setLastNode(Command *srcChain,Command *endNode)
         walker = walker->next;
     }
     walker->next = endNode; // insert the new node at the end of the chain.
-    endNode->prev = walker;
-    srcChain->tail = endNode;
+    endNode->prev = walker; // Link new tail to the old.
+    srcChain->tail = endNode; //Update reference to tail.
 }
 
 
@@ -98,7 +102,7 @@ int execReverseOrder(Command *srcChain)
     }
 
     Command *walker = srcChain->tail;
-    while (walker->prev != NULL)
+    while (walker->prev != NULL) //Walk back from the end of the chain towards the beginning.
     {
         runCommand(walker);
         walker = walker->prev;
@@ -167,7 +171,6 @@ int shellLoop(Command *cmd)
                 setLastNode(cmd, newCmd); //Append to the end of the list.
                 token = strtok(NULL, "|"); //Move to next token.
             }
-
     }
     return (0);
 }
