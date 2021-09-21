@@ -146,11 +146,7 @@ int shellLoop(Command *cmd)
     {
         //Copy to a buffer for tokenization, so we don't overwrite the user's input.
         strcpy(buffer, userInput);
-        for(int i=0;i<= strlen(buffer);i++){
-            if(buffer[i]=='\n'){
-                buffer[i]='\0';
-            }
-        }
+
         token = strtok(buffer, "|");
 
         //Special case: Did user just hit enter without input?
@@ -163,6 +159,13 @@ int shellLoop(Command *cmd)
         if (strcmp(token,"exit\n") == 0)
         {
             return (1);
+        }
+
+        //for removing newline character from the user input
+        for(int i=0;i<= strlen(buffer);i++){
+            if(buffer[i]=='\n'){
+                buffer[i]='\0';
+            }
         }
 
         if (token[strlen(token) - 1] == '\n'){
