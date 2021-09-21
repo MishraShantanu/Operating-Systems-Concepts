@@ -4,7 +4,7 @@
 #include <sys/wait.h>
 #include <string.h>
 
-#define MAX_COMMAND_LENGTH 30
+#define MAX_COMMAND_LENGTH 100
 
 
 /* PURPOSE:
@@ -15,16 +15,9 @@ typedef struct _command
     char name[MAX_COMMAND_LENGTH];         //Store the name of the command.
     struct _command *next;                 //The next command.
     struct _command *prev;                 //The previous command.
-    int cmdCount;
+    struct _command *tail;                 //The last node in the chain.
+    int cmdCount;                          //The # of commands contained within this node chain.
 } Command;
-
-//TODO: Make a function that reverses the list. [Read right to left].
-        //Walk backwards from the end of the node chain?
-        //Set to cmd.prev instead of cmd.next in shellLoop?
-
-//TODO: find a way to discern between executable programs and parameters.
-        //Likely tokenize by " | " as delimiter first, then by " " after.
-
 
 
 /* PURPOSE: executes individual commands by creating a child process using fork and later uses
@@ -33,14 +26,11 @@ typedef struct _command
  * POST-CONDITIONS: Individual command is executed.
  * RETURN: None.
  */
-
 void runCommand(Command *command){
-
-
     //initialize variable to tokenize the given command
     char **tokens[100];
     int counter = 0;
-    char * token = strtok(command," ");
+    char * token = strtok(command->name," ");
 
 
 
@@ -83,49 +73,40 @@ void runCommand(Command *command){
  */
 void setLastNode(Command *srcChain,Command *endNode)
 {
-    //printf("Apprending to last: %s\n",endNode->name);
-
-
     Command *walker = srcChain;
     while (walker->next != NULL) //Step to the end of the node-chain
     {
         walker->next->prev = walker; //backlink the node.
         walker = walker->next;
-        //printf("\nwalker name: %s\n",walker->name);
     }
     walker->next = endNode; // insert the new node at the end of the chain.
+    endNode->prev = walker;
+    srcChain->tail = endNode;
 }
 
 
-/* PURPOSE: Prints all the tokens/items stored in the given node chain.
- * PRE-CONDITIONS: srcChain -- the first node in the node chain to print.
- * POST-CONDITIONS: Prints the entire chain to the console.
- * RETURN: None.
+/* PURPOSE: Executes the given command (from right-to-left)
+ * PRE-CONDITIONS: srcChain -- Node chain representing the sequence of commands to execute.
+ * POST-CONDITIONS: Triggers runCommand() on each node in srcChain.
+ * RETURN: 0 if execution was successful, 1 when execution has failed.
  */
-int printAllNodes(Command *srcChain)
+int execReverseOrder(Command *srcChain)
 {
     if (srcChain->cmdCount == 0) // Check if given an empty srcChain.
     {
         return (1);
     }
 
-    int count = 0;
-    Command *walker = srcChain;
-
-    while (walker->next != NULL) //Step to the end of the node-chain, printing each node.
+    Command *walker = srcChain->tail;
+    while (walker->prev != NULL)
     {
-        count++;
         runCommand(walker);
-        printf("cmd %d --> %s \n",count,walker->name);
-        walker = walker->next;
-
-
+        walker = walker->prev;
     }
-    count++;
-    printf("cmd %d --> %s \n",count,walker->name);
     runCommand(walker);
-    return (0);
+    return 0;
 }
+
 
 
 /* PURPOSE: Reads and parses a line of user input into a node chain of commands.
@@ -137,8 +118,8 @@ int shellLoop(Command *cmd)
 {
     printf("wrdsh> ");
     //Prepare to get user input, tokenized.
-    char userInput[100];
-    char buffer[100];
+    char userInput[300];
+    char buffer[300];
     char *token;
 
     //Sanitization check: did input work? If so, do stuff. If not, skip.
@@ -168,15 +149,18 @@ int shellLoop(Command *cmd)
             }
         }
 
-        if (token[strlen(token) - 1] == '\n'){
-            token[strlen(token) - 1] = '\0'; // replace last char by '\0' if it is new line char
-        }
+
 
         //Start parsing the input.
         strncpy(cmd->name,token,sizeof(cmd->name)); //Copy the first token's string to cmd->name.
         token = strtok(NULL, "|"); //Move to next token.
         cmd->cmdCount++;
-            while (token) {
+            while (token)
+            {
+                //Strip leading spaces and trailing \n from each token if they exist.
+                if (token[0] == ' ') token++;
+                if (token[strlen(token) - 1] == '\n') token[strlen(token) - 1] = '\0';
+
                 cmd->cmdCount++;
                 Command *newCmd = calloc(1, sizeof(Command));
                 strncpy(newCmd->name, token, sizeof(newCmd->name)); //Store the token as the current command's name.
@@ -198,10 +182,10 @@ int main(int argc, char *argv[])
     printf("\nShell first run:\n");
     while(shellStatus != 1)
     {
-        printf("Shell returned %d.\n",shellStatus);
         Command *getCmd = calloc(1, sizeof(Command));//Allocate an empty Command to store the loop's output.
         shellStatus = shellLoop(getCmd);//Trigger the 'get input' loop.
-        printAllNodes(getCmd);//TESTING PURPOSES: Prints to console to confirm proper parsing of nodes.
+        execReverseOrder(getCmd);
+        printf("Shell returned %d.\n",shellStatus);
     }
     return 0;
 }
