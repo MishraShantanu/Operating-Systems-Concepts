@@ -27,6 +27,55 @@ typedef struct _command
 
 
 
+/* PURPOSE: executes individual commands by creating a child process using fork and later uses
+ * execvp to execute the system call
+ * PRE-CONDITIONS: - command: the command object which contains the name of command to be executed
+ * POST-CONDITIONS: Individual command is executed.
+ * RETURN: None.
+ */
+
+void runCommand(Command *command){
+
+
+    //initialize variable to tokenize the given command
+    char **tokens[100];
+    int counter = 0;
+    char * token = strtok(command," ");
+
+
+
+    while (token!=NULL){
+        if (token == '\n'){
+            token = '\0'; // replace last char by '\0' if it is new line char
+        }
+        tokens[counter] = token;
+        counter+=1;
+        token = strtok(NULL," ");
+    }
+    //The command should have null at end to show the end of command
+    tokens[counter] =NULL;
+
+    //forking to call the child process
+    int rc= fork();
+    if(rc<0){
+           //forking failed exit
+        fprintf(stderr, "Fork failed \n");
+        exit(1);
+    }else if(rc==0){
+        //child (new process)
+        printf(tokens);
+        if (execvp(tokens[0], tokens) == -1) {
+            perror("wrdsh");
+        }
+    }else {
+
+        //original parent process
+
+        int wait_count =wait(NULL);
+       // printf("parent return code: %d ", wait_count);
+    }
+}
+
 /* PURPOSE: Appends a given token/command to the end of the node chain.
  * PRE-CONDITIONS: srcChain -- the first node in the node chain to append to.
  *                 endNode  -- the node to append at the end of the chain.
@@ -35,14 +84,15 @@ typedef struct _command
  */
 void setLastNode(Command *srcChain,Command *endNode)
 {
-    printf("Apprending to last: %s\n",endNode->name);
+    //printf("Apprending to last: %s\n",endNode->name);
 
 
     Command *walker = srcChain;
     while (walker->next != NULL) //Step to the end of the node-chain
     {
         walker->next->prev = walker; //backlink the node.
-        walker = walker->next;printf("\nwalker name: %s\n",walker->name);
+        walker = walker->next;
+        //printf("\nwalker name: %s\n",walker->name);
     }
     walker->next = endNode; // insert the new node at the end of the chain.
 }
@@ -66,11 +116,15 @@ int printAllNodes(Command *srcChain)
     while (walker->next != NULL) //Step to the end of the node-chain, printing each node.
     {
         count++;
+        runCommand(walker);
         printf("cmd %d --> %s \n",count,walker->name);
         walker = walker->next;
+
+
     }
     count++;
     printf("cmd %d --> %s \n",count,walker->name);
+    runCommand(walker);
     return (0);
 }
 
@@ -105,6 +159,10 @@ int shellLoop(Command *cmd)
         if (strcmp(token,"exit\n") == 0)
         {
             return (1);
+        }
+
+        if (token[strlen(token) - 1] == '\n'){
+            token[strlen(token) - 1] = '\0'; // replace last char by '\0' if it is new line char
         }
 
         //Start parsing the input.
