@@ -7,6 +7,19 @@
 #define MAX_COMMAND_LENGTH 100
 
 
+
+
+//TODO:
+/*      Known bugs:
+ *          Entering only one command is either double printing or haulting the shell.
+ *          Stripping more than one space at the beginning of the command is not working as intended.
+ *
+ *
+ *      Features to implement:
+ *          Handle "command not found" situations.
+ *
+ */
+
 /* PURPOSE:
  * Stores the given input in a doubly linked list of commands.
  */
@@ -34,13 +47,13 @@ void runCommand(Command *command){
 
 
 
-    while (token!=NULL){
-
-
+    while (token!=NULL)
+    {
         tokens[counter] = token;
         counter+=1;
         token = strtok(NULL," ");
     }
+
     //The command should have null at end to show the end of command
     tokens[counter] =NULL;
 
@@ -60,7 +73,9 @@ void runCommand(Command *command){
         {
             perror("wrdsh");
         }
-    }else {
+    }
+    else
+    {
 
         //original parent process
 
@@ -157,7 +172,7 @@ int shellLoop(Command *cmd)
 
         //Start parsing the input.
         strncpy(cmd->name,token,sizeof(cmd->name)); //Copy the first token's string to cmd->name.
-        token = strtok(NULL, "|"); //Move to next token.
+        //token = strtok(NULL, "|"); //Move to next token.
         cmd->cmdCount++;
             while (token)
             {
