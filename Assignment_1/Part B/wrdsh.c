@@ -11,7 +11,6 @@
 
 //TODO:
 /*      Known bugs:
- *          Entering only one command is either double printing or haulting the shell.
  *          Stripping more than one space at the beginning of the command is not working as intended.
  *
  *
@@ -92,6 +91,12 @@ void runCommand(Command *command){
  */
 void setLastNode(Command *srcChain,Command *endNode)
 {
+    if (srcChain->cmdCount == 1)
+    {
+        srcChain->tail = endNode; //Update reference to tail.
+        return;
+    }
+
     Command *walker = srcChain;
     while (walker->next != NULL) //Step to the end of the node-chain
     {
@@ -146,7 +151,6 @@ int shellLoop(Command *cmd)
     {
         //Copy to a buffer for tokenization, so we don't overwrite the user's input.
         strcpy(buffer, userInput);
-
         token = strtok(buffer, "|");
 
         //Special case: Did user just hit enter without input?
@@ -157,23 +161,21 @@ int shellLoop(Command *cmd)
 
         //Special case: User is trying to exit the shell.
         if (strcmp(token,"exit\n") == 0)
+        //if (strcmp(buffer,"exit\n") == 0)
         {
             return (1);
         }
 
         //for removing newline character from the user input
-        for(int i=0;i<= strlen(buffer);i++){
+        for(int i=0;i<= strlen(buffer);i++)
+        {
             if(buffer[i]=='\n'){
                 buffer[i]='\0';
             }
         }
 
-
-
         //Start parsing the input.
         strncpy(cmd->name,token,sizeof(cmd->name)); //Copy the first token's string to cmd->name.
-        //token = strtok(NULL, "|"); //Move to next token.
-        cmd->cmdCount++;
             while (token)
             {
                 //Strip leading spaces and trailing \n from each token if they exist.
