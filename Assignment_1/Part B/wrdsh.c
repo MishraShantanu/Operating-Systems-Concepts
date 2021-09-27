@@ -62,14 +62,16 @@ typedef struct _command
  * POST-CONDITIONS: Individual command is executed.
  * RETURN: None.
  */
-void runCommand(Command *command)
+void runCommand(Command *command, int *fd)
 {
     //TODO: Handle "no such command found"
     //TODO: Handle cmd.forwards == 1  [forward stdout to destination]
     //initialize variable to tokenize the given command
     char **tokens[100];
     int counter = 0;
-    char * token = strtok(command->name," ");
+    char *token = strtok(command->name," ");
+ //  int fd[2];
+ //   pipe(fd);
 
 
     while (token!=NULL)
@@ -92,12 +94,58 @@ void runCommand(Command *command)
     }
     else if(rc==0)
     {
-        //child (new process)
-        printf(tokens);
-        if (execvp(tokens[0], tokens) == -1)
-        {
-            perror("wrdsh");
+        if(command->prev!=NULL&command->next!=NULL){
+            printf(" Middle command %s\n",command->name);
+            close(fd[1]);
+            dup2(fd[0],STDIN_FILENO);
+
+            dup2(fd[1],STDOUT_FILENO);
+            close(fd[0]);
+            close(fd[1]);
+            if (execvp(tokens[0], tokens) == -1)
+            {
+                perror("wrdsh");
+            }
+
+
+
+        }else if(command->prev==NULL&command->next!=NULL){
+            printf(" Last command%s\n",command->name);
+
+            close(fd[1]);
+            dup2(fd[0],STDIN_FILENO);
+            close(fd[0]);
+            if (execvp(tokens[0], tokens) == -1)
+            {
+                perror("wrdsh");
+            }
+
+
+        }else if(command->prev!=NULL&command->next==NULL){
+            printf(" First command%s\n",command->name);
+
+
+            close(fd[0]);
+            dup2(fd[1],STDOUT_FILENO);
+            close(fd[1]);
+            if (execvp(tokens[0], tokens) == -1)
+            {\
+                perror("wrdsh");
+            }
+
+
+        }else {
+            //single command
+            //child (new process)
+           printf(tokens);
+            if (execvp(tokens[0], tokens) == -1)
+            {
+                perror("wrdsh");
+            }
+
         }
+
+
     }
     else
     {
@@ -105,8 +153,12 @@ void runCommand(Command *command)
         //original parent process
 
         int wait_count =wait(NULL);
-       // printf("parent return code: %d ", wait_count);
+        printf("parent return code: %d ", wait_count);
     }
+
+
+    printf("command completed\n");
+
 }
 
 /* PURPOSE: Removes duplicate spaces (and trailing \n) from a given string.
@@ -177,7 +229,7 @@ void setLastNode(Command *srcChain,Command *endNode)
  * POST-CONDITIONS: Triggers runCommand() on each node in srcChain.
  * RETURN: 0 if execution was successful, 1 when execution has failed.
  */
-int execReverseOrder(Command *srcChain)
+int execReverseOrder(Command *srcChain, int *fd)
 {
     if (srcChain->cmdCount == 0) // Check if given an empty srcChain.
     {
@@ -187,10 +239,10 @@ int execReverseOrder(Command *srcChain)
     Command *walker = srcChain->tail;
     while (walker->prev != NULL) //Walk back from the end of the chain towards the beginning.
     {
-        runCommand(walker);
+        runCommand(walker,fd);
         walker = walker->prev;
     }
-    runCommand(walker);
+    runCommand(walker,fd);
     return 0;
 }
 
@@ -258,6 +310,7 @@ int shellLoop(Command *cmd)
 int main(int argc, char *argv[])
 {
     int fileDescriptors[2]; //File descriptors. fd[0] = read  |   fd[1] = write
+    pipe(fileDescriptors);
 
     //The following is the continuous input loop for the shell.
     int shellStatus = 0;
@@ -266,7 +319,7 @@ int main(int argc, char *argv[])
     {
         Command *getCmd = calloc(1, sizeof(Command));//Allocate an empty Command to store the loop's output.
         shellStatus = shellLoop(getCmd);//Trigger the 'get input' loop.
-        execReverseOrder(getCmd);
+        execReverseOrder(getCmd,&fileDescriptors);
         printf("Shell returned %d.\n",shellStatus);
     }
     return 0;
