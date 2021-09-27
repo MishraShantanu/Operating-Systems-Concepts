@@ -94,14 +94,15 @@ void runCommand(Command *command, int *fd)
     }
     else if(rc==0)
     {
-        if(command->prev!=NULL&command->next!=NULL){
+        if(((command->prev)!=NULL)&((command->next)!=NULL)){
             printf(" Middle command %s\n",command->name);
+
             close(fd[1]);
             dup2(fd[0],STDIN_FILENO);
 
             dup2(fd[1],STDOUT_FILENO);
-            close(fd[0]);
-            close(fd[1]);
+            //close(fd[0]);
+            //close(fd[1]);
             if (execvp((const char *) tokens[0], (char *const *) tokens) == -1)
             {
                 perror("wrdsh");
@@ -109,7 +110,7 @@ void runCommand(Command *command, int *fd)
 
 
 
-        }else if(command->prev==NULL&command->next!=NULL){
+        }else if(((command->prev)==NULL)&((command->next)!=NULL)){
             printf(" Last command%s\n",command->name);
 
             close(fd[1]);
@@ -121,7 +122,7 @@ void runCommand(Command *command, int *fd)
             }
 
 
-        }else if(command->prev!=NULL&command->next==NULL){
+        }else if(((command->prev)!=NULL)&((command->next)==NULL)){
             printf(" First command%s\n",command->name);
 
 
