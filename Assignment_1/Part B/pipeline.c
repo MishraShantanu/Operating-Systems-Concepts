@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/wait.h>
+#include <string.h>
 
 int main(int argc, char *argv[])
 {
@@ -22,6 +23,14 @@ int main(int argc, char *argv[])
         dup2(fileDescriptors[1],STDOUT_FILENO);  //STDIN_FILENO(?)
         // if do exec now, the program we run will have write end of pipe
         // as its standard output
+
+        char *myargs[3];
+        myargs[0] = strdup("ls");   // program: "wc" (word count)
+        myargs[1] = strdup("-l"); // argument: file to count
+        myargs[2] = NULL;           // marks end of array
+
+
+        execvp(myargs[0], myargs);  // runs word count
 
         //printf("hello parent! I am child.\n          I am rc == 0. My returnCode -> %d\n",returnCode);
         printf("I am child 1.\n");
@@ -66,7 +75,7 @@ int main(int argc, char *argv[])
         dup2(fileDescriptors[0],STDIN_FILENO);
         // if do exec now the program we run will
         // have the read end of pipe as standard input
-        //
+
         char *message;
         size_t size = 100;
         message = (char *) malloc (size + 1);

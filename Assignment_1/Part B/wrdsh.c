@@ -5,7 +5,7 @@ Computer Science 332.3
 Prof: Dr. Derek Eager
 University of Saskatchewan - Arts & Science
 	Department of Computer Science
-A project by: Spencer Tracy | Spt631 | 11236962 and Shantanu Mishra | Shm572 | TODO: ENTER YOUR STUDENT #
+A project by: Spencer Tracy | Spt631 | 11236962 and Shantanu Mishra | Shm572 | 11255997
 __________________________________________________
  */
 
@@ -44,12 +44,12 @@ __________________________________________________
 /* PURPOSE:
  * Stores the given input in a doubly linked list of commands.
  */
-typedef struct _command
+typedef struct command
 {
     char name[MAX_COMMAND_LENGTH];         //Store the name of the command.
-    struct _command *next;                 //The next command.
-    struct _command *prev;                 //The previous command.
-    struct _command *tail;                 //The last node in the chain.
+    struct command *next;                 //The next command.
+    struct command *prev;                 //The previous command.
+    struct command *tail;                 //The last node in the chain.
     int forwards;                          //0 -> command does not need to forward stdout.  1-> forward stdout.
     char forwardsTo[MAX_COMMAND_LENGTH/2]; //If forwards is 1, where does cmd forward output to?
     int cmdCount;                          //The # of commands contained within this node chain.
@@ -76,7 +76,7 @@ void runCommand(Command *command, int *fd)
 
     while (token!=NULL)
     {
-        tokens[counter] = token;
+        tokens[counter] = (char **) token;
         counter+=1;
         token = strtok(NULL," ");
     }
@@ -102,7 +102,7 @@ void runCommand(Command *command, int *fd)
             dup2(fd[1],STDOUT_FILENO);
             close(fd[0]);
             close(fd[1]);
-            if (execvp(tokens[0], tokens) == -1)
+            if (execvp((const char *) tokens[0], (char *const *) tokens) == -1)
             {
                 perror("wrdsh");
             }
@@ -115,7 +115,7 @@ void runCommand(Command *command, int *fd)
             close(fd[1]);
             dup2(fd[0],STDIN_FILENO);
             close(fd[0]);
-            if (execvp(tokens[0], tokens) == -1)
+            if (execvp((const char *) tokens[0], (char *const *) tokens) == -1)
             {
                 perror("wrdsh");
             }
@@ -128,7 +128,7 @@ void runCommand(Command *command, int *fd)
             close(fd[0]);
             dup2(fd[1],STDOUT_FILENO);
             close(fd[1]);
-            if (execvp(tokens[0], tokens) == -1)
+            if (execvp((const char *) tokens[0], (char *const *) tokens) == -1)
             {\
                 perror("wrdsh");
             }
@@ -137,8 +137,8 @@ void runCommand(Command *command, int *fd)
         }else {
             //single command
             //child (new process)
-           printf(tokens);
-            if (execvp(tokens[0], tokens) == -1)
+          // printf(tokens);
+            if (execvp((const char *) tokens[0], (char *const *) tokens) == -1)
             {
                 perror("wrdsh");
             }
@@ -307,7 +307,7 @@ int shellLoop(Command *cmd)
 }
 
 
-int main(int argc, char *argv[])
+int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[])
 {
     int fileDescriptors[2]; //File descriptors. fd[0] = read  |   fd[1] = write
     pipe(fileDescriptors);
@@ -319,7 +319,7 @@ int main(int argc, char *argv[])
     {
         Command *getCmd = calloc(1, sizeof(Command));//Allocate an empty Command to store the loop's output.
         shellStatus = shellLoop(getCmd);//Trigger the 'get input' loop.
-        execReverseOrder(getCmd,&fileDescriptors);
+        execReverseOrder(getCmd, (int *) &fileDescriptors);
         printf("Shell returned %d.\n",shellStatus);
     }
     return 0;
