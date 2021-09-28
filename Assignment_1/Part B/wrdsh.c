@@ -27,6 +27,8 @@ __________________________________________________
  */
 
 
+//A simple comment.
+
 //TODO:
 /*      Known bugs:
  *          Currently strips double-spacing contained within "  std   out quotes"
