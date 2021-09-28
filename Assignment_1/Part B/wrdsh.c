@@ -51,8 +51,6 @@ typedef struct command
     struct command *next;                 //The next command.
     struct command *prev;                 //The previous command.
     struct command *tail;                 //The last node in the chain.
-    int forwards;                          //0 -> command does not need to forward stdout.  1-> forward stdout.
-    char forwardsTo[MAX_COMMAND_LENGTH/2]; //If forwards is 1, where does cmd forward output to?
     int cmdCount;                          //The # of commands contained within this node chain.
 } Command;
 
@@ -95,14 +93,15 @@ void runCommand(Command *command, int *fd)
     }
     else if(rc==0)
     {
-        if(command->prev!=NULL&command->next!=NULL){
+        if(((command->prev)!=NULL)&((command->next)!=NULL)){
             printf(" Middle command %s\n",command->name);
+
             close(fd[1]);
             dup2(fd[0],STDIN_FILENO);
 
             dup2(fd[1],STDOUT_FILENO);
-            close(fd[0]);
-            close(fd[1]);
+            //close(fd[0]);
+            //close(fd[1]);
             if (execvp((const char *) tokens[0], (char *const *) tokens) == -1)
             {
                 perror("wrdsh");
@@ -110,7 +109,7 @@ void runCommand(Command *command, int *fd)
 
 
 
-        }else if(command->prev==NULL&command->next!=NULL){
+        }else if(((command->prev)==NULL)&((command->next)!=NULL)){
             printf(" Last command%s\n",command->name);
 
             close(fd[1]);
@@ -122,7 +121,7 @@ void runCommand(Command *command, int *fd)
             }
 
 
-        }else if(command->prev!=NULL&command->next==NULL){
+        }else if(((command->prev)!=NULL)&((command->next)==NULL)){
             printf(" First command%s\n",command->name);
 
 
@@ -217,7 +216,6 @@ Command * createCommand(char* parseMe)
 {
     Command *newPipe = calloc(1,sizeof(Command));
     strcpy(newPipe->name,parseMe);
-    //char buffff[100] ="";
     if (strrchr(parseMe,'<'))
     {
         char *token;
@@ -230,13 +228,14 @@ Command * createCommand(char* parseMe)
             if (strcmp(token,"<") == 0)
             {
                 strcpy(newPipe->name,savePointer);
-                newPipe->forwards = 1;
-                strcpy(newPipe->forwardsTo,cmdBuffer);
+                strcat(newPipe->name,"> ");
+                strcat(newPipe->name,cmdBuffer);
             }
             strcat(cmdBuffer,token);
             token = strtok_r(0," ",&savePointer);
         }
     }
+
     return newPipe;
 }
 
