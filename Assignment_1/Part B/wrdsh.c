@@ -51,6 +51,8 @@ typedef struct command
     struct command *next;                 //The next command.
     struct command *prev;                 //The previous command.
     struct command *tail;                 //The last node in the chain.
+    int forwards;                          //0 -> command does not need to forward stdout.  1-> forward stdout.
+    char forwardsTo[MAX_COMMAND_LENGTH/2];
     int cmdCount;                          //The # of commands contained within this node chain.
 } Command;
 
@@ -228,8 +230,8 @@ Command * createCommand(char* parseMe)
             if (strcmp(token,"<") == 0)
             {
                 strcpy(newPipe->name,savePointer);
-                strcat(newPipe->name,"> ");
-                strcat(newPipe->name,cmdBuffer);
+                newPipe->forwards = 1;
+                strcpy(newPipe->forwardsTo,cmdBuffer);
             }
             strcat(cmdBuffer,token);
             token = strtok_r(0," ",&savePointer);
