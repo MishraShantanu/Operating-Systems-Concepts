@@ -49,8 +49,6 @@ typedef struct command
     struct command *next;                 //The next command.
     struct command *prev;                 //The previous command.
     struct command *tail;                 //The last node in the chain.
-    int forwards;                          //0 -> command does not need to forward stdout.  1-> forward stdout.
-    char forwardsTo[MAX_COMMAND_LENGTH/2]; //If forwards is 1, where does cmd forward output to?
     int cmdCount;                          //The # of commands contained within this node chain.
 } Command;
 
@@ -215,7 +213,6 @@ Command * createCommand(char* parseMe)
 {
     Command *newPipe = calloc(1,sizeof(Command));
     strcpy(newPipe->name,parseMe);
-    //char buffff[100] ="";
     if (strrchr(parseMe,'<'))
     {
         char *token;
@@ -227,22 +224,15 @@ Command * createCommand(char* parseMe)
         {
             if (strcmp(token,"<") == 0)
             {
-
-                //strcat(buffff,savePointer);
-                //strcat(buffff,"> ");
-                //strcat(buffff,cmdBuffer);
-                //printf("\nbuff: %s \n",buffff);
-
-
-
                 strcpy(newPipe->name,savePointer);
-                newPipe->forwards = 1;
-                strcpy(newPipe->forwardsTo,cmdBuffer);
+                strcat(newPipe->name,"> ");
+                strcat(newPipe->name,cmdBuffer);
             }
             strcat(cmdBuffer,token);
             token = strtok_r(0," ",&savePointer);
         }
     }
+
     return newPipe;
 }
 
