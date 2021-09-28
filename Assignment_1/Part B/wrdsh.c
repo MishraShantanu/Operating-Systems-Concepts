@@ -227,14 +227,6 @@ Command * createCommand(char* parseMe)
         {
             if (strcmp(token,"<") == 0)
             {
-
-                //strcat(buffff,savePointer);
-                //strcat(buffff,"> ");
-                //strcat(buffff,cmdBuffer);
-                //printf("\nbuff: %s \n",buffff);
-
-
-
                 strcpy(newPipe->name,savePointer);
                 newPipe->forwards = 1;
                 strcpy(newPipe->forwardsTo,cmdBuffer);
