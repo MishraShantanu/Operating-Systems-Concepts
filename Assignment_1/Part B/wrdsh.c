@@ -340,8 +340,6 @@ char * delimBySpace(char* parseMe)
         token = strtok_r(0," ",&savePointer);
     }
     strcat(cmdBuffer," ");
-
-    printf("Delim by space returning: %s\n",cmdBuffer);
     return cmdBuffer;
 
 
@@ -355,11 +353,23 @@ int delimByPipe(Command* userCommands, char* parseMe)
     char parseBuffer[MAX_COMMAND_LENGTH];
     //TODO: Write a check -- does anything follow the last |? If not, throw exception (syntax error)
     strcpy(parseBuffer,parseMe);
+
+    int pipeCount = 0;
+    int tokenCount = 0;
+
+    for (int i = 0; i < strlen(parseBuffer);i++) if (parseBuffer[i] == '|') pipeCount++; // Count # pipes in string.
+
     token = strtok_r(parseBuffer, "|", &savePointer);
     while (token)
     {
+        tokenCount++;
         setLastNode(userCommands,createCommand(delimBySpace(token)));
         token = strtok_r(0,"|",&savePointer);
+    }
+    if (pipeCount != tokenCount-1)
+    {
+        printf("Syntax error! Please try again.\n");
+        return -1;
     }
     return 0;
 }
@@ -385,7 +395,7 @@ int shellLoop(Command *userCommands)
         if (buffer[strlen(buffer) - 1] == '\n') buffer[strlen(buffer) - 1] = '\0'; //Replace \n with \0
         if (strrchr(buffer, '|'))
         {
-            delimByPipe(userCommands, buffer);
+            if (delimByPipe(userCommands, buffer) == -1) return -1;
         }
         else
         {
@@ -410,12 +420,13 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[])
     {
         Command *getCmd = calloc(1, sizeof(Command));//Allocate an empty Command to store the loop's output.
         shellStatus = shellLoop(getCmd);                    //Trigger the 'get input' loop.
-        execReverseOrder(getCmd, (int *) &fileDescriptors); //Execute all commands given by the shell.
+        if (shellStatus != -1)
+        {
+            execReverseOrder(getCmd, (int *) &fileDescriptors); //Execute all commands given by the shell.
+        }
         printf("Shell returned %d.\n",shellStatus);
         free(getCmd);
     }
     return 0;
 }
 
-
-//TODO: Spencer -- Try to handle command not found.
