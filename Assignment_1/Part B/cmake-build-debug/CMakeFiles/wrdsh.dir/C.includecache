@@ -17,6 +17,4 @@ sys/wait.h
 -
 string.h
 -
-ctype.h
--
 
