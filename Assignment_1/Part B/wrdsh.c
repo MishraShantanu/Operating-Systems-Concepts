@@ -160,11 +160,15 @@ int execReverseOrder(Command *srcChain, int *fd)
     }
 
     Command *walker = srcChain->tail;
+    //printf("Walker: %s Forwards: %d  forwardsTo: %s\n",walker->name,walker->forwards,walker->forwardsTo);
     while (walker->prev != NULL) //Walk back from the end of the chain towards the beginning, executing each command.
     {
+        //printf("Walker: %s Forwards: %d  forwardsTo: %s\n",walker->name,walker->forwards,walker->forwardsTo);
         runCommand(walker,fd);
         walker = walker->prev;
     }
+    //printf("Walker: %s Forwards: %d  forwardsTo: %s\n",walker->name,walker->forwards,walker->forwardsTo);
+
     runCommand(walker,fd);
     return 0;
 }
@@ -178,23 +182,34 @@ int execReverseOrder(Command *srcChain, int *fd)
  */
 void setLastNode(Command *srcChain,Command *endNode)
 {
+    //printf("Attempting to set last node: %s\n",endNode->name);
+
     if (srcChain->cmdCount == 0)
     {
-        srcChain->tail = endNode; //Update reference to tail.
+        //printf("cmdcount is zero, copying node: %s\n",endNode->name);
+        strcpy(srcChain->name,endNode->name);
+        if (endNode->forwards == 1)
+        {
+            strcpy(srcChain->forwardsTo,endNode->forwardsTo);
+            srcChain->forwards = 1;
+        }
         srcChain->cmdCount++;
         return;
     }
     Command *walker = srcChain;
     while (walker->next != NULL) //Step to the end of the node-chain
     {
+        //printf("Walker detected: Currently on node: %s \n",walker->name);
         walker->next->prev = walker; //Backlink each node.
         walker = walker->next;
     }
+    //printf("Walker's next is null. Currently on node: %s \n",walker->name);
     walker->next = endNode;     //Insert the new node at the end of the chain.
     endNode->prev = walker;     //Link new tail to the old.
     srcChain->tail = endNode;   //Update reference to tail.
     srcChain->cmdCount++;
 }
+
 
 /* PURPOSE: To take a line of input and parse it into a struct Command.
  * PRE-CONDITIONS: parseMe -- The text to be transformed into a command.
@@ -266,6 +281,8 @@ int shellLoop(Command *userCommands)
     }
     return 0;
 }
+
+
 
 
 
