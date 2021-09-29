@@ -14,52 +14,52 @@ __________________________________________________
 #include <unistd.h>
 #include <sys/wait.h>
 #include <string.h>
+#include <ctype.h>
+
 
 #define MAX_COMMAND_LENGTH 400
-#define INPUT_FD 0
-#define OUTPUT_FD 1
 
 /*                Features of wrdsh:
- *   - Parses a given line of input into executable commands.    [Complete]
- *   - Executes commands from right-to-left.                     [Complete]
+ *   - Parses a given line of input into executable commands.
+ *   - Executes commands from right-to-left.
  *   - Supports pipes [ | ] and stdout redirection [ > ].
  *   - Duplicates letters of "c" "m" "p" "t" found in stdout.
+ *
+ *
  */
 
-
-//A simple comment.
 
 //TODO:
 /*      Known bugs:
  *          Currently strips double-spacing contained within "  std   out quotes"
  *          Forwarding ( use of > ) is currently not handled correctly.
+ *          Outputs mangled text when command is not found.
  *
  *      Features to implement:
  *          Handle "command not found" situations gracefully.
  *          Handle incorrect syntax (IE, ls |)
  *          Store args separately from desired executable within command.
- *          Duplicate letters of c - m - p - t in stdout.
+ *
  */
 
 /* PURPOSE:
- * Stores the given input in a doubly linked list of commands to be executed.
+ * Stores the given input in a doubly linked list of commands.
  */
 typedef struct command
 {
     char name[MAX_COMMAND_LENGTH];         //Store the name of the command.
-    struct command *next;                  //The next command in the node chain.
-    struct command *prev;                  //The previous command in the node chain.
-    struct command *tail;                  //The last node in the chain.
+    struct command *next;                 //The next command.
+    struct command *prev;                 //The previous command.
+    struct command *tail;                 //The last node in the chain.
     int forwards;                          //0 -> command does not need to forward stdout.  1-> forward stdout.
-    char forwardsTo[MAX_COMMAND_LENGTH/2]; //If forwards == 1, the location which the command will forward stdout to.
+    char forwardsTo[MAX_COMMAND_LENGTH/2]; //If forwards is 1, where does cmd forward output to?
     int cmdCount;                          //The # of commands contained within this node chain.
 } Command;
 
 
-/* PURPOSE: Executes individual commands by creating a child process using fork and later uses
+/* PURPOSE: executes individual commands by creating a child process using fork and later uses
  * execvp to execute the system call
- * PRE-CONDITIONS: - command -- The command object which contains the name of command to be executed.
- *                   fd      -- The intended file descriptors inherited by execReverseOrder.
+ * PRE-CONDITIONS: - command: the command object which contains the name of command to be executed
  * POST-CONDITIONS: Individual command is executed.
  * RETURN: None.
  */
@@ -71,102 +71,169 @@ void runCommand(Command *command, int *fd)
     char **tokens[100];
     int counter = 0;
     char *token = strtok(command->name," ");
+    //  int fd[2];
+    //   pipe(fd);
+
+
     while (token!=NULL)
     {
         tokens[counter] = (char **) token;
         counter+=1;
         token = strtok(NULL," ");
     }
+
     //The command should have null at end to show the end of command
     tokens[counter] =NULL;
 
     //forking to call the child process
     int rc= fork();
-    if(rc<0) //forking failed exit
+    if(rc<0)
     {
+        //forking failed exit
         fprintf(stderr, "Fork failed \n");
         exit(1);
     }
     else if(rc==0)
     {
-        if(((command->prev)!=NULL)&((command->next)!=NULL))
-        {
+        if(((command->prev)!=NULL)&((command->next)!=NULL)){
             printf(" Middle command %s\n",command->name);
-            close(fd[OUTPUT_FD]);
-            dup2(fd[INPUT_FD],STDIN_FILENO);
-            dup2(fd[OUTPUT_FD],STDOUT_FILENO);
+
+            close(fd[1]);
+            dup2(fd[0],STDIN_FILENO);
+
+            dup2(fd[1],STDOUT_FILENO);
             //close(fd[0]);
             //close(fd[1]);
             if (execvp((const char *) tokens[0], (char *const *) tokens) == -1)
             {
                 perror("wrdsh");
             }
-        }
-        else if(((command->prev)==NULL)&((command->next)!=NULL))
-        {
+
+
+
+        }else if(((command->prev)==NULL)&((command->next)!=NULL)){
             printf(" Last command%s\n",command->name);
 
-            close(fd[OUTPUT_FD]);
-            dup2(fd[INPUT_FD],STDIN_FILENO);
-            close(fd[INPUT_FD]);
+            printf("\n 1 command completed fd0 %d & fd1 %d\n",fd[0],fd[1]);
+
+
+            close(fd[1]);
+
+            printf("stdIN: %d and STDOUT: %d\n",STDIN_FILENO,STDOUT_FILENO);
+
+            dup2(fd[0],STDIN_FILENO);
+            printf("stdIN: %d and STDOUT: %d\n",STDIN_FILENO,STDOUT_FILENO);
+            close(fd[0]);
+
+            printf("\n 2 command completed fd0 %d & fd1 %d\n",fd[0],fd[1]);
+
+
             if (execvp((const char *) tokens[0], (char *const *) tokens) == -1)
             {
                 perror("wrdsh");
             }
-        }
-        else if(((command->prev)!=NULL)&((command->next)==NULL))
-        {
+
+
+        }else if(((command->prev)!=NULL)&((command->next)==NULL)){
             printf(" First command%s\n",command->name);
 
-            close(fd[INPUT_FD]);
-            dup2(fd[OUTPUT_FD],STDOUT_FILENO);
-            close(fd[OUTPUT_FD]);
+
+             close(fd[0]);
+            dup2(fd[1],STDOUT_FILENO);
+                close(fd[1]);
+            if (execvp((const char *) tokens[0], (char *const *) tokens) == -1)
+            {\
+                perror("wrdsh");
+            }
+
+
+        }else {
+            //single command
+            //child (new process)
+            // printf(tokens);
+
+            close(fd[0]);
+            dup2(fd[1],STDOUT_FILENO);
+            close(fd[1]);
             if (execvp((const char *) tokens[0], (char *const *) tokens) == -1)
             {
                 perror("wrdsh");
+            }
+
+        }
+
+
+    }
+    else
+    {
+
+        //original parent process
+
+        int wait_count =wait(NULL);
+        printf("parent return code: %d ", wait_count);
+
+        if(((command->prev)==NULL)&((command->next)!=NULL)||((command->prev)==NULL)&((command->next)==NULL)) {
+
+            char *temp;
+            int i=0;
+            close(fd[1]);
+            temp = malloc(MAX_COMMAND_LENGTH* sizeof(char *));
+            while (read(fd[0], temp, (MAX_COMMAND_LENGTH * sizeof(char *))) != 0) {
+                while (temp[i] != '\0'){
+                    printf("%c", temp[i]);
+                    if (temp[i] == 'c' || temp[i] == 'C' || temp[i] == 'm' || temp[i] == 'M' || temp[i] == 'p' ||
+                        temp[i] == 'P' || temp[i] == 't' || temp[i] == 'T') {
+                        printf("%c", temp[i]);
+                    }
+                    i++;
+                }
+            }
+        }
+
+    }
+
+
+//    close(fd[0]);
+//    close(fd[1]);
+
+
+    printf("command completed fd0 %d & fd1 %d\n",fd[0],fd[1]);
+
+}
+
+/* PURPOSE: Removes duplicate spaces (and trailing \n) from a given string.
+ * PRE-CONDITIONS: - stripMe -> The string you wish to remove redundant spacing from.
+ * POST-CONDITIONS: stripMe is modified (without redundant spacing or trailing \n).
+ * RETURN: The given string without extra spaces.
+ */
+char *stripRedundantSpacing(char *stripMe)
+{
+    int currentInChar;
+    int currentOutChar;
+
+    currentInChar = 0;
+    currentOutChar = 0;
+
+    //Strip tailing new line if present.
+    if (stripMe[strlen(stripMe) - 1] == '\n') stripMe[strlen(stripMe) - 1] = '\0';
+
+    while (stripMe[currentInChar])
+    {
+        if (isspace(stripMe[currentInChar]) || iscntrl(stripMe[currentInChar]))
+        {
+            if (currentOutChar > 0 && !isspace(stripMe[currentOutChar-1]))
+            {
+                stripMe[currentOutChar++] = ' ';
             }
         }
         else
         {
-            //single command
-            //child (new process)
-          // printf(tokens);
-            if (execvp((const char *) tokens[0], (char *const *) tokens) == -1)
-            {
-                perror("wrdsh");
-            }
+            stripMe[currentOutChar++] = stripMe[currentInChar];
         }
+        currentInChar++;
     }
-    else
-    {
-        //original parent process
-        int wait_count =wait(NULL);
-        printf("parent return code: %d ", wait_count);
-    }
-    printf("command completed\n");
-}
-
-/* PURPOSE: Executes the given command (from right-to-left)
- * PRE-CONDITIONS: srcChain -- Node chain representing the sequence of commands to execute.
- *                 fd       -- File descriptors to be passed to each command.
- * POST-CONDITIONS: Triggers runCommand() on each node in srcChain.
- * RETURN: 0 if execution was successful, 1 when execution has failed.
- */
-int execReverseOrder(Command *srcChain, int *fd)
-{
-    if (srcChain->cmdCount == 0) // Check if given an empty srcChain.
-    {
-        return (1);
-    }
-
-    Command *walker = srcChain->tail;
-    while (walker->prev != NULL) //Walk back from the end of the chain towards the beginning, executing each command.
-    {
-        runCommand(walker,fd);
-        walker = walker->prev;
-    }
-    runCommand(walker,fd);
-    return 0;
+    stripMe[currentOutChar] = 0;
+    return stripMe;
 }
 
 
@@ -178,95 +245,106 @@ int execReverseOrder(Command *srcChain, int *fd)
  */
 void setLastNode(Command *srcChain,Command *endNode)
 {
-    if (srcChain->cmdCount == 0)
+    if (srcChain->cmdCount == 1)
     {
         srcChain->tail = endNode; //Update reference to tail.
-        srcChain->cmdCount++;
         return;
     }
+
     Command *walker = srcChain;
     while (walker->next != NULL) //Step to the end of the node-chain
     {
-        walker->next->prev = walker; //Backlink each node.
+        walker->next->prev = walker; //backlink the node.
         walker = walker->next;
     }
-    walker->next = endNode;     //Insert the new node at the end of the chain.
-    endNode->prev = walker;     //Link new tail to the old.
-    srcChain->tail = endNode;   //Update reference to tail.
-    srcChain->cmdCount++;
+    walker->next = endNode; // insert the new node at the end of the chain.
+    endNode->prev = walker; // Link new tail to the old.
+    srcChain->tail = endNode; //Update reference to tail.
 }
 
-/* PURPOSE: To take a line of input and parse it into a struct Command.
- * PRE-CONDITIONS: parseMe -- The text to be transformed into a command.
- * POST-CONDITIONS: parseMe is modified via tokenization (only when forwarding is detected).
- * RETURN: A command consistent with the properties of parseMe.
- */
-Command * createCommand(char* parseMe)
-{
-    Command *newPipe = calloc(1,sizeof(Command));
-    strcpy(newPipe->name,parseMe);  //Create a new command, copy given text as name.
-    if (strrchr(parseMe,'<'))    //Does this new command expect to forward stdout somewhere else?
-    {
-        char *token;
-        char *savePointer;
-        char cmdBuffer[MAX_COMMAND_LENGTH] = "";
 
-        token = strtok_r(parseMe, " ", &savePointer); //Crawl over each word in the input.
-        while (token)
-        {
-            if (strcmp(token,"<") == 0)   //Once we have found where the command intends to forward stdout,
-            {
-                strcpy(newPipe->name,savePointer);     //Save the command's name.
-                newPipe->forwards = 1;                 //Declare this command intends to forward.
-                strcpy(newPipe->forwardsTo,cmdBuffer); //Save the destination of the intended forward.
-            }
-            strcat(cmdBuffer,token);                   //Keep copying words into the buffer for each token.
-            token = strtok_r(0," ",&savePointer);
-        }
+
+/* PURPOSE: Executes the given command (from right-to-left)
+ * PRE-CONDITIONS: srcChain -- Node chain representing the sequence of commands to execute.
+ * POST-CONDITIONS: Triggers runCommand() on each node in srcChain.
+ * RETURN: 0 if execution was successful, 1 when execution has failed.
+ */
+int execReverseOrder(Command *srcChain, int *fd)
+{
+    if (srcChain->cmdCount == 0) // Check if given an empty srcChain.
+    {
+        return (1);
     }
-    return newPipe;
+
+    Command *walker = srcChain->tail;
+    while (walker->prev != NULL) //Walk back from the end of the chain towards the beginning.
+    {
+        runCommand(walker,fd);
+        walker = walker->prev;
+    }
+    runCommand(walker,fd);
+    return 0;
 }
 
 
 /* PURPOSE: Reads and parses a line of user input into a node chain of commands.
- * PRE-CONDITIONS: userCommands -- Empty Command struct.
- * POST-CONDITIONS: userCommands is modified such that it contains the user's command.
+ * PRE-CONDITIONS: cmd -- Empty Command struct.
+ * POST-CONDITIONS: cmd is modified such that it contains the user's command.
  * RETURN: 1 if user is trying to exit, 0 otherwise.
  */
-int shellLoop(Command *userCommands)
+int shellLoop(Command *cmd)
 {
     printf("wrdsh> "); //Prompt for input.
+    //Prepare to get user input, tokenized.
     char userInput[MAX_COMMAND_LENGTH];
     char buffer[MAX_COMMAND_LENGTH];
-
+    char *token;
+    const char forwardChar = '>';
     //Sanitization check: did input work? If so, parse it. If not, skip.
-    if (fgets(userInput, sizeof(userInput), stdin) != NULL)
+    if (fgets(userInput,sizeof(userInput),stdin) != NULL)
     {
-        strcpy(buffer, userInput);
-        if (strcmp(userInput, "\n") == 0) return (0);            //Special case: Did user just hit enter without input?
-        if (strcmp(userInput, "exit\n") == 0) return (1);        //Special case: User is trying to exit the shell.
-        if (buffer[strlen(buffer) - 1] == '\n') buffer[strlen(buffer) - 1] = '\0'; //Replace \n with \0
-        char *token;
-        char *savePointer;
-        char cmdBuffer[MAX_COMMAND_LENGTH] = "";
-        token = strtok_r(buffer, " ", &savePointer);  //Step through each separate word given by the user.
+        //Special case: Did user just hit enter without input?
+        if (strcmp(userInput,"\n") == 0)
+        {
+            return (0); //Try again.
+        }
+        //Special case: User is trying to exit the shell.
+        if (strcmp(userInput,"exit\n") == 0)
+        {
+            return (1);
+        }
+        //Copy input to a buffer (with redundant spaces removed)
+        strcpy(buffer,userInput);
+        strcpy(buffer,stripRedundantSpacing(buffer));
+        //Separate commands by pipe:
+        token = strtok(buffer, "|");
+        strncpy(cmd->name,token,sizeof(cmd->name)); //Copy the first token's string to cmd->name.
         while (token)
         {
-            if (strcmp(token,"|") == 0)  //When a pipe is detected, create a command from everything that preceded it.
-            {
-                token = strtok_r(0," ",&savePointer);       //Move past the "|" to the next found word.
-                setLastNode(userCommands,createCommand(cmdBuffer)); //Link this new command to userCommands.
-                strcpy(cmdBuffer,""); //Reset the buffer so a new command can be created.
-            }
-            strcat(cmdBuffer,token);  //Continue to step through each word, saving each one to cmdBuffer.
-            strcat(cmdBuffer," ");
-            token = strtok_r(0," ",&savePointer);
-        }
-        setLastNode(userCommands,createCommand(cmdBuffer)); //Create a command from buffer and link it to userCommands.
-    }
-    return 0;
-}
+            cmd->cmdCount++; //Count each executable in the chain.
+            Command *newCmd = calloc(1, sizeof(Command)); //Allocate a fresh cmd to append.
 
+            char *cmdForwards = strchr(token,forwardChar); //Detect if the current command intends to forward stdout.
+            if (cmdForwards)
+            {
+                newCmd->forwards++; //Set int boolean indicating this command has to forward.
+                cmdForwards++; //skip the > char
+                strncpy(newCmd->forwardsTo, cmdForwards, sizeof(newCmd->forwardsTo)); //Set where cmd wishes to forward.
+                token = strtok(token,">");
+                strncpy(newCmd->name, token, sizeof(newCmd->name));
+                newCmd->forwards = 1;
+                printf("Forward found! Forward %s to %s\n",newCmd->name,newCmd->forwardsTo);
+            }
+            else
+            {
+                strncpy(newCmd->name, token, sizeof(newCmd->name)); //Store the token as the current command's name.
+            }
+            setLastNode(cmd, newCmd); //Append to the end of the linked list.
+            token = strtok(NULL, "|"); //Move to next cmd in pipe.
+        }
+    }
+    return (0);
+}
 
 
 int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[])
@@ -280,8 +358,8 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[])
     while(shellStatus != 1)
     {
         Command *getCmd = calloc(1, sizeof(Command));//Allocate an empty Command to store the loop's output.
-        shellStatus = shellLoop(getCmd);                    //Trigger the 'get input' loop.
-        execReverseOrder(getCmd, (int *) &fileDescriptors); //Execute all commands given by the shell.
+        shellStatus = shellLoop(getCmd);//Trigger the 'get input' loop.
+        execReverseOrder(getCmd, (int *) &fileDescriptors);
         printf("Shell returned %d.\n",shellStatus);
     }
     return 0;
