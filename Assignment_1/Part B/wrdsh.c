@@ -243,6 +243,7 @@ Command * createCommand(char* parseMe)
 }
 
 
+
 /* PURPOSE: Reads and parses a line of user input into a node chain of commands.
  * PRE-CONDITIONS: userCommands -- Empty Command struct.
  * POST-CONDITIONS: userCommands is modified such that it contains the user's command.
