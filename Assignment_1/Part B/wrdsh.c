@@ -89,17 +89,23 @@ void runCommand(Command *command, int *fd)
     int rc= fork();
     if(rc<0)
     {
+
+        printf("rc < 0. Failed. closing.\n");
+
         //forking failed exit
         fprintf(stderr, "Fork failed \n");
         exit(1);
     }
     else if(rc==0)
     {
-        if(((command->prev)!=NULL)&((command->next)!=NULL)){
+
+        printf("S1 \n");
+        if(((command->prev)!=NULL)&((command->next)!=NULL))
+        {
             //   printf(" Middle command %s\n",command->name);
 
-            close(fd[1]);
-            dup2(fd[0],STDIN_FILENO);
+            close(fd[OUTPUT_FD]);
+            dup2(fd[INPUT_FD],STDIN_FILENO);
 
             dup2(fd[1],STDOUT_FILENO);
             //close(fd[0]);
@@ -111,18 +117,22 @@ void runCommand(Command *command, int *fd)
 
 
 
-        }else if(((command->prev)==NULL)&((command->next)!=NULL)){
+        }
+        else if(((command->prev)==NULL)&((command->next)!=NULL))
+        {
+
+            printf("s2\n");
             //   printf(" Last command%s\n",command->name);
 
             // printf("\n 1 command completed fd0 %d & fd1 %d\n",fd[0],fd[1]);
 
 
-            close(fd[1]);
+            close(fd[OUTPUT_FD]);
 
             // printf("stdIN: %d and STDOUT: %d\n",STDIN_FILENO,STDOUT_FILENO);
-            dup2(fd[0],STDIN_FILENO);
+            dup2(fd[INPUT_FD],STDIN_FILENO);
             //printf("stdIN: %d and STDOUT: %d\n",STDIN_FILENO,STDOUT_FILENO);
-            close(fd[0]);
+            close(fd[INPUT_FD]);
 
             //printf("\n 2 command completed fd0 %d & fd1 %d\n",fd[0],fd[1]);
 
@@ -133,27 +143,34 @@ void runCommand(Command *command, int *fd)
             }
 
 
-        }else if(((command->prev)!=NULL)&((command->next)==NULL)){
+        }
+        /*
+        else if(((command->prev)!=NULL)&((command->next)==NULL))
+        {
             //  printf(" First command%s\n",command->name);
 
-
-            close(fd[0]);
-            dup2(fd[1],STDOUT_FILENO);
-            close(fd[1]);
+            printf("s3\n");
+            close(fd[INPUT_FD]);
+            dup2(fd[OUTPUT_FD],STDOUT_FILENO);
+            close(fd[OUTPUT_FD]);
             if (execvp((const char *) tokens[0], (char *const *) tokens) == -1)
             {\
                 perror("wrdsh");
             }
 
 
-        }else {
+        }
+         */
+        else
+        {
+            printf("sec 3");
             //single command
             //child (new process)
             // printf(tokens);
 
-            close(fd[0]);
-            dup2(fd[1],STDOUT_FILENO);
-            close(fd[1]);
+            close(fd[INPUT_FD]);
+            dup2(fd[OUTPUT_FD],STDOUT_FILENO);
+            close(fd[OUTPUT_FD]);
             if (execvp((const char *) tokens[0], (char *const *) tokens) == -1)
             {
                 perror("wrdsh");
@@ -165,20 +182,23 @@ void runCommand(Command *command, int *fd)
     }
     else
     {
-
+        printf("s4\n");
         //original parent process
 
         int wait_count =wait(NULL);
         //  printf("parent return code: %d ", wait_count);
 
-        if(((command->prev)==NULL)&((command->next)!=NULL)||((command->prev)==NULL)&((command->next)==NULL)) {
-
+        //if(((command->prev)==NULL)&((command->next)!=NULL)||((command->prev)==NULL)&((command->next)==NULL))
+        //{
+            printf("dup sec\n");
             char *temp;
             int i=0;
-            close(fd[1]);
+            close(fd[OUTPUT_FD]);
             temp = malloc(MAX_COMMAND_LENGTH* sizeof(char *));
-            while (read(fd[0], temp, (MAX_COMMAND_LENGTH * sizeof(char *))) != 0) {
-                while (temp[i] != '\0'){
+            while (read(fd[INPUT_FD], temp, (MAX_COMMAND_LENGTH * sizeof(char *))) != 0)
+            {
+                while (temp[i] != '\0')
+                {
                     printf("%c", temp[i]);
                     if (temp[i] == 'c' || temp[i] == 'C' || temp[i] == 'm' || temp[i] == 'M' || temp[i] == 'p' ||
                         temp[i] == 'P' || temp[i] == 't' || temp[i] == 'T') {
@@ -187,7 +207,7 @@ void runCommand(Command *command, int *fd)
                     i++;
                 }
             }
-        }
+        //}
 
     }
 
@@ -347,6 +367,10 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[])
         shellStatus = shellLoop(getCmd);                    //Trigger the 'get input' loop.
         execReverseOrder(getCmd, (int *) &fileDescriptors); //Execute all commands given by the shell.
         printf("Shell returned %d.\n",shellStatus);
+        free(getCmd);
     }
     return 0;
 }
+
+
+//TODO: Spencer -- Try to handle command not found.
