@@ -249,10 +249,12 @@ int execReverseOrder(Command *srcChain, int *fd)
     Command *walker = srcChain->tail;
     while (walker->prev != NULL) //Walk back from the end of the chain towards the beginning, executing each command.
     {
-        runCommand(walker,fd);
+        printf("Exec command: %s\n",walker->name);
+        //runCommand(walker,fd);
         walker = walker->prev;
     }
-    runCommand(walker,fd);
+    printf("Exec command: %s\n",walker->name);
+    //runCommand(walker,fd);
     return 0;
 }
 
@@ -323,6 +325,46 @@ Command * createCommand(char* parseMe)
 
 
 
+char * delimBySpace(char* parseMe)
+{
+    char *token;
+    char *savePointer;
+    char parseBuffer[MAX_COMMAND_LENGTH];
+    char *cmdBuffer = calloc(1,MAX_COMMAND_LENGTH);
+    strcpy(parseBuffer,parseMe);
+    token = strtok_r(parseBuffer, " ", &savePointer);  //Step through each separate word given by the user.
+    while (token)
+    {
+        strcat(cmdBuffer,token);  //Continue to step through each word, saving each one to cmdBuffer.
+        strcat(cmdBuffer," ");
+        token = strtok_r(0," ",&savePointer);
+    }
+    strcat(cmdBuffer," ");
+
+    printf("Delim by space returning: %s\n",cmdBuffer);
+    return cmdBuffer;
+
+
+}
+
+
+int delimByPipe(Command* userCommands, char* parseMe)
+{
+    char *token;
+    char *savePointer;
+    char parseBuffer[MAX_COMMAND_LENGTH];
+    //TODO: Write a check -- does anything follow the last |? If not, throw exception (syntax error)
+    strcpy(parseBuffer,parseMe);
+    token = strtok_r(parseBuffer, "|", &savePointer);
+    while (token)
+    {
+        setLastNode(userCommands,createCommand(delimBySpace(token)));
+        token = strtok_r(0,"|",&savePointer);
+    }
+    return 0;
+}
+
+
 /* PURPOSE: Reads and parses a line of user input into a node chain of commands.
  * PRE-CONDITIONS: userCommands -- Empty Command struct.
  * POST-CONDITIONS: userCommands is modified such that it contains the user's command.
@@ -341,27 +383,17 @@ int shellLoop(Command *userCommands)
         if (strcmp(userInput, "\n") == 0) return (0);            //Special case: Did user just hit enter without input?
         if (strcmp(userInput, "exit\n") == 0) return (1);        //Special case: User is trying to exit the shell.
         if (buffer[strlen(buffer) - 1] == '\n') buffer[strlen(buffer) - 1] = '\0'; //Replace \n with \0
-        char *token;
-        char *savePointer;
-        char cmdBuffer[MAX_COMMAND_LENGTH] = "";
-        token = strtok_r(buffer, " ", &savePointer);  //Step through each separate word given by the user.
-        while (token)
+        if (strrchr(buffer, '|'))
         {
-            if (strcmp(token,"|") == 0)  //When a pipe is detected, create a command from everything that preceded it.
-            {
-                token = strtok_r(0," ",&savePointer);       //Move past the "|" to the next found word.
-                setLastNode(userCommands,createCommand(cmdBuffer)); //Link this new command to userCommands.
-                strcpy(cmdBuffer,""); //Reset the buffer so a new command can be created.
-            }
-            strcat(cmdBuffer,token);  //Continue to step through each word, saving each one to cmdBuffer.
-            strcat(cmdBuffer," ");
-            token = strtok_r(0," ",&savePointer);
+            delimByPipe(userCommands, buffer);
         }
-        setLastNode(userCommands,createCommand(cmdBuffer)); //Create a command from buffer and link it to userCommands.
+        else
+        {
+            setLastNode(userCommands,createCommand(delimBySpace(buffer)));
+        }
     }
     return 0;
 }
-
 
 
 
