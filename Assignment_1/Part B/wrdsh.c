@@ -65,6 +65,9 @@ typedef struct command
  */
 void runCommand(Command *command, int *fd)
 {
+
+
+    printf("Running command: %s    forwards: %d    forwardsTo: %s \n",command->name,command->forwards,command->forwardsTo);
     //TODO: Handle "no such command found"
     //TODO: Handle cmd.forwards == 1  [forward stdout to destination]
     //initialize variable to tokenize the given command
@@ -99,7 +102,9 @@ void runCommand(Command *command, int *fd)
     else if(rc==0)
     {
 
-        printf("S1 \n");
+        printf("s1    -   ");
+        printf("output fd: %d   - ",fd[OUTPUT_FD]);
+        printf("input fd: %d \n",fd[INPUT_FD]);
         if(((command->prev)!=NULL)&((command->next)!=NULL))
         {
             //   printf(" Middle command %s\n",command->name);
@@ -121,7 +126,9 @@ void runCommand(Command *command, int *fd)
         else if(((command->prev)==NULL)&((command->next)!=NULL))
         {
 
-            printf("s2\n");
+            printf("s2    -   ");
+            printf("output fd: %d   - ",fd[OUTPUT_FD]);
+            printf("input fd: %d \n",fd[INPUT_FD]);
             //   printf(" Last command%s\n",command->name);
 
             // printf("\n 1 command completed fd0 %d & fd1 %d\n",fd[0],fd[1]);
@@ -144,12 +151,14 @@ void runCommand(Command *command, int *fd)
 
 
         }
-        /*
         else if(((command->prev)!=NULL)&((command->next)==NULL))
         {
             //  printf(" First command%s\n",command->name);
 
-            printf("s3\n");
+            printf("s3    -   ");
+            printf("output fd: %d   - ",fd[OUTPUT_FD]);
+            printf("input fd: %d \n",fd[INPUT_FD]);
+
             close(fd[INPUT_FD]);
             dup2(fd[OUTPUT_FD],STDOUT_FILENO);
             close(fd[OUTPUT_FD]);
@@ -160,10 +169,11 @@ void runCommand(Command *command, int *fd)
 
 
         }
-         */
         else
         {
-            printf("sec 3");
+            printf("s4    -   ");
+            printf("output fd: %d   - ",fd[OUTPUT_FD]);
+            printf("input fd: %d \n",fd[INPUT_FD]);
             //single command
             //child (new process)
             // printf(tokens);
@@ -182,14 +192,16 @@ void runCommand(Command *command, int *fd)
     }
     else
     {
-        printf("s4\n");
+        printf("s5    -   ");
+        printf("output fd: %d   - ",fd[OUTPUT_FD]);
+        printf("input fd: %d \n",fd[INPUT_FD]);
         //original parent process
 
         int wait_count =wait(NULL);
         //  printf("parent return code: %d ", wait_count);
 
-        //if(((command->prev)==NULL)&((command->next)!=NULL)||((command->prev)==NULL)&((command->next)==NULL))
-        //{
+        if(((command->prev)==NULL)&((command->next)!=NULL)||((command->prev)==NULL)&((command->next)==NULL))
+        {
             printf("dup sec\n");
             char *temp;
             int i=0;
@@ -197,6 +209,7 @@ void runCommand(Command *command, int *fd)
             temp = malloc(MAX_COMMAND_LENGTH* sizeof(char *));
             while (read(fd[INPUT_FD], temp, (MAX_COMMAND_LENGTH * sizeof(char *))) != 0)
             {
+                printf("Actual dupe loop activated \n");
                 while (temp[i] != '\0')
                 {
                     printf("%c", temp[i]);
@@ -207,7 +220,7 @@ void runCommand(Command *command, int *fd)
                     i++;
                 }
             }
-        //}
+        }
 
     }
 
