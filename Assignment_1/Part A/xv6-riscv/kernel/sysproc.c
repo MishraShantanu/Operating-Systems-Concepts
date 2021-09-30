@@ -95,3 +95,13 @@ sys_uptime(void)
   release(&tickslock);
   return xticks;
 }
+
+uint64
+sys_howmanycmpt(void){
+  
+  
+   return howmanycmpt();
+  // return 33;
+
+}
+    
