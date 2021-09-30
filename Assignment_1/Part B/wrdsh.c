@@ -100,21 +100,24 @@ void runCommand(Command *command, int *fd)
     {
         if(command->position == 2) //first
         {
-            dup2(fd[OUTPUT_FD],STDOUT_FILENO);
             close(fd[INPUT_FD]);
-            if (execvp(cmdToRun, (char *const *) cmdArgs) == -1) perror("wrdsh");
+            dup2(fd[OUTPUT_FD],STDOUT_FILENO);
+            dup2(fd[INPUT_FD],STDIN_FILENO);
         }
-        if(command->position == 1) //Middle [between two pipes.].
+        else if(command->position == 1) //Middle [between two pipes.].
         {
             dup2(fd[OUTPUT_FD],STDOUT_FILENO);
-            if (execvp(cmdToRun, (char *const *) cmdArgs) == -1) perror("wrdsh");
+            dup2(fd[INPUT_FD],STDIN_FILENO);
+
         }
         else//last  [BROKEN]
         {
             dup2(fd[OUTPUT_FD],STDOUT_FILENO);
+            dup2(fd[INPUT_FD],STDIN_FILENO);
             close(fd[OUTPUT_FD]);
-            if (execvp(cmdToRun, (char *const *) cmdArgs) == -1) perror("wrdsh");
+            close(fd[INPUT_FD]);
         }
+        if (execvp(cmdToRun, (char *const *) cmdArgs) == -1) perror("wrdsh");
     }
     else    //original parent process
     {
@@ -127,7 +130,8 @@ void runCommand(Command *command, int *fd)
             char *temp;
             int i=0;
             close(fd[OUTPUT_FD]);
-            temp = calloc(1,MAX_COMMAND_LENGTH);
+            fflush(stdout);
+            temp = calloc(20,MAX_COMMAND_LENGTH);
             while (read(fd[INPUT_FD], temp, (MAX_COMMAND_LENGTH * sizeof(char *))) != 0)
             {
                 printf("Actual dupe loop activated \n");
@@ -144,6 +148,9 @@ void runCommand(Command *command, int *fd)
             free(temp);
         }
     }
+
+
+
 }
 
 /* PURPOSE: Executes the given command (from right-to-left)
@@ -334,14 +341,13 @@ int shellLoop(Command *userCommands)
 
 int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[])
 {
-    int fileDescriptors[2]; //File descriptors. fd[0] = read  |   fd[1] = write
-    pipe(fileDescriptors);
-
     //The following is the continuous input loop for the shell.
     int shellStatus = 0;
     printf("\nShell first run:\n");
     while(shellStatus != 1)
     {
+        int fileDescriptors[2]; //File descriptors. fd[0] = read  |   fd[1] = write
+        pipe(fileDescriptors);
         Command *getCmd = calloc(1, sizeof(Command));//Allocate an empty Command to store the loop's output.
         shellStatus = shellLoop(getCmd);                    //Trigger the 'get input' loop.
         if (shellStatus != -1)
@@ -350,11 +356,7 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[])
         }
         printf("Shell returned %d.\n",shellStatus);
         free(getCmd);
-
-
     }
     return 0;
 }
 
-
-//TODO: Spencer -- Try to handle command not found.
