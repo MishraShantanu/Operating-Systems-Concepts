@@ -53,6 +53,7 @@ typedef struct command
     int forwards;                          //0 -> command does not need to forward stdout.  1-> forward stdout.
     char forwardsTo[MAX_COMMAND_LENGTH/2]; //If forwards == 1, the location which the command will forward stdout to.
     int cmdCount;                          //The # of commands contained within this node chain.
+    int position;                          //0 -> last, 1 -> middle, 2 -> first, 3 -> singleton.
 } Command;
 
 
@@ -65,148 +66,100 @@ typedef struct command
  */
 void runCommand(Command *command, int *fd)
 {
-
-
-    printf("Running command: %s    forwards: %d    forwardsTo: %s \n",command->name,command->forwards,command->forwardsTo);
+    //printf("Running command: %s    forwards: %d    forwardsTo: %s \n",command->name,command->forwards,command->forwardsTo);
+    printf("Running command: %s    position: %d\n",command->name,command->position);
     //TODO: Handle "no such command found"
     //TODO: Handle cmd.forwards == 1  [forward stdout to destination]
     //initialize variable to tokenize the given command
-    char **tokens[100];
-    int counter = 0;
-    char *token = strtok(command->name," ");
-    //  int fd[2];
-    //   pipe(fd);
+    char **cmdArgs[100];
+    int argCount = 0;
 
+    char buffer[MAX_COMMAND_LENGTH] = "";
+    char *savepointer;
+    strcat(buffer,command->name);
+    char *cmdToRun = strtok(command->name," ");
+    char *argToken = strtok_r(buffer," ",&savepointer);
 
-    while (token!=NULL)
+    while (argToken!=NULL)
     {
-        tokens[counter] = (char **) token;
-        counter+=1;
-        token = strtok(NULL," ");
+        cmdArgs[argCount] = (char **) argToken;
+        argCount+=1;
+        argToken = strtok_r(NULL," ",&savepointer);
     }
-
     //The command should have null at end to show the end of command
-    tokens[counter] =NULL;
+    cmdArgs[argCount] =NULL;
 
     //forking to call the child process
     int rc= fork();
     if(rc<0)
     {
-
-        printf("rc < 0. Failed. closing.\n");
-
         //forking failed exit
         fprintf(stderr, "Fork failed \n");
         exit(1);
     }
     else if(rc==0)
     {
-
-        printf("s1    -   ");
-        printf("output fd: %d   - ",fd[OUTPUT_FD]);
-        printf("input fd: %d \n",fd[INPUT_FD]);
-        if(((command->prev)!=NULL)&((command->next)!=NULL))
+        printf("\ns1 (child)   ");
+        if(command->position == 1) //Middle [between two pipes.].
         {
+
             //   printf(" Middle command %s\n",command->name);
 
-            close(fd[OUTPUT_FD]);
-            dup2(fd[INPUT_FD],STDIN_FILENO);
-
-            dup2(fd[1],STDOUT_FILENO);
+            //close(fd[OUTPUT_FD]);
+            //dup2(fd[INPUT_FD],STDIN_FILENO);
+            dup2(fd[OUTPUT_FD],STDOUT_FILENO);
             //close(fd[0]);
             //close(fd[1]);
-            if (execvp((const char *) tokens[0], (char *const *) tokens) == -1)
+            printf("s1 case 1     ");
+            if (execvp(cmdToRun, (char *const *) cmdArgs) == -1)
             {
                 perror("wrdsh");
             }
-
-
-
         }
-        else if(((command->prev)==NULL)&((command->next)!=NULL))
+        else if(command->position == 0) //last
         {
-
-            printf("s2    -   ");
-            printf("output fd: %d   - ",fd[OUTPUT_FD]);
-            printf("input fd: %d \n",fd[INPUT_FD]);
-            //   printf(" Last command%s\n",command->name);
-
-            // printf("\n 1 command completed fd0 %d & fd1 %d\n",fd[0],fd[1]);
-
-
-            close(fd[OUTPUT_FD]);
-
-            // printf("stdIN: %d and STDOUT: %d\n",STDIN_FILENO,STDOUT_FILENO);
-            dup2(fd[INPUT_FD],STDIN_FILENO);
-            //printf("stdIN: %d and STDOUT: %d\n",STDIN_FILENO,STDOUT_FILENO);
-            close(fd[INPUT_FD]);
-
-            //printf("\n 2 command completed fd0 %d & fd1 %d\n",fd[0],fd[1]);
-
-
-            if (execvp((const char *) tokens[0], (char *const *) tokens) == -1)
-            {
-                perror("wrdsh");
-            }
-
-
+            printf("s1 case 2    ");
+            if (execvp(cmdToRun, (char *const *) cmdArgs) == -1) perror("wrdsh");
         }
-        else if(((command->prev)!=NULL)&((command->next)==NULL))
+        else if(command->position == 2) //First
         {
             //  printf(" First command%s\n",command->name);
 
-            printf("s3    -   ");
-            printf("output fd: %d   - ",fd[OUTPUT_FD]);
-            printf("input fd: %d \n",fd[INPUT_FD]);
 
-            close(fd[INPUT_FD]);
-            dup2(fd[OUTPUT_FD],STDOUT_FILENO);
-            close(fd[OUTPUT_FD]);
-            if (execvp((const char *) tokens[0], (char *const *) tokens) == -1)
-            {\
-                perror("wrdsh");
-            }
+            //close(fd[INPUT_FD]);
+            //dup2(fd[OUTPUT_FD],STDOUT_FILENO);
+            //close(fd[OUTPUT_FD]);
+            printf("s1 case 3    ");
 
+            if (execvp(cmdToRun, (char *const *) cmdArgs) == -1) perror("wrdsh");
 
         }
-        else
+        else //Singleton
         {
-            printf("s4    -   ");
-            printf("output fd: %d   - ",fd[OUTPUT_FD]);
-            printf("input fd: %d \n",fd[INPUT_FD]);
             //single command
             //child (new process)
             // printf(tokens);
-
-            close(fd[INPUT_FD]);
-            dup2(fd[OUTPUT_FD],STDOUT_FILENO);
-            close(fd[OUTPUT_FD]);
-            if (execvp((const char *) tokens[0], (char *const *) tokens) == -1)
+            //close(fd[INPUT_FD]);
+            //dup2(fd[OUTPUT_FD],STDOUT_FILENO);
+            //close(fd[OUTPUT_FD]);
+            printf("s1 case 4    ");
+            if (execvp(cmdToRun, (char *const *) cmdArgs) == -1) perror("wrdsh");
             {
                 perror("wrdsh");
             }
-
         }
-
-
     }
-    else
+    else    //original parent process
     {
-        printf("s5    -   ");
-        printf("output fd: %d   - ",fd[OUTPUT_FD]);
-        printf("input fd: %d \n",fd[INPUT_FD]);
-        //original parent process
-
-        int wait_count =wait(NULL);
-        //  printf("parent return code: %d ", wait_count);
-
-        if(((command->prev)==NULL)&((command->next)!=NULL)||((command->prev)==NULL)&((command->next)==NULL))
+        printf("Parent ");
+        int wait_count = wait(NULL);
+        printf("pRC %d   ", wait_count);
+        if(command->position == 0|| command->position == 3) //last or singleton command.
         {
-            printf("dup sec\n");
             char *temp;
             int i=0;
-            close(fd[OUTPUT_FD]);
-            temp = malloc(MAX_COMMAND_LENGTH* sizeof(char *));
+           //close(fd[OUTPUT_FD]);
+            temp = calloc(1,MAX_COMMAND_LENGTH);
             while (read(fd[INPUT_FD], temp, (MAX_COMMAND_LENGTH * sizeof(char *))) != 0)
             {
                 printf("Actual dupe loop activated \n");
@@ -219,18 +172,12 @@ void runCommand(Command *command, int *fd)
                     }
                     i++;
                 }
+                close(fd[OUTPUT_FD]);
             }
+            free(temp);
         }
-
+        //close(fd[OUTPUT_FD]);
     }
-
-
-//    close(fd[0]);
-//    close(fd[1]);
-
-
-    //printf("command completed fd0 %d & fd1 %d\n",fd[0],fd[1]);
-
 }
 
 /* PURPOSE: Executes the given command (from right-to-left)
@@ -246,15 +193,26 @@ int execReverseOrder(Command *srcChain, int *fd)
         return (1);
     }
 
-    Command *walker = srcChain->tail;
-    while (walker->prev != NULL) //Walk back from the end of the chain towards the beginning, executing each command.
+    if (srcChain->cmdCount == 1) //Singleton command.
     {
-        printf("Exec command: %s\n",walker->name);
-        //runCommand(walker,fd);
-        walker = walker->prev;
+        srcChain->position = 3;
+        runCommand(srcChain,fd);
     }
-    printf("Exec command: %s\n",walker->name);
-    //runCommand(walker,fd);
+    else
+    {
+        Command *walker = srcChain->tail;
+        walker->position=2;
+        runCommand(walker,fd);
+        walker = walker->prev;
+        while (walker->prev != NULL) //Walk back from the end of the chain towards the beginning, executing each command.
+        {
+            walker->position = 1;
+            runCommand(walker,fd);
+            walker = walker->prev;
+        }
+        walker->position = 0;
+        runCommand(walker,fd);
+    }
     return 0;
 }
 
@@ -430,3 +388,5 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[])
     return 0;
 }
 
+
+//TODO: Spencer -- Try to handle command not found.
