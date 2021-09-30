@@ -66,7 +66,6 @@ typedef struct command
  */
 void runCommand(Command *command, int *fd)
 {
-    //printf("Running command: %s    forwards: %d    forwardsTo: %s \n",command->name,command->forwards,command->forwardsTo);
     printf("Running command: %s    position: %d\n",command->name,command->position);
     //TODO: Handle "no such command found"
     //TODO: Handle cmd.forwards == 1  [forward stdout to destination]
@@ -75,16 +74,16 @@ void runCommand(Command *command, int *fd)
     int argCount = 0;
 
     char buffer[MAX_COMMAND_LENGTH] = "";
-    char *savepointer;
+    char *savePointer;
     strcat(buffer,command->name);
     char *cmdToRun = strtok(command->name," ");
-    char *argToken = strtok_r(buffer," ",&savepointer);
+    char *argToken = strtok_r(buffer," ",&savePointer);
 
     while (argToken!=NULL)
     {
         cmdArgs[argCount] = (char **) argToken;
         argCount+=1;
-        argToken = strtok_r(NULL," ",&savepointer);
+        argToken = strtok_r(NULL," ",&savePointer);
     }
     //The command should have null at end to show the end of command
     cmdArgs[argCount] =NULL;
@@ -97,68 +96,37 @@ void runCommand(Command *command, int *fd)
         fprintf(stderr, "Fork failed \n");
         exit(1);
     }
-    else if(rc==0)
+    else if(rc==0)  //Child process
     {
-        printf("\ns1 (child)   ");
+        if(command->position == 2) //first
+        {
+            dup2(fd[OUTPUT_FD],STDOUT_FILENO);
+            close(fd[INPUT_FD]);
+            if (execvp(cmdToRun, (char *const *) cmdArgs) == -1) perror("wrdsh");
+        }
         if(command->position == 1) //Middle [between two pipes.].
         {
-
-            //   printf(" Middle command %s\n",command->name);
-
-            //close(fd[OUTPUT_FD]);
-            //dup2(fd[INPUT_FD],STDIN_FILENO);
             dup2(fd[OUTPUT_FD],STDOUT_FILENO);
-            //close(fd[0]);
-            //close(fd[1]);
-            printf("s1 case 1     ");
-            if (execvp(cmdToRun, (char *const *) cmdArgs) == -1)
-            {
-                perror("wrdsh");
-            }
-        }
-        else if(command->position == 0) //last
-        {
-            printf("s1 case 2    ");
             if (execvp(cmdToRun, (char *const *) cmdArgs) == -1) perror("wrdsh");
         }
-        else if(command->position == 2) //First
+        else//last  [BROKEN]
         {
-            //  printf(" First command%s\n",command->name);
-
-
-            //close(fd[INPUT_FD]);
-            //dup2(fd[OUTPUT_FD],STDOUT_FILENO);
-            //close(fd[OUTPUT_FD]);
-            printf("s1 case 3    ");
-
+            dup2(fd[OUTPUT_FD],STDOUT_FILENO);
+            close(fd[OUTPUT_FD]);
             if (execvp(cmdToRun, (char *const *) cmdArgs) == -1) perror("wrdsh");
-
-        }
-        else //Singleton
-        {
-            //single command
-            //child (new process)
-            // printf(tokens);
-            //close(fd[INPUT_FD]);
-            //dup2(fd[OUTPUT_FD],STDOUT_FILENO);
-            //close(fd[OUTPUT_FD]);
-            printf("s1 case 4    ");
-            if (execvp(cmdToRun, (char *const *) cmdArgs) == -1) perror("wrdsh");
-            {
-                perror("wrdsh");
-            }
         }
     }
     else    //original parent process
     {
-        printf("Parent ");
         int wait_count = wait(NULL);
-        printf("pRC %d   ", wait_count);
+        //printf("Parent ");
+        //printf("pRC %d   ", wait_count);
         if(command->position == 0|| command->position == 3) //last or singleton command.
+        //if(command->position == 0) //last command.
         {
             char *temp;
             int i=0;
-           //close(fd[OUTPUT_FD]);
+            close(fd[OUTPUT_FD]);
             temp = calloc(1,MAX_COMMAND_LENGTH);
             while (read(fd[INPUT_FD], temp, (MAX_COMMAND_LENGTH * sizeof(char *))) != 0)
             {
@@ -172,11 +140,9 @@ void runCommand(Command *command, int *fd)
                     }
                     i++;
                 }
-                close(fd[OUTPUT_FD]);
             }
             free(temp);
         }
-        //close(fd[OUTPUT_FD]);
     }
 }
 
@@ -384,6 +350,8 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[])
         }
         printf("Shell returned %d.\n",shellStatus);
         free(getCmd);
+
+
     }
     return 0;
 }
