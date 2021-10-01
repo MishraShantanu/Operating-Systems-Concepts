@@ -153,7 +153,7 @@ void runCommand(Command *command, int *fd,int cmdCount, int numberOfpipes)
 
     }else    //original parent process
         {
-           int childStatus = wait(NULL);
+            wait(NULL);
             //printf("Parent ");
             //printf("pRC %d   ", wait_count);
             if (((command->prev) == NULL) & ((command->next) != NULL) ||
