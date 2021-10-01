@@ -133,7 +133,7 @@ void runCommand(Command *command, int *fd,int cmdCount, int numberOfpipes)
            // close(fd[1]);
         } else { //single command
 
-            if(strcmp(command->name, "../wrdsh")==0||strcmp(command->name, "wrdsh")==0||strcmp(command->name, "./wrdsh")==0){
+            if(strstr(command->name,"wrdsh")!=NULL){
 
             }else{
                 close(fd[0]);
@@ -181,8 +181,8 @@ void runCommand(Command *command, int *fd,int cmdCount, int numberOfpipes)
                         //check how many character to write
                         while(temp[i]!='\0'){
                             fileInputText[bufferSize] = temp[i];
-                            if (temp[i] == 'c' || temp[i] == 'C' || temp[i] == 'm' || temp[i] == 'M' || temp[i] == 'p' ||
-                                temp[i] == 'P' || temp[i] == 't' || temp[i] == 'T') {
+                            if (temp[i] == 'c' ||  temp[i] == 'm' ||  temp[i] == 'p' ||
+                                temp[i] == 't' ) {
                                 bufferSize++;
                                 fileInputText[bufferSize] = temp[i];
 
@@ -213,8 +213,8 @@ void runCommand(Command *command, int *fd,int cmdCount, int numberOfpipes)
                    // printf("Actual dupe loop activated \n");
                     while (temp[i] != '\0') {
                         printf("%c", temp[i]);
-                        if (temp[i] == 'c' || temp[i] == 'C' || temp[i] == 'm' || temp[i] == 'M' || temp[i] == 'p' ||
-                            temp[i] == 'P' || temp[i] == 't' || temp[i] == 'T') {
+                        if (temp[i] == 'c' ||  temp[i] == 'm' ||  temp[i] == 'p' ||
+                            temp[i] == 't') {
                             printf("%c", temp[i]);
                         }
                         i++;
