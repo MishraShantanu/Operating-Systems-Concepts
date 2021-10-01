@@ -77,7 +77,7 @@ void runCommand(Command *command, int *fd,int cmdCount, int numberOfpipes)
     char buffer[MAX_COMMAND_LENGTH] = "";
     char *savePointer;
     strcat(buffer,command->name);
-    char *cmdToRun = strtok(command->name," ");
+    //char *cmdToRun = strtok(command->name," ");
     char *argToken = strtok_r(buffer," ",&savePointer);
 
     while (argToken!=NULL)
@@ -128,26 +128,29 @@ void runCommand(Command *command, int *fd,int cmdCount, int numberOfpipes)
         {
             //printf("First Command Name: %s command number %d, write to %d\n", command->name, cmdCount, cmdCount);
 
-            close(fd[0]);
+            //close(fd[0]);
             dup2(fd[1], STDOUT_FILENO);
-            close(fd[1]);
+           // close(fd[1]);
         } else { //single command
-            close(fd[0]);
-            dup2(fd[1], STDOUT_FILENO);
-            close(fd[1]);
+
+            if(strcmp(command->name, "../wrdsh")==0||strcmp(command->name, "wrdsh")==0||strcmp(command->name, "./wrdsh")==0){
+
+            }else{
+                close(fd[0]);
+                dup2(fd[1], STDOUT_FILENO);
+                close(fd[1]);
+            }
+
+//            close(fd[0]);
+//            dup2(fd[1], STDOUT_FILENO);
+//            close(fd[1]);
+
         }
 
 
 
-        if (execvp(cmdToRun, (char *const *) cmdArgs) == -1) {
-            printf("here");
-            for(int i=0; i<numberOfpipes;i++){
-                close(fd[i]);
-            }
-
+        if (execvp((const char *) cmdArgs[0], (char *const *) cmdArgs) == -1) {
             perror("wrdsh");
-
-
 
         }
 

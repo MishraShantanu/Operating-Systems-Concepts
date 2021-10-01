@@ -71,133 +71,79 @@ void runCommand(Command *command, int *fd)
     char **tokens[100];
     int counter = 0;
     char *token = strtok(command->name," ");
-    //  int fd[2];
-    //   pipe(fd);
-
-
     while (token!=NULL)
     {
         tokens[counter] = (char **) token;
         counter+=1;
         token = strtok(NULL," ");
     }
-
     //The command should have null at end to show the end of command
     tokens[counter] =NULL;
 
     //forking to call the child process
     int rc= fork();
-    if(rc<0)
+    if(rc<0) //forking failed exit
     {
-        //forking failed exit
         fprintf(stderr, "Fork failed \n");
         exit(1);
     }
     else if(rc==0)
     {
-        if(((command->prev)!=NULL)&((command->next)!=NULL)){
-            //   printf(" Middle command %s\n",command->name);
-
-            close(fd[1]);
-            dup2(fd[0],STDIN_FILENO);
-
-            dup2(fd[1],STDOUT_FILENO);
+        if(((command->prev)!=NULL)&((command->next)!=NULL))
+        {
+            printf(" Middle command %s\n",command->name);
+            close(fd[OUTPUT_FD]);
+            dup2(fd[INPUT_FD],STDIN_FILENO);
+            dup2(fd[OUTPUT_FD],STDOUT_FILENO);
             //close(fd[0]);
             //close(fd[1]);
             if (execvp((const char *) tokens[0], (char *const *) tokens) == -1)
             {
                 perror("wrdsh");
             }
+        }
+        else if(((command->prev)==NULL)&((command->next)!=NULL))
+        {
+            printf(" Last command%s\n",command->name);
 
-
-
-        }else if(((command->prev)==NULL)&((command->next)!=NULL)){
-            //   printf(" Last command%s\n",command->name);
-
-            // printf("\n 1 command completed fd0 %d & fd1 %d\n",fd[0],fd[1]);
-
-
-            close(fd[1]);
-
-            // printf("stdIN: %d and STDOUT: %d\n",STDIN_FILENO,STDOUT_FILENO);
-            dup2(fd[0],STDIN_FILENO);
-            //printf("stdIN: %d and STDOUT: %d\n",STDIN_FILENO,STDOUT_FILENO);
-            close(fd[0]);
-
-            //printf("\n 2 command completed fd0 %d & fd1 %d\n",fd[0],fd[1]);
-
-
+            close(fd[OUTPUT_FD]);
+            dup2(fd[INPUT_FD],STDIN_FILENO);
+            close(fd[INPUT_FD]);
             if (execvp((const char *) tokens[0], (char *const *) tokens) == -1)
             {
                 perror("wrdsh");
             }
+        }
+        else if(((command->prev)!=NULL)&((command->next)==NULL))
+        {
+            printf(" First command%s\n",command->name);
 
-
-        }else if(((command->prev)!=NULL)&((command->next)==NULL)){
-            //  printf(" First command%s\n",command->name);
-
-
-            close(fd[0]);
-            dup2(fd[1],STDOUT_FILENO);
-            close(fd[1]);
+            close(fd[INPUT_FD]);
+            dup2(fd[OUTPUT_FD],STDOUT_FILENO);
+            close(fd[OUTPUT_FD]);
             if (execvp((const char *) tokens[0], (char *const *) tokens) == -1)
-            {\
+            {
                 perror("wrdsh");
             }
-
-
-        }else {
+        }
+        else
+        {
             //single command
             //child (new process)
             // printf(tokens);
-
-            close(fd[0]);
-            dup2(fd[1],STDOUT_FILENO);
-            close(fd[1]);
             if (execvp((const char *) tokens[0], (char *const *) tokens) == -1)
             {
                 perror("wrdsh");
             }
-
         }
-
-
     }
     else
     {
-
         //original parent process
-
         int wait_count =wait(NULL);
-        //  printf("parent return code: %d ", wait_count);
-
-        if(((command->prev)==NULL)&((command->next)!=NULL)||((command->prev)==NULL)&((command->next)==NULL)) {
-
-            char *temp;
-            int i=0;
-            close(fd[1]);
-            temp = malloc(MAX_COMMAND_LENGTH* sizeof(char *));
-            while (read(fd[0], temp, (MAX_COMMAND_LENGTH * sizeof(char *))) != 0) {
-                while (temp[i] != '\0'){
-                    printf("%c", temp[i]);
-                    if (temp[i] == 'c' || temp[i] == 'C' || temp[i] == 'm' || temp[i] == 'M' || temp[i] == 'p' ||
-                        temp[i] == 'P' || temp[i] == 't' || temp[i] == 'T') {
-                        printf("%c", temp[i]);
-                    }
-                    i++;
-                }
-            }
-        }
-
+        printf("parent return code: %d ", wait_count);
     }
-
-
-//    close(fd[0]);
-//    close(fd[1]);
-
-
-    //printf("command completed fd0 %d & fd1 %d\n",fd[0],fd[1]);
-
+    printf("command completed\n");
 }
 
 /* PURPOSE: Executes the given command (from right-to-left)
@@ -234,14 +180,8 @@ void setLastNode(Command *srcChain,Command *endNode)
 {
     if (srcChain->cmdCount == 0)
     {
-        strcpy(srcChain->name,endNode->name);
-        if (endNode->forwards == 1)
-        {
-            strcpy(srcChain->forwardsTo,endNode->forwardsTo);
-            srcChain->forwards = 1;
-        }
+        srcChain->tail = endNode; //Update reference to tail.
         srcChain->cmdCount++;
-        srcChain->tail = endNode;
         return;
     }
     Command *walker = srcChain;
@@ -255,7 +195,6 @@ void setLastNode(Command *srcChain,Command *endNode)
     srcChain->tail = endNode;   //Update reference to tail.
     srcChain->cmdCount++;
 }
-
 
 /* PURPOSE: To take a line of input and parse it into a struct Command.
  * PRE-CONDITIONS: parseMe -- The text to be transformed into a command.
@@ -287,7 +226,6 @@ Command * createCommand(char* parseMe)
     }
     return newPipe;
 }
-
 
 
 /* PURPOSE: Reads and parses a line of user input into a node chain of commands.
@@ -328,8 +266,6 @@ int shellLoop(Command *userCommands)
     }
     return 0;
 }
-
-
 
 
 
