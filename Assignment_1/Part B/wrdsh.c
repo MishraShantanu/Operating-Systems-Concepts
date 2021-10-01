@@ -8,7 +8,6 @@ University of Saskatchewan - Arts & Science
 A project by: Spencer Tracy | Spt631 | 11236962 and Shantanu Mishra | Shm572 | 11255997
 __________________________________________________
  */
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -16,8 +15,8 @@ __________________________________________________
 #include <string.h>
 
 #define MAX_COMMAND_LENGTH 400
-#define INPUT_FD 0
-#define OUTPUT_FD 1
+//#define INPUT_FD 0
+//#define OUTPUT_FD 1
 
 /*                Features of wrdsh:
  *   - Parses a given line of input into executable commands.    [Complete]
@@ -25,6 +24,7 @@ __________________________________________________
  *   - Supports pipes [ | ] and stdout redirection [ > ].
  *   - Duplicates letters of "c" "m" "p" "t" found in stdout.
  */
+
 
 
 //A simple comment.
@@ -64,9 +64,9 @@ typedef struct command
  * POST-CONDITIONS: Individual command is executed.
  * RETURN: None.
  */
-void runCommand(Command *command, int *fd)
-{
-    printf("Running command: %s    position: %d\n",command->name,command->position);
+void runCommand(Command *command, int *fd,int cmdCount, int numberOfpipes)
+{   //printf("Command Name: %s command number %d\n", command->name, cmdCount );
+    //printf("Running command: %s    position: %d\n",command->name,command->position);
     //TODO: Handle "no such command found"
     //TODO: Handle cmd.forwards == 1  [forward stdout to destination]
     //initialize variable to tokenize the given command
@@ -98,60 +98,100 @@ void runCommand(Command *command, int *fd)
     }
     else if(rc==0)  //Child process
     {
-        if(command->position == 2) //first
-        {
-            close(fd[INPUT_FD]);
-            dup2(fd[OUTPUT_FD],STDOUT_FILENO);
-            dup2(fd[INPUT_FD],STDIN_FILENO);
-        }
-        else if(command->position == 1) //Middle [between two pipes.].
-        {
-            dup2(fd[OUTPUT_FD],STDOUT_FILENO);
-            dup2(fd[INPUT_FD],STDIN_FILENO);
+        if (((command->prev) != NULL) & ((command->next) != NULL)) { //middle pipe
 
-        }
-        else//last  [BROKEN]
+            close(fd[(cmdCount - 2) * 2 + 1]);
+            dup2(fd[(cmdCount - 2) * 2], STDIN_FILENO);
+            close(fd[(cmdCount - 2) * 2]);
+
+            close(fd[2 * cmdCount - 2]);
+            dup2(fd[2 * cmdCount - 1], STDOUT_FILENO);
+            close(fd[2 * cmdCount - 1]);
+            //printf("Middle  Command Name: %s command number %d, will read from %d and write to %d\n", command->name, cmdCount  , (cmdCount-2)*2, 2*cmdCount - 1 );
+        } else if (((command->prev) == NULL) & ((command->next) != NULL)) //Last pipe
         {
-            dup2(fd[OUTPUT_FD],STDOUT_FILENO);
-            dup2(fd[INPUT_FD],STDIN_FILENO);
-            close(fd[OUTPUT_FD]);
-            close(fd[INPUT_FD]);
-        }
-        if (execvp(cmdToRun, (char *const *) cmdArgs) == -1) perror("wrdsh");
-    }
-    else    //original parent process
-    {
-        int wait_count = wait(NULL);
-        //printf("Parent ");
-        //printf("pRC %d   ", wait_count);
-        if(command->position == 0|| command->position == 3) //last or singleton command.
-        //if(command->position == 0) //last command.
+            printf("Last  Command Name: %s command number %d, will read from %d and write to %d\n", command->name,
+                   cmdCount, 2 * cmdCount - 2, 2 * cmdCount - 1);
+
+            close(fd[(cmdCount - 2)*2+1]);
+            dup2(fd[(cmdCount - 2)*2], STDIN_FILENO);
+//            close(fd[(cmdCount - 2)*2]);
+
+            close(fd[2*cmdCount - 2]);
+            dup2(fd[2*cmdCount - 1], STDOUT_FILENO);
+            close(fd[2*cmdCount - 1]);
+
+//            close(fd[1]);
+//            dup2(fd[0], STDIN_FILENO);
+//
+//
+//            close(fd[2]);
+//            dup2(fd[3], STDOUT_FILENO);
+//            close(fd[0]);
+//            close(fd[3]);
+
+
+        } else if (((command->prev) != NULL) & ((command->next) == NULL))// first  pipe
         {
-            char *temp;
-            int i=0;
-            close(fd[OUTPUT_FD]);
-            fflush(stdout);
-            temp = calloc(20,MAX_COMMAND_LENGTH);
-            while (read(fd[INPUT_FD], temp, (MAX_COMMAND_LENGTH * sizeof(char *))) != 0)
+            printf("First Command Name: %s command number %d, write to %d\n", command->name, cmdCount, cmdCount);
+
+            close(fd[0]);
+            dup2(fd[1], STDOUT_FILENO);
+            close(fd[1]);
+        } else { //single command
+            close(fd[0]);
+            dup2(fd[1], STDOUT_FILENO);
+            close(fd[1]);
+        }
+
+
+
+        if (execvp(cmdToRun, (char *const *) cmdArgs) == -1) {
+            perror("wrdsh");
+        }
+
+    }else    //original parent process
+        {
+            wait(NULL);
+            //printf("Parent ");
+            //printf("pRC %d   ", wait_count);
+            if (((command->prev) == NULL) & ((command->next) != NULL) ||
+                ((command->prev) == NULL) & ((command->next) == NULL)) //last or singleton command.
+                //if(command->position == 0) //last command.
             {
-                printf("Actual dupe loop activated \n");
-                while (temp[i] != '\0')
-                {
-                    printf("%c", temp[i]);
-                    if (temp[i] == 'c' || temp[i] == 'C' || temp[i] == 'm' || temp[i] == 'M' || temp[i] == 'p' ||
-                        temp[i] == 'P' || temp[i] == 't' || temp[i] == 'T') {
+
+                char *temp;
+                int i = 0;
+
+
+//                for (int i = 0; i < numberOfpipes; i++)
+//                    close(fd[i]);
+
+                close(fd[numberOfpipes-1]);
+//                close(fd[0]);
+//                close(fd[1]);
+
+
+                temp = calloc(20, MAX_COMMAND_LENGTH);
+                while (read(fd[numberOfpipes-2], temp, (MAX_COMMAND_LENGTH * sizeof(char *))) != 0) {
+                    printf("Actual dupe loop activated \n");
+                    while (temp[i] != '\0') {
                         printf("%c", temp[i]);
+                        if (temp[i] == 'c' || temp[i] == 'C' || temp[i] == 'm' || temp[i] == 'M' || temp[i] == 'p' ||
+                            temp[i] == 'P' || temp[i] == 't' || temp[i] == 'T') {
+                            printf("%c", temp[i]);
+                        }
+                        i++;
                     }
-                    i++;
                 }
+                free(temp);
             }
-            free(temp);
         }
     }
 
 
 
-}
+
 
 /* PURPOSE: Executes the given command (from right-to-left)
  * PRE-CONDITIONS: srcChain -- Node chain representing the sequence of commands to execute.
@@ -159,35 +199,41 @@ void runCommand(Command *command, int *fd)
  * POST-CONDITIONS: Triggers runCommand() on each node in srcChain.
  * RETURN: 0 if execution was successful, 1 when execution has failed.
  */
-int execReverseOrder(Command *srcChain, int *fd)
+int execReverseOrder(Command *srcChain)
 {
+
+
+
+    int fd[srcChain->cmdCount*2];
+
+    for (int i=0; i < srcChain->cmdCount; i++) {
+        if ( pipe(fd + 2*i) < 0) {
+            perror("wrdsh");
+        }
+    }
+//    pipe(fd);
     if (srcChain->cmdCount == 0) // Check if given an empty srcChain.
     {
         return (1);
     }
 
-    if (srcChain->cmdCount == 1) //Singleton command.
+    Command *walker = srcChain->tail;
+    while (walker->prev != NULL) //Walk back from the end of the chain towards the beginning, executing each command.
     {
-        srcChain->position = 3;
-        runCommand(srcChain,fd);
-    }
-    else
-    {
-        Command *walker = srcChain->tail;
-        walker->position=2;
-        runCommand(walker,fd);
+        if(walker->position==0){
+            runCommand(walker,fd, srcChain->cmdCount, srcChain->cmdCount*2);
+        }else {runCommand(walker,fd, (srcChain->cmdCount+1)-walker->position, srcChain->cmdCount*2); }
+
         walker = walker->prev;
-        while (walker->prev != NULL) //Walk back from the end of the chain towards the beginning, executing each command.
-        {
-            walker->position = 1;
-            runCommand(walker,fd);
-            walker = walker->prev;
-        }
-        walker->position = 0;
-        runCommand(walker,fd);
     }
+
+    if(walker->position==0){
+        runCommand(walker,fd, srcChain->cmdCount, srcChain->cmdCount*2);
+    }else {runCommand(walker,fd, (srcChain->cmdCount+1)-walker->position, srcChain->cmdCount*2); }
+
     return 0;
 }
+
 
 
 /* PURPOSE: Appends a given token/command to the end of the node chain.
@@ -220,6 +266,10 @@ void setLastNode(Command *srcChain,Command *endNode)
     endNode->prev = walker;     //Link new tail to the old.
     srcChain->tail = endNode;   //Update reference to tail.
     srcChain->cmdCount++;
+    endNode->position = srcChain->cmdCount;
+  //  printf("Command Name: %s command number %d\n", endNode->name, endNode->position  );
+
+
 }
 
 
@@ -346,13 +396,14 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) char *argv[])
     printf("\nShell first run:\n");
     while(shellStatus != 1)
     {
-        int fileDescriptors[2]; //File descriptors. fd[0] = read  |   fd[1] = write
-        pipe(fileDescriptors);
+       // int fileDescriptors[10]; //File descriptors. fd[0] = read  |   fd[1] = write
+       // pipe(fileDescriptors);
+
         Command *getCmd = calloc(1, sizeof(Command));//Allocate an empty Command to store the loop's output.
         shellStatus = shellLoop(getCmd);                    //Trigger the 'get input' loop.
         if (shellStatus != -1)
         {
-            execReverseOrder(getCmd, (int *) &fileDescriptors); //Execute all commands given by the shell.
+            execReverseOrder(getCmd); //Execute all commands given by the shell.
         }
         printf("Shell returned %d.\n",shellStatus);
         free(getCmd);
