@@ -140,18 +140,20 @@ void runCommand(Command *command, int *fd,int cmdCount, int numberOfpipes)
 
 
         if (execvp(cmdToRun, (char *const *) cmdArgs) == -1) {
+            printf("here");
             for(int i=0; i<numberOfpipes;i++){
                 close(fd[i]);
             }
-            printf("here");
+
             perror("wrdsh");
+
 
 
         }
 
     }else    //original parent process
         {
-            wait(NULL);
+           int childStatus = wait(NULL);
             //printf("Parent ");
             //printf("pRC %d   ", wait_count);
             if (((command->prev) == NULL) & ((command->next) != NULL) ||
@@ -165,22 +167,34 @@ void runCommand(Command *command, int *fd,int cmdCount, int numberOfpipes)
                 if(command->forwards==1){
                     //open redirect file
                     int filedescriptor = open(command->forwardsTo,  O_WRONLY | O_CREAT | O_TRUNC,
-                                              S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+                                              S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH | O_APPEND);
 
                     temp = calloc(20, MAX_COMMAND_LENGTH);
                     i = 0;
 
-
+                    char fileInputText[8000];
                     int bufferSize = 0;
                     while (read(fd[numberOfpipes-2], temp, (MAX_COMMAND_LENGTH * sizeof(char *))) != 0) {
                         //check how many character to write
                         while(temp[i]!='\0'){
+                            fileInputText[bufferSize] = temp[i];
+                            if (temp[i] == 'c' || temp[i] == 'C' || temp[i] == 'm' || temp[i] == 'M' || temp[i] == 'p' ||
+                                temp[i] == 'P' || temp[i] == 't' || temp[i] == 'T') {
+                                bufferSize++;
+                                fileInputText[bufferSize] = temp[i];
+
+
+                            }
+
                             i++;
                             bufferSize++;
+
+
                           //  printf("buffer size %d and char", bufferSize);
                         }
+                        write(filedescriptor,fileInputText, bufferSize);
 
-                            write(filedescriptor,temp,bufferSize);
+
 
 
 
