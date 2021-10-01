@@ -15,11 +15,11 @@ int main(int argc, char *argv[]){
                // printf("closing child %d ",i);
                     exit(-1);
             }
+           
             
-            wait(0);
-             
             
         }
+         
        printf("%d\n",howmanycmpt());wait(0);
     exit(0);
 }

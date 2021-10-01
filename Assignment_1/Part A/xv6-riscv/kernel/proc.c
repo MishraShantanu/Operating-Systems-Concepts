@@ -667,7 +667,7 @@ howmanycmpt(void)
     acquire(&p->lock);
       
       if(strncmp((const char*)&p->name,name,4)==0){
-           printf("process name %s\n %", &p->name );
+          // printf("process name %s\n %", &p->name );
           count++;
       }
       
