@@ -13,6 +13,7 @@ __________________________________________________
 #include <unistd.h>
 #include <sys/wait.h>
 #include <string.h>
+#include <fcntl.h>
 
 #define MAX_COMMAND_LENGTH 400
 //#define INPUT_FD 0
@@ -68,7 +69,7 @@ void runCommand(Command *command, int *fd,int cmdCount, int numberOfpipes)
 {   //printf("Command Name: %s command number %d\n", command->name, cmdCount );
     //printf("Running command: %s    position: %d\n",command->name,command->position);
     //TODO: Handle "no such command found"
-    //TODO: Handle cmd.forwards == 1  [forward stdout to destination]
+    //cmd.forwards == 1  [forward stdout to destination]
     //initialize variable to tokenize the given command
     char **cmdArgs[100];
     int argCount = 0;
@@ -110,30 +111,22 @@ void runCommand(Command *command, int *fd,int cmdCount, int numberOfpipes)
             //printf("Middle  Command Name: %s command number %d, will read from %d and write to %d\n", command->name, cmdCount  , (cmdCount-2)*2, 2*cmdCount - 1 );
         } else if (((command->prev) == NULL) & ((command->next) != NULL)) //Last pipe
         {
-            printf("Last  Command Name: %s command number %d, will read from %d and write to %d\n", command->name,
-                   cmdCount, 2 * cmdCount - 2, 2 * cmdCount - 1);
+           // printf("Last  Command Name: %s command number %d, will read from %d and write to %d\n", command->name,
+            //       cmdCount, 2 * cmdCount - 2, 2 * cmdCount - 1);
 
             close(fd[(cmdCount - 2)*2+1]);
             dup2(fd[(cmdCount - 2)*2], STDIN_FILENO);
-//            close(fd[(cmdCount - 2)*2]);
+            close(fd[(cmdCount - 2)*2]);
 
             close(fd[2*cmdCount - 2]);
             dup2(fd[2*cmdCount - 1], STDOUT_FILENO);
             close(fd[2*cmdCount - 1]);
 
-//            close(fd[1]);
-//            dup2(fd[0], STDIN_FILENO);
-//
-//
-//            close(fd[2]);
-//            dup2(fd[3], STDOUT_FILENO);
-//            close(fd[0]);
-//            close(fd[3]);
 
 
         } else if (((command->prev) != NULL) & ((command->next) == NULL))// first  pipe
         {
-            printf("First Command Name: %s command number %d, write to %d\n", command->name, cmdCount, cmdCount);
+            //printf("First Command Name: %s command number %d, write to %d\n", command->name, cmdCount, cmdCount);
 
             close(fd[0]);
             dup2(fd[1], STDOUT_FILENO);
@@ -147,7 +140,13 @@ void runCommand(Command *command, int *fd,int cmdCount, int numberOfpipes)
 
 
         if (execvp(cmdToRun, (char *const *) cmdArgs) == -1) {
+            for(int i=0; i<numberOfpipes;i++){
+                close(fd[i]);
+            }
+            printf("here");
             perror("wrdsh");
+
+
         }
 
     }else    //original parent process
@@ -159,22 +158,42 @@ void runCommand(Command *command, int *fd,int cmdCount, int numberOfpipes)
                 ((command->prev) == NULL) & ((command->next) == NULL)) //last or singleton command.
                 //if(command->position == 0) //last command.
             {
-
-                char *temp;
-                int i = 0;
-
-
-//                for (int i = 0; i < numberOfpipes; i++)
-//                    close(fd[i]);
-
                 close(fd[numberOfpipes-1]);
-//                close(fd[0]);
-//                close(fd[1]);
+                char *temp;
+                int i;
+                //checks if output needs to be redirected
+                if(command->forwards==1){
+                    //open redirect file
+                    int filedescriptor = open(command->forwardsTo,  O_WRONLY | O_CREAT | O_TRUNC,
+                                              S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+
+                    temp = calloc(20, MAX_COMMAND_LENGTH);
+                    i = 0;
 
 
+                    int bufferSize = 0;
+                    while (read(fd[numberOfpipes-2], temp, (MAX_COMMAND_LENGTH * sizeof(char *))) != 0) {
+                        //check how many character to write
+                        while(temp[i]!='\0'){
+                            i++;
+                            bufferSize++;
+                          //  printf("buffer size %d and char", bufferSize);
+                        }
+
+                            write(filedescriptor,temp,bufferSize);
+
+
+
+                    }
+                    free(temp);
+
+
+                }
+
+                i = 0;
                 temp = calloc(20, MAX_COMMAND_LENGTH);
                 while (read(fd[numberOfpipes-2], temp, (MAX_COMMAND_LENGTH * sizeof(char *))) != 0) {
-                    printf("Actual dupe loop activated \n");
+                   // printf("Actual dupe loop activated \n");
                     while (temp[i] != '\0') {
                         printf("%c", temp[i]);
                         if (temp[i] == 'c' || temp[i] == 'C' || temp[i] == 'm' || temp[i] == 'M' || temp[i] == 'p' ||
