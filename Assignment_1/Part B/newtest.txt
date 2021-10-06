@@ -1,0 +1,12 @@
+            cclose(fd[1]);
+            //cclose(fd[0]);
+            //cclose(fd[1]);
+            cclose(fd[1]);
+            cclose(fd[0]);
+            cclose(fd[0]);
+            cclose(fd[1]);
+            cclose(fd[0]);
+            cclose(fd[1]);
+            cclose(fd[1]);
+//    cclose(fd[0]);
+//    cclose(fd[1]);

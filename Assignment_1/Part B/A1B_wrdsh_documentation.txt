@@ -1,0 +1,124 @@
+/*
+Assignment 1 Part B.
+	wrdsh.c -- Documentation file.
+
+Computer Science 332.3
+Prof: Dr. Derek Eager
+University of Saskatchewan - Arts & Science
+	Department of Computer Science
+A project by: Spencer Tracy | Spt631 | 11236962 and Shantanu Mishra | Shm572 | 11255997
+__________________________________________________
+ */
+
+
+Features of wrdsh:
+	wrdsh [Weird - Shell] is a command line interpreted shell.
+		- wrdsh will prompt the user to enter a line of input, which will be interpreted as either a single or a series of command(s).
+		- wrdsh will interpret user-inputted commands from RIGHT-TO-LEFT instead of the traditional LEFT-TO-WRITE approach used by most other shells.
+		- wrdsh supports the use of pipes (via the '|' operator) as well as redirection of output (via the '<' operator). 
+			- An example: 
+				If I user were to input the line: 
+					wrdsh> out.txt < grep impossible | cat myfile.txt
+				Firstly, wrdsh will preform cat myfile.txt  -- then pipe the output as input to:
+				grep impossible   -- and will then redirect stdout from grep impossible to myfile.txt
+				
+		- wrdsh has a particular liking for the characters "c", "m", "p", and "t". Whenever these characters are
+		  detected within stdout, these characters will be duplicated.
+		  		  
+			- An example: 
+				wrdsh> echo "cmpt332!"
+					The console will output:
+					ccmmpptt332!
+		- wrdsh will detect and correct for invalid use of white-space in a command before attempting to execute it.		
+		- wrdsh will detect improper syntax of piping within a command.
+			- An example:
+				wrdsh>       echo "cmpt"|cat    wrdsh.c        |  
+						[Corrected by shell and interpreted as: wrdsh>echo "cmpt" | cat wrdsh.c |]
+				Due to too many pipes, wrdsh will inform the user:
+					Syntax Error! Please try again.
+				Then restart the input loop.
+				
+		- wrdsh will inform the user when the given command cannot be found.
+		
+		
+
+
+Known bugs:
+	-wrdsh will strip redundant whitespace even when it is contained in " ".
+		For example: 
+			wrdsh> out.txt > echo "   hello    world " 
+				out.txt will simply contain:
+					hello world
+	- wrdsh will fail to return to console when a single-worded non-existing command is entered.
+		-ie wrdsh>jenfjhn
+		Command not found.
+		[At this point, wrdsh shellLoop() will not be able to return its exit status, and wrdsh must be exited via CTRL + C]
+		
+	
+	- If user inputs one or many spaces before typing exit, it will cause the following:
+			Bad file descriptor
+			[At this point, wrdsh shellLoop() will not be able to return its exit status, and wrdsh must be exited via CTRL + C]
+
+	
+
+
+Known limitations:
+
+	- Currently, as defined within wrdsh.c via 'Define MAX_COMMAND_LENGTH 400' -- the maximum number of characters a user may input
+	   in one line is 400 characters in length.
+	
+	- Command->forwardsTo cannot exceed MAX_COMMAND_LENGTH / 2 in length.
+			-By simply changing MAX_COMMAND_LENGTH, the change will be reflected throughout the shell.
+
+	- As defined in runCommand(), the fileInputText[8000] is limited to 8000 characters.
+		Meaning, if the output to either the console or forwarding of stdout > 8000 characters, wrdsh will encounter a buffer overflow.
+	
+	
+
+API Documentation:
+
+wrdsh contains a customized structure known as Command.
+	Command is a doubly linked list with the following attributes:
+
+	char name[MAX_COMMAND_LENGTH];         //Store the name of the command.
+    struct command *next;                  //The next command in the node chain.
+    struct command *prev;                  //The previous command in the node chain.
+    struct command *tail;                  //The last node in the chain.
+    int forwards;                          //0 -> command does not need to forward stdout.  1-> forward stdout.
+    char forwardsTo[MAX_COMMAND_LENGTH/2]; //If forwards == 1, the location which the command will forward stdout to.
+    int cmdCount;                          //The # of commands contained within this node chain.
+    int position;                          //0 -> last, 1 -> middle, 2 -> first, 3 -> singleton.
+	
+	FLOW OF EXECUTION:
+		The main() section of this program will do the following:
+			-Allocate an empty command.
+			-Populate that command via the shellLoop() function.
+				If wrdsh was not able to parse the user's command via shellLoop(), loop will exit with return value -1.
+			-Trigger the execution of the given command(s) by passing the command chain to execReverseOrder().
+			-Free the allocated space for the command chain once the execution has completed.
+			
+		The shellLoop(Command* userCommands) when triggered will preform the following:
+			-Detect if user is trying to exit the program [via wrdsh>exit] -- will return 1 in this case.
+			-Detect if user has tried to input an empty line -- will restart the input loop. 
+			
+			-Parses the line of command(s) inputted and pass to one of two functions:
+				-If a pipe is detected within the input, it will trigger delimByPipe(Command userCommands, char* parseMe)
+					by passing the empty command struct and the string of the user's input.
+					delimByPipe() will then separate each pipe, removing incorrect spaces (via delimBySpace()), create a node (via createCommand()), and 
+					append each created node/command to the empty Command struct passed to it from shellLoop/main via setLastNode().
+						*NOTE: If given an invalid # of pipes, this will hault execution and ask the user to try again.
+					
+				-Otherwise, shellLoop will parse the input via delimBySpace, then trigger createCommand(char* parseMe) based on the output,
+					then set the newly created command to userCommands via setLastNode(Command* userCommands, Command* endNode).
+		
+		Once shellLoop has populated userCommands via delimByPipe()/ setLastNode(userCommands, createCommand(delimBySpace(userInput))),
+			assuming successful syntax, it will return to main with its exit status, and the pointer to userCommands will be populated with Commands.
+			
+		Main will now trigger execReverseOrder() by passing the userCommands to it, and execReverseOrder() will step backwards from
+		the tail of the linked list towards the head -- triggering the function runCommand() for each node in the linked list.
+		
+		runCommand will then parse each given command, fork() and pipe() as appropriate, and then in the parent trigger the duplication of 
+		the characters "c", "m", "p", "t".
+		After which, executed  commands will either output to a file (if '<' has been used to indicate the user desires redirection of output)
+			or to stdout (the console) with the above characters duplicated within.
+			

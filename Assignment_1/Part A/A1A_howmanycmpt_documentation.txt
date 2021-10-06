@@ -1,0 +1,83 @@
+/*
+Assignment 1 Part A.
+	wrdsh.c -- Documentation file.
+
+Computer Science 332.3
+Prof: Dr. Derek Eager
+University of Saskatchewan - Arts & Science
+	Department of Computer Science
+A project by: Spencer Tracy | Spt631 | 11236962 and Shantanu Mishra | Shm572 | 11255997
+__________________________________________________
+ */
+ 
+ 
+ 
+
+
+Features of homemanycmpt system call:
+        It checks for the number of process whoes name beign with cmpt and they can be in any state. 
+    
+Features of cmpttest.c a user program:
+        It calls the homemanycmpt system call and prints the number of process whoes name beign with cmpt and they can be in any state. 
+		
+		
+        
+How to run:
+
+    1. call make qemu 
+    2. once the shell is ready call cmpttest with total number of fork required as argument
+        example. cmpttest 50
+        program would retrun 51
+
+
+Known bugs:
+	-NA
+
+
+Known limitations:
+      If a large number of fork request is sent then based upon system policy it wont allow parent to fork more then a given threshold. 
+      so in that case after a particular number program will return the same number of process. 
+     
+      for example if user executes cmpttest.c 75 then program will only output 62 as 61 max fork will be possible.
+
+
+
+Changes made in xv6-riscv
+            Proc.c \
+            Defined howmanycmpt()
+
+        Makefile
+            added _cmpttest\
+
+
+        user/cmpttest.c
+            Created howmanycmpt testing.
+
+        kernel/defs.h
+            +line 107 -- added howmanycmpt(void)
+
+        kernel/proc.c
+            Added function howmanycmpt(void) [returns int for how many processes start with cmpt]
+
+        kernel/syscall.c
+            added extern uint64 sys_howmanycmpt(void); line 107.
+
+        kernel/syscall.h
+            Added #define SYS_howmanycmpt 22
+
+        kernel/sysproc.c 
+            Added sys_howmanycmpt
+                returns howmanycmpt()
+
+        user/_cmpttest
+            added file
+
+        user/user.h
+                added int howmanycmpt(void)
+
+        user/usys.pl
+            added entry("howmanycmpt"); line 39
+	
+	
+	
+
