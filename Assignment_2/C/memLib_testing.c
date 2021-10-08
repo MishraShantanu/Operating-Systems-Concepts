@@ -1,30 +1,32 @@
-//
-// Created by Spencer on 2021-10-07.
-//
-#include <sys/mman.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include "M_Init.h"
-#include "M_Alloc.h"
 
+
+
+typedef struct
+{
+    int size;
+    int magic;
+} header_t;
+
+typedef struct
+{
+    int size;
+    int magic;
+} footer_t;
 
 int main(int argc, char *argv[])
 {
-    int givenSize = 4002;
-    if (M_Init(givenSize) == 1)
+
+    if (M_Init(4002) == 1)
     {
-        printf("Initialization of M_Init failed!");
-        return 1;
+        exit(1);
     }
 
-    void *ptr = (void *) 0xdeadbeaf;
-    printf("what happens?  %p\n",ptr);
-    //printf("location of code : %p\n", main);
-    printf("location of heap : %p\n", malloc(100e6));
-    int x = 3;
-    printf("location of stack: %p\n", &x);
+    printf("freeList: %d\n",freeList->size);
 
-    //printf("mapfile in test: %d\n",MAP);
-    M_Alloc(givenSize/2);
-    return 0;
+    printf("Pointer of freeList: %p\n",freeList);
+    printf("Pointer of freeList+200: %p\n",freeList+200);
+
 }
