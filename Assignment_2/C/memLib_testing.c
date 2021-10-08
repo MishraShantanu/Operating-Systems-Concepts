@@ -1,14 +1,6 @@
 #include <stdio.h>
-#include <stdlib.h>
 #include "M_Init.h"
 
-
-
-typedef struct
-{
-    int size;
-    int magic;
-} header_t;
 
 typedef struct
 {
@@ -19,14 +11,24 @@ typedef struct
 int main(int argc, char *argv[])
 {
 
-    if (M_Init(4002) == 1)
+    //Pick an arbitrary size to init, exit if failed.
+    if (M_Init(654321) == -1)
     {
-        exit(1);
+        return -1;
     }
 
     printf("freeList: %d\n",freeList->size);
+    printf("freeList next: %p\n",freeList->next);
 
-    printf("Pointer of freeList: %p\n",freeList);
+    printf("Pointer of freeList: %p\n",(int *)freeList);
+
+    freeList->next = freeList+200;
+    if ((int*) freeList->next != magicNumber)
+    {
+        printf("freeList->next has been detected as allocated!\n");
+    }
+    printf("Pointer of freeList next: %p\n",freeList->next);
+    printf("Pointer of freeList prev: %p\n",freeList->prev);
     printf("Pointer of freeList+200: %p\n",freeList+200);
 
 }

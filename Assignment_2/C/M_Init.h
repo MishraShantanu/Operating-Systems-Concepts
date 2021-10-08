@@ -5,14 +5,17 @@
 #ifndef M_INIT_H
 #define M_INIT_H
 
-typedef struct __node_t
+#include <sys/mman.h>
+#include <stdio.h>
+typedef struct node_t
 {
     int size;
-    struct __node_t *next;
-    struct __node_t *prev;
+    struct node_t *next;
+    struct node_t *prev;
 }node_t;
 
 node_t *freeList;
+int *magicNumber;
 
 int M_Init(int size);
 

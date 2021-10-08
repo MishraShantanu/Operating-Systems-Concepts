@@ -8,68 +8,42 @@
 	The function should return 0 on success and -1 for a failure return.
 
 */
-
-#include <sys/mman.h>
-#include <stdio.h>
 #include "M_Init.h"
 
-typedef struct
-{
-    int size;
-    int magic;
-} header_t;
-
-typedef struct
-{
-    int size;
-    int magic;
-} footer_t;
-
-typedef struct __node_t
-{
-    int size;
-    struct __node_t *next;
-    struct __node_t *prev;
-} node_t;
-
-
+node_t *freeList;
 int M_Init(int size)
 {
 
-    //TODO: Check if M_Init has already been run.
-
-
+    if (freeList != NULL) //freeList should be null on the first call.
+    {
+        printf("Failure: M_Init was called twice!\n");
+        return -1;
+    }
+    //Round up to the nearest multiple of 16.
     int memChunks = size/16;
     if (size%16 != 0)
     {
         memChunks++;
     }
     memChunks = memChunks * 16;
+    //Create the mmap space for storing nodes.
+    freeList = mmap((void *) 0xdead0000, memChunks, PROT_READ |
+    PROT_WRITE, MAP_ANON | MAP_SHARED, -1, 0);
 
-    //node_t *head = mmap(NULL, memChunks, PROT_READ|PROT_WRITE,MAP_ANON|MAP_PRIVATE, -1, 0);
-    node_t *head = mmap((void *) 0xdeadbeaf, memChunks, PROT_READ | PROT_WRITE, MAP_ANON | MAP_SHARED, -1, 0);
-    //node_t *head = mmap(NULL, memChunks, PROT_READ|PROT_WRITE,MAP_SHARED, -1, 0);
-
-    //0xdeadbeaf
-    if(head == MAP_FAILED)
+    if(freeList == MAP_FAILED) //Check and report failure to allocate.
     {
         printf("Mapping Failed\n");
-        return 1;
+        return -1;
     }
-
-    head->size = (int)(memChunks - sizeof(node_t));
-    head->next = NULL;
-    head->prev = NULL;
-    printf("mapfile in Init: %p\n",head);
-
-
-    //printf("mapfile in Init: %p\n",head);
-
-
-    //MAP_FILE
+    //Define magic number, set next and prev as magic number to determine if a block
+    //has already been allocated.
+    magicNumber = (int *) 123456789;
+    freeList->size = (int)(memChunks - sizeof(node_t));
+    freeList->next = (struct node_t *) magicNumber;
+    freeList->prev = (struct node_t *) magicNumber;
     return 0;
-
 }
+
 
 //
 //int main(int argc, char *argv[])
