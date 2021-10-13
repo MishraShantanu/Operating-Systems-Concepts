@@ -4,7 +4,19 @@
 #include "kernel/fs.h"
 
 int main(int argc, char *argv[]){
-   
-       printf("%d\n",waitstat());wait(0);
-    exit(0);
+
+    int rc = fork();
+    if(rc==0){
+        exit(0);
+    }else{
+         int i = 0;
+       // wait(0);
+   i = waitstat();
+   printf("i: %d\n", i);
+  exit(0);
+    }
+    
+ 
+        
+        
 }

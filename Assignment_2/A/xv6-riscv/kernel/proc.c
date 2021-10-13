@@ -119,6 +119,11 @@ allocproc(void)
 found:
   p->pid = allocpid();
   p->state = USED;
+    
+    acquire(&tickslock);
+    p->created = ticks;
+    release(&tickslock);
+    p->running = 0;
 
   // Allocate a trapframe page.
   if((p->trapframe = (struct trapframe *)kalloc()) == 0){
@@ -340,6 +345,11 @@ void
 exit(int status)
 {
   struct proc *p = myproc();
+   
+  acquire(&tickslock);
+  p->ended = ticks;
+  release(&tickslock);
+  // printf("closing the process and ticks is %d \n",p->ended); 
 
   if(p == initproc)
     panic("init exiting");
@@ -362,12 +372,16 @@ exit(int status)
 
   // Give any children to init.
   reparent(p);
+    
+ 
 
   // Parent might be sleeping in wait().
   wakeup(p->parent);
+    
+  
   
   acquire(&p->lock);
-
+    
   p->xstate = status;
   p->state = ZOMBIE;
 
@@ -454,7 +468,7 @@ scheduler(void)
         p->state = RUNNING;
         c->proc = p;
         swtch(&c->context, &p->context);
-
+        p->running++;
         // Process is done running for now.
         // It should have changed its p->state before coming back.
         c->proc = 0;
@@ -656,8 +670,89 @@ procdump(void)
 }
 
 
-int 
-waitstat(void){
+// int 
+// waitstat(void){
+//      struct proc *p;
+//     char name[4] = "test";
+//     int count = 0;
+
+//   for(p = proc; p < &proc[NPROC]; p++){
+//     acquire(&p->lock);
+      
+//       if(strncmp((const char*)&p->name,name,4)==0){
+//           // printf("process name %s\n %", &p->name );
+//           printf("process start time: %d, process end time: %d, process run time: %d \n", p->created, p->ended, p->running);
+//           count++;
+//       }
+      
+        
+       
+//     release(&p->lock);
+//  }
+//     return 101;
+// }
+
+//,uint64* turnaroundTime, uint64* runTime
+
+int waitstat(uint64 addr,uint64 turnaroundTime, uint64 runTime ){
+
+    struct proc *np;
+  int havekids, pid;
+  struct proc *p = myproc();
+
+  acquire(&wait_lock);
+
+  for(;;){
+    // Scan through table looking for exited children.
+    havekids = 0;
+    for(np = proc; np < &proc[NPROC]; np++){
+      if(np->parent == p){
+        // make sure the child isn't still in exit() or swtch().
+        acquire(&np->lock);
+
+        havekids = 1;
+        if(np->state == ZOMBIE){
+          int rTime = np->running;
+          int tTime = np->ended - np-> created;
+            // printf("end: %d, created: %d",np->ended,np-> created);
+            // printf("\n 1st cal time %d : %d \n",rTime,tTime);
+            
+          // turnaroundTime = tTime;
+          // runTime = rTime;
+          copyout(p->pagetable, turnaroundTime, (char *)&tTime,
+                                  sizeof(tTime));
+          
+          copyout(p->pagetable, runTime, (char *)&rTime,
+                                  sizeof(rTime));
+                                
+
+          // printf("\n 2nd  cal time %d : %d \n",runTime,turnaroundTime);
+          // Found one.
+          pid = np->pid;
+          if(addr != 0 && copyout(p->pagetable, addr, (char *)&np->xstate,
+                                  sizeof(np->xstate)) < 0) {
+            release(&np->lock);
+            release(&wait_lock);
+            return -1;
+          }
+          freeproc(np);
+          release(&np->lock);
+          release(&wait_lock);
+          return pid;
+        }
+        release(&np->lock);
+      }
+    }
+
+    // No point waiting if we don't have any children.
+    if(!havekids || p->killed){
+      release(&wait_lock);
+      return -1;
+    }
     
-    return 101;
+    // Wait for a child to exit.
+    sleep(p, &wait_lock);  //DOC: wait-sleep
+  }
+    
+
 }
