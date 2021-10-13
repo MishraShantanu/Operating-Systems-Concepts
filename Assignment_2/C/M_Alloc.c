@@ -17,44 +17,9 @@
 #include <stdio.h>
 #include "M_Alloc.h"
 
-/* Purpose: Round up an integer to the nearest multiple of 16 [bytes].
- * Pre-conditions: size -- must be > 0.
- * Post-conditions: None.
- * Return: The nearest (rounded if needed) multiple of 16.
- */
-int roundChunks(int size)
-{
-    int memChunks = size/16;
-    if (size%16 != 0)
-    {
-        memChunks++;
-    }
-    return memChunks * 16;
-}
 
 
-typedef struct
-{
-    int size;
-    int magic;
-} header_t;
-
-typedef struct
-{
-    int size;
-    int magic;
-} footer_t;
-
-typedef struct __node_t
-{
-    int size;
-    struct __node_t *next;
-    struct __node_t *prev;
-} node_t;
-
-
-//void *M_Alloc(int size)
-void M_Alloc(int size)
+void *M_Alloc(int size)
 {
     int memChunks = size/16;
     if (size%16 != 0)
@@ -63,11 +28,7 @@ void M_Alloc(int size)
     }
     memChunks = memChunks * 16;
     printf("Test print, allocated %d\n",memChunks);
-
-    void *ptr = (void *) 0xdeadb000;
-    node_t *head = mmap((void *) 0xdeadbeaf, memChunks, PROT_READ | PROT_WRITE, MAP_ANON | MAP_SHARED, -1, 0);
-
-    //return (void *) 1;
+    return (void *) 1;
 }
 
 

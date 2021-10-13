@@ -37,10 +37,11 @@ int M_Init(int size)
     }
     //Define magic number, set next and prev as magic number to determine if a block
     //has already been allocated.
-    magicNumber = (int *) 123456789;
-    freeList->size = (int)(memChunks - sizeof(node_t));
-    freeList->next = (struct node_t *) magicNumber;
-    freeList->prev = (struct node_t *) magicNumber;
+    magicNumber = (void *) 123456789;
+    freeList->size = (int)(memChunks - (sizeof(node_t)));
+    freeList->current =  freeList;
+    memStruct *ptr = freeList->current;
+
     return 0;
 }
 
@@ -51,7 +52,10 @@ int M_Init(int size)
 //    int givenSize = 4002;
 //    //M_Init(givenSize);
 //
-//
+//    printf("memchunks %d - sizeof(node_t) %lu == %d\n",memChunks, sizeof(node_t),freeList->size);
+//    printf("Size of freeList %lu\n", sizeof(*freeList));
+//    printf("Size of next %lu\n", sizeof(*freeList->next));
+//    printf("Size of prev %lu\n", sizeof(*freeList->prev));
 //    //printf("Given %d -- rounded up is %d \n",givenSize, roundedSize);
 //    //printf("size of node_t: %lu \n",sizeof (node_t));
 //    //printf("size of head: %d \n",head->size);
