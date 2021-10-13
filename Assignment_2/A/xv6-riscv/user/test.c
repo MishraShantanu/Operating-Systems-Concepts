@@ -7,7 +7,10 @@ int main(int argc, char *argv[]){
 
     int rc;
     int AturnaroundTime=0, BturnaroundTime=0, CturnaroundTime=0, ArunningTime=0, BrunningTime=0, CrunningTime=0 ;
-    int startPid=-1;
+    
+    int startPidA=-1,endPidA=-1;
+    int startPidB=-1,endPidB=-1;
+    int startPidC=-1,endPidC=-1;
 
     for(int f=0;f<45;f++){
         
@@ -44,10 +47,20 @@ int main(int argc, char *argv[]){
             exit(0);
         }else{
             
-            if(f==0 && startPid==-1){
-                startPid = rc;
-               // printf("setting start pid: %d\n", startPid);
+            if(f==0 && startPidA==-1){
+                startPidA = rc;
+            }else if(f==14 && endPidA==-1){
+                 endPidA = rc;
+            }else if(f==15 && startPidB==-1){
+                startPidB = rc;
+            }else if(f==29 && endPidB==-1){
+                 endPidB = rc;
+            }else if(f==30 && startPidC==-1){
+                startPidC = rc;
+            }else if(f==44 && endPidC==-1){
+                 endPidC = rc;
             }
+            
             
         }
     }
@@ -61,17 +74,17 @@ int main(int argc, char *argv[]){
     
            pid = waitstat(0,&turnaroundTime,&runningTime);
         //   printf("Pid: %d \n",pid);
-           if(pid <startPid+15){
-               // printf("A %d %d\n",pid,startPid+15);
+           if(pid>=startPidA && pid<=endPidA){
+              //  printf("A %d %d %d\n",pid,startPidA,endPidA);
                 AturnaroundTime += turnaroundTime;
                 ArunningTime += runningTime;
                 
-            }else if(pid >=startPid+15 &&  pid < startPid+30){
-              //  printf("B %d %d %d\n",pid,startPid+15,startPid+30);
+            }else if(pid>=startPidB && pid<=endPidB){
+              // printf("B %d %d %d\n",pid,startPidA,endPidA);
                 BturnaroundTime += turnaroundTime;
                 BrunningTime += runningTime;   
-            }else{
-              // printf("C %d %d\n",pid,startPid);
+            }else if(pid>=startPidC && pid<=endPidC){
+              // printf("C %d %d %d\n",pid,startPidA,endPidA);
 
                CturnaroundTime += turnaroundTime;
                 CrunningTime += runningTime;
