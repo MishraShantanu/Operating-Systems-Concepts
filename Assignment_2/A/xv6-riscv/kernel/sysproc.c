@@ -95,3 +95,30 @@ sys_uptime(void)
   release(&tickslock);
   return xticks;
 }
+
+
+uint64
+sys_waitstat(void){
+  
+  uint64 p;
+  uint64 turnaroundTime;
+  uint64 runningTime;
+  
+
+ // printf("reached waitsys TT: %d", *turnaroundTime);
+  
+  
+  if(argaddr(0, &p) < 0)
+    return -1;
+  // printf("A\n");
+  if(argaddr(1,&turnaroundTime)<0)
+     return -1;
+  // printf("B\n");
+  if(argaddr(2,&runningTime)<0)
+     return -1;
+  // printf("C\n");
+  return waitstat(p,turnaroundTime,runningTime);
+  // return 33;
+
+}
+
