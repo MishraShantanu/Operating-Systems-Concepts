@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include "M_Init.h"
+#include "M_Display.h"
 //#include "M_Alloc.h"
 
 
@@ -86,6 +87,10 @@ int main(int argc, char *argv[])
 
     node_t *ptr4 = M_Alloc(1212);
     printf("Alloc pointer is pointing at: %p with a hard limit at %p [due to size %d]\n",ptr4,ptr4->next,ptr4->size);
+
+
+
+    M_Display();
 
 
     //printf("Alloc pointer is pointing at: %p with a hard limit at %p [due to size %d]\n",ptr,ptr->next,ptr->size);
