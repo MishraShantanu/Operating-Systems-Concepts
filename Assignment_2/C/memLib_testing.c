@@ -5,47 +5,46 @@
 
 void *M_Alloc(int size)
 {
-    int memChunks = size/16 + 2;
+    int memChunks = size/16;
     if (size%16 != 0)
     {
         memChunks++;
     }
-
     memChunks = memChunks * 16;
+
+
+
     printf("Test print, allocated %d\n",memChunks);
 
-    if ((int*) freeList->current == (int*) freeList)
-    {
-        printf("Allocating first chunk in free list!\n");
-        freeList->current->header = (struct header_t *) (freeList->current);
-        printf("test1\n");
-
-        freeList->current->header->size = memChunks;
-        printf("test2\n");
-
-        freeList->current->footer = (struct footer_t *) (freeList->current);
-        freeList->current->footer->size = memChunks;
-
-        //TODO: Footer and header causing seg faults, investigate.
-                //Maybe point to data from current +8 in return (omit header)?
-                //How do I omit footer?
-                //Should I just add an extra 32 bytes to this no matter what to fit both?
+    //if (freeList->current->next == magicNumber)
+    //{
 
 
-        printf("test3\n");
-        printf("footersize:%d\n",freeList->current->footer->size);
-        //freeList->current->next->size = memChunks;
-        freeList->current->size = memChunks;
+    freeList->current->size = memChunks;
+    freeList->current->next = (struct node_t *) ((int *) freeList->current + memChunks);
+    freeList->current->next->next = magicNumber;
+    void *out = freeList->current;
+
+    freeList->current = (struct node_t *) ((int *) freeList->current + memChunks);
 
 
-        printf("cur pointer: %p next pointer %p\n",freeList->current,freeList->current + memChunks);
-        //freeList->current;
-        //freeList->current = freeList->current + memChunks;
-        //freeList->current = freeList->current->next;
-        freeList->current = freeList->current + memChunks;
-        return freeList->current;
-    }
-    return NULL;
+
+
+
+    //
+    //
+
+
+    //freeList->current = freeList->current + memChunks;
+
+
+    //freeList->current->next->prev = freeList->current;
+    //freeList->current = freeList->current->next;
+
+    return out;
+    //}
+    //printf("Magic next. doing nothing.\n");
+    //return NULL;
 //    else
 //    {
 //
@@ -70,66 +69,25 @@ int main(int argc, char *argv[])
 {
 
     //Pick an arbitrary size to init, exit if failed.
-    if (M_Init(600) == -1)
+    if (M_Init(16000) == -1)
     {
         return -1;
     }
 
-    void *ptr = M_Alloc(200);
-    printf("Alloc pointer is pointing at: %p\n",ptr);
-    printf("freeList.current - freelist == %ld\n",freeList->current - freeList);
-
-    //printf("after alloc, freeList is: %p and freeList->current is: %p",freeList,freeList->current);
-    printf("after alloc, freeList is: %p\n",freeList);
-
-    printf("after alloc, freeList.current is: %p\n",freeList->current);
-    //printf("after alloc, freeList.current.footer is: %\n",freeList->current->footer->size);
+    node_t *ptr = M_Alloc(200);
+    printf("Alloc pointer is pointing at: %p with a hard limit at %p [due to size %d]\n",ptr,ptr->current,ptr->size);
 
 
+    node_t *ptr2 = M_Alloc(50);
+    printf("Alloc pointer is pointing at: %p with a hard limit at %p [due to size %d]\n",ptr2,ptr2->next,ptr2->size);
 
-    //printf("footersize:%d\n",freeList->current->footer->size);
+    node_t *ptr3 = M_Alloc(145);
+    printf("Alloc pointer is pointing at: %p with a hard limit at %p [due to size %d]\n",ptr3,ptr3->next,ptr3->size);
 
-    //printf("current footer size: %d\n",);
-
-//    freeList->header = (struct header_t *) (freeList + 200);
-//    if ((int*) freeList->next != magicNumber)
-//    {
-//        printf("freeList->next has been detected as allocated!\n");
-//    }
-//    printf("Freelist root: %p\n",freeList);
-//    printf("Freelist current: %p\n",freeList->current);
-//    printf("Freelist next: %p\n",freeList->next);
-//    printf("Freelist current.next: %p\n",freeList->current->next);
+    node_t *ptr4 = M_Alloc(1212);
+    printf("Alloc pointer is pointing at: %p with a hard limit at %p [due to size %d]\n",ptr4,ptr4->next,ptr4->size);
 
 
-    //printf("Pointer of freeList next: %p\n",freeList->next);
-    //printf("Pointer of freeList prev: %p\n",freeList->prev);
-    //printf("Pointer of freeList+200: %p which should be the same as freeList->next %p\n",freeList+200,freeList->next);
-    //printf("Size of freeList %lu\n", sizeof(freeList));
-    //printf("Size of node_t %lu\n", sizeof(node_t));
-    //printf("Size of next %lu\n", sizeof(freeList->next));
-    //printf("Size of prev %lu\n", sizeof(freeList->prev));
-    //printf("Size of header %lu\n", sizeof());
-    //printf("Pointer of freeList: %p\n",(int *)freeList);
-    //printf("freeList next: %p\n",(int*) freeList->next);
-    //printf("freeList prev: %p\n",(int*) freeList->prev);
-
-
-    //freeList->current = (freeList + 300);
-
-
-
-
-    //freeList->next->size =100;
-    //freeList->next = freeList +300;
-
-    //printf("memchunks %d - sizeof(node_t) %lu == %d\n",memChunks, sizeof(node_t),freeList->size);
-//    printf("Size of node_t %lu\n", sizeof(node_t));
-//    printf("Size of freeList %lu\n", sizeof(*freeList));
-//    printf("Size of header %lu\n", sizeof(header_t));
-//    printf("Size of footer %lu\n", sizeof(footer_t));
-//    printf("Size of next %lu\n", sizeof(freeList->next));
-//    printf("Size of prev %lu\n", sizeof(freeList->prev));
-
+    //printf("Alloc pointer is pointing at: %p with a hard limit at %p [due to size %d]\n",ptr,ptr->next,ptr->size);
 
 }

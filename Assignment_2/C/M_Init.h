@@ -13,6 +13,9 @@ typedef struct node_t
 {
     int size;
     struct node_t *current;
+    struct node_t *head;
+    struct node_t *next;
+    struct node_t *prev;
 }node_t;
 
 
