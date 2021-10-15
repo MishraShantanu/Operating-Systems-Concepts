@@ -39,10 +39,10 @@ int M_Init(int size)
     //has already been allocated.
     magicNumber = (void *) 123456789;
     freeList->size = (int)(memChunks - (sizeof(node_t)));
+    freeList->totalSize =(int)(memChunks - (sizeof(node_t)));
     freeList->current =  freeList;
-    freeList->head =  freeList;
 
-    memStruct *ptr = freeList->current;
+    //memStruct *ptr = freeList->current;
     return 0;
 }
 

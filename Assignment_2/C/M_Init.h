@@ -15,6 +15,7 @@ typedef struct node_t
     struct node_t *current;
     struct node_t *next;
     struct node_t *prev;
+    int totalSize;
 }node_t;
 
 

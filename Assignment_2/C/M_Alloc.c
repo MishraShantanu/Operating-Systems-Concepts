@@ -11,12 +11,7 @@
 	Allocation should use the next fit policy.
  */
 
-
-
-#include <sys/mman.h>
-#include <stdio.h>
 #include "M_Alloc.h"
-
 
 
 void *M_Alloc(int size)
@@ -27,21 +22,16 @@ void *M_Alloc(int size)
         memChunks++;
     }
     memChunks = memChunks * 16;
-    printf("Test print, allocated %d\n",memChunks);
-    return (void *) 1;
+
+
+    freeList->current->size = memChunks;
+    //printf("Size ought to be: %d\n",(int)((freeList->current + memChunks) - freeList->current));
+
+    freeList->current->next = (void*) freeList->current + freeList->current->size;
+    freeList->current->next->next = magicNumber;
+
+    void *out = freeList->current;
+    freeList->current = freeList->current->next;
+    freeList->current->prev = out;
+    return out;
 }
-
-
-//int main(int argc, char *argv[])
-//{
-//    //Access the initialized M_Init
-//            //Handle if M_Init is not yet initialized.
-//
-//    int givenSize = 4002;
-//    int roundedSize = roundChunks(givenSize);
-//
-//
-//
-//
-//    return 0;
-//}
