@@ -19,30 +19,14 @@ typedef struct node_t
 }node_t;
 
 
-
 typedef struct memStruct
 {
     unsigned long size;
     struct memStruct* memptr;
 }memStruct;
 
-
-//typedef struct header_t
-//{
-//    int size;
-//    //void* next;
-//    void* next;
-//} header_t;
-//
-//typedef struct footer_t
-//{
-//    int size;
-//    //node_t *prev;
-//    void* prev;
-//} footer_t;
-
-
 node_t *freeList;
+int freeListSize;
 void* magicNumber;
 
 int M_Init(int size);

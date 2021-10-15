@@ -7,38 +7,33 @@
 
 int M_Free(void *pointer)
 {
-
-    int total = freeList->totalSize;
-
-    //Get size.
     node_t *block = pointer;
-    //(int)((freeList->current + memChunks) - freeList->current))
-    //(int)((block + blockSize) - block))
-    int blockSize = block->size;
     printf("Free is triggered on block:    %p with a hard limit at %p [due to size %d]\n",block, block->next,block->size);
 
     //Check for coalescing.
-
-        //Is the space before free?
-    if (block->prev == NULL)
+    if (block->prev != magicNumber && block->next != magicNumber) //Nothing free above and below. Leave as is.
     {
-        printf("PREVIOUS BLOCK IS NULL.\n");
-    }
-    else
-    {
-        printf("\nPREVIOUS BLOCK IS NOT NULL.\n");
+        printf("Prev and next block are not free.\n");
         printf("Previous block: %p with a hard limit at %p [due to size %d]\n", block->prev, block, block->prev->size);
-    }
-        //Is the space after free?
-    if (block->next == NULL)
-    {
-        printf("NEXT BLOCK IS NULL.\n");
-    }
-    else
-    {
-        printf("\nNEXT BLOCK IS NOT NULL.\n");
         printf("Next block: %p with a hard limit at %p [due to size %d]\n",block->next,(void*)block->next + block->next->size,block->next->size);
+        block->prev->next = magicNumber;
+        block->next->prev = magicNumber;
     }
+    //else if (block->prev != magicNumber || block->next->size == 0) // Combine cur with prev as one big free node.
+    else if (block->prev != magicNumber || block->next->size == 0) // Combine cur with prev as one big free node.
+    {
+        printf("Prev block is NULL, next is not.\n");
+        printf("Next block: %p with a hard limit at %p [due to size %d]\n",block->next,(void*)block->next + block->next->size,block->next->size);
+        block->prev->next = block->next;
+
+    }
+    else //Combine cur with next as one big free node.
+    {
+        printf("Next block is NULL, prev is not.\n");
+        printf("Previous block: %p with a hard limit at %p [due to size %d]\n", block->prev, block, block->prev->size);
+        block->next = block->next->next;
+    }
+
 
     return 0; //return 1 on fail.
 }
