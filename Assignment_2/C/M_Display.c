@@ -7,18 +7,17 @@
 void M_Display()
 {
     int nodeNumber = 1;
-    node_t *cur = freeList;
-    int total = freeList->totalSize;
-    void* endAddress = (void*)freeList+total;
+    memStruct *cur = freeList;
+    void* endAddress = (void*)freeList+freeListSize;
     printf("M_Display triggered.\n");
 
-    printf("Freelist total size: %d\n",freeList->totalSize);
-    printf("Freelist ends at %p\n", (void*)freeList+total);
+    printf("Freelist total size: %d\n",freeListSize);
+    printf("Freelist ends at %p\n", freeList+freeListSize);
 
-    while (cur->next != magicNumber)
+    while (cur->memptr != magicNumber)
     {
-        printf("Block %d: %p with a hard limit at %p [due to size %d]\n",nodeNumber,cur,cur->next,cur->size);
-        cur = cur->next;
+        printf("Block %d: %p with a hard limit at %p [due to size %lu]\n",nodeNumber,cur,cur->memptr,cur->size);
+        cur = cur->memptr;
         nodeNumber++;
     }
 

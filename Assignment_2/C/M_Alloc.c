@@ -16,23 +16,83 @@
 
 void *M_Alloc(int size)
 {
-    int memChunks = size/16;
+    long unsigned memChunks = size/16;
     if (size%16 != 0)
     {
         memChunks++;
     }
     memChunks = memChunks * 16;
 
+    //printf("Requested size: %d Actual size: %d\n",size,memChunks);
+
+
+
+
+
+    //Check for magic number:
+//    if (currentBlock->memptr == magicNumber)
+//    {
+//        printf("Current block [%p with size %lu] "
+//               "points to magic number\n",currentBlock,currentBlock->size);
+//    }
+//    else
+//    {
+//        printf("Current block [%p with size %lu] DOES NOT point to magic number! "
+//               "(points to: [%p with size %lu])!\n",currentBlock,currentBlock->size,currentBlock->memptr,currentBlock->memptr->size);
+//        if (currentBlock->memptr->size == 0)
+//        {
+//            printf("END OF LIST REACHED");
+//            return NULL;
+//        }
+//    }
+
+
+    printf("Current address: [%p] size: [%lu]  points to:[%p]\n",currentBlock,currentBlock->size,currentBlock->memptr);
+
+
     //Create a new block.
 
-    currentBlock->size = memChunks;
-    //printf("Size ought to be: %d\n",(int)((freeList->current + memChunks) - freeList->current));
+    //Header:
+    memStruct *header = (void*) currentBlock;
 
-    freeList->current->next = (void*) freeList->current + freeList->current->size;
-    freeList->current->next->next = magicNumber;
+    //Footer:
+    memStruct *footer = (void*) currentBlock + memChunks-16;
 
-    void *out = freeList->current;
-    freeList->current = freeList->current->next;
-    freeList->current->prev = out;
-    return out;
+    //Set footer values:
+    footer->size = currentBlock->size - memChunks;
+    footer->memptr = currentBlock;
+
+    //Set header values.
+    header->size = memChunks;
+    //header->memptr = currentBlock + memChunks;
+    header->memptr = footer;
+
+
+    //footer->size = currentBlock->size - memChunks;
+
+
+
+    printf("Header address: [%p] size: [%lu]  points to:[%p]\n",header,header->size,header->memptr);
+    printf("Footer address: [%p] size: [%lu]  points to:[%p]\n\n",footer,footer->size,footer->memptr);
+
+
+//    currentBlock->size = memChunks; //How big is the new block?
+//    currentBlock->memptr = currentBlock + memChunks; //Where is next header?
+//
+    //currentBlock->memptr->memptr = magicNumber; //Next's header should be a magic number.
+//    currentBlock->memptr->size = memChunks;
+//
+//    void* out = currentBlock+16;
+    currentBlock = currentBlock->memptr;
+
+    return NULL;
+    //return out+16;
 }
+//
+//int main(int argc, char *argv[])
+//{
+//
+//    M_Init(1590);
+//    M_Alloc(30);
+//    return 0;
+//}
