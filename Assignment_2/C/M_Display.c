@@ -16,7 +16,7 @@ void M_Display()
 
     while (cur->memptr != magicNumber)
     {
-        printf("Block %d: %p with a hard limit at %p [due to size %lu]\n",nodeNumber,cur,cur->memptr,cur->size);
+        printf("Block %d: %p with a hard limit at %p [due to size %lu]\n",nodeNumber,cur,(void*)cur->memptr - 16,cur->size);
         cur = cur->memptr;
         nodeNumber++;
     }

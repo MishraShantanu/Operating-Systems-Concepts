@@ -28,7 +28,7 @@ int main(int argc, char *argv[])
 
     void* ptr5 = M_Alloc(134);
     //printf("Alloc pointer is pointing at: %p with a hard limit at %p [due to size %d]\n",ptr4,ptr4->next,ptr4->size);
-    //M_Display();
+    M_Display();
     //M_Free(ptr4);
 
     //printf("Does seg fault happen before here?\n");

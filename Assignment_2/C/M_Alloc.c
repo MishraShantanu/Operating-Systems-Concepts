@@ -23,10 +23,6 @@ void *M_Alloc(int size)
     }
     memChunks = memChunks * 16;
 
-    //printf("Requested size: %d Actual size: %d\n",size,memChunks);
-
-
-
 
 
     //Check for magic number:
