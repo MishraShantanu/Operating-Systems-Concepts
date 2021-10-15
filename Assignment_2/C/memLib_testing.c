@@ -13,20 +13,20 @@ int main(int argc, char *argv[])
         return -1;
     }
 
-    node_t *ptr = M_Alloc(200);
+    void* ptr = M_Alloc(200);
     //printf("Alloc pointer is pointing at: %p with a hard limit at %p [due to size %d]\n",ptr,ptr->current,ptr->size);
 
 
-    node_t *ptr2 = M_Alloc(50);
+    void* ptr2 = M_Alloc(50);
     //printf("Alloc pointer is pointing at: %p with a hard limit at %p [due to size %d]\n",ptr2,ptr2->next,ptr2->size);
 
-    node_t *ptr3 = M_Alloc(145);
+    void* ptr3 = M_Alloc(145);
     //printf("Alloc pointer is pointing at: %p with a hard limit at %p [due to size %d]\n",ptr3,ptr3->next,ptr3->size);
 
-    node_t *ptr4 = M_Alloc(1212);
+    void* ptr4 = M_Alloc(1212);
     //printf("Alloc pointer is pointing at: %p with a hard limit at %p [due to size %d]\n",ptr4,ptr4->next,ptr4->size);
     M_Display();
-    M_Free(ptr4);
+    //M_Free(ptr4);
 
 
 

@@ -9,15 +9,6 @@
 #include <stdio.h>
 
 
-typedef struct node_t
-{
-    int size;
-    struct node_t *current;
-    struct node_t *next;
-    struct node_t *prev;
-    int totalSize;
-}node_t;
-
 
 typedef struct memStruct
 {
@@ -25,9 +16,10 @@ typedef struct memStruct
     struct memStruct* memptr;
 }memStruct;
 
-node_t *freeList;
+void* freeList;
 int freeListSize;
 void* magicNumber;
+memStruct* currentBlock;
 
 int M_Init(int size);
 

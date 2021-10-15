@@ -23,8 +23,9 @@ void *M_Alloc(int size)
     }
     memChunks = memChunks * 16;
 
+    //Create a new block.
 
-    freeList->current->size = memChunks;
+    currentBlock->size = memChunks;
     //printf("Size ought to be: %d\n",(int)((freeList->current + memChunks) - freeList->current));
 
     freeList->current->next = (void*) freeList->current + freeList->current->size;
