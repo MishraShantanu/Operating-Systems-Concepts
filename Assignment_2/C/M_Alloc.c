@@ -81,7 +81,7 @@ void *M_Alloc(int size)
 //
     //currentBlock->memptr->memptr = magicNumber; //Next's header should be a magic number.
 //    currentBlock->memptr->size = memChunks;
-//
+
     void* out = currentBlock+16;
     currentBlock = currentBlock->memptr;
     currentBlock->memptr = magicNumber;
