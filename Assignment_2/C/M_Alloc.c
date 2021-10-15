@@ -56,7 +56,7 @@ void *M_Alloc(int size)
     memStruct *header = (void*) currentBlock;
 
     //Footer:
-    memStruct *footer = (void*) currentBlock + memChunks-16;
+    memStruct *footer = (void*) currentBlock + 16 + memChunks; //Move past the header + allocated length of node.
 
     //Set footer values:
     footer->size = currentBlock->size - memChunks;
@@ -82,10 +82,10 @@ void *M_Alloc(int size)
     //currentBlock->memptr->memptr = magicNumber; //Next's header should be a magic number.
 //    currentBlock->memptr->size = memChunks;
 //
-//    void* out = currentBlock+16;
+    void* out = currentBlock+16;
     currentBlock = currentBlock->memptr;
-
-    return NULL;
+    currentBlock->memptr = magicNumber;
+    return out;
     //return out+16;
 }
 //
