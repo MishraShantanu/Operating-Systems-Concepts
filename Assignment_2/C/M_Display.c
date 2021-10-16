@@ -4,30 +4,29 @@
 #include <stdio.h>
 #include "M_Init.h"
 
+
+/* PURPOSE: To print to the console each block stored in freeList [Defined in M_Init].
+ * PRE-CONDITIONS: freeList cannot be null.
+ * POST-CONDITIONS: Blocks of memory and their size are printed to the console.
+ * RETURN: None.
+ */
 void M_Display()
 {
     int nodeNumber = 1;
     memStruct *cur = freeList;
     void* endAddress = (void*)freeList+freeListSize;
-    printf("M_Display triggered.\n");
-
-    printf("Freelist total size: %d\n",freeListSize);
-    printf("Freelist ends at %p\n", freeList+freeListSize);
+    printf("\nM_Display triggered.\n"
+           "Freelist total size: %d\n"
+           "Freelist starts at %p and ends at %p\n",
+        freeListSize,freeList,freeList+freeListSize);
 
     while (cur->memptr != magicNumber)
     {
-        printf("Block %d: %p with a hard limit at %p [due to size %lu]\n",nodeNumber,cur,(void*)cur->memptr - 16,cur->size);
+        printf("\tBlock %d: %p --> %p [due to size %lu]\n",nodeNumber,cur,(void*)cur->memptr - 16,cur->size);
         cur = cur->memptr;
         nodeNumber++;
     }
 
-
-
-    printf("Block %d is FREE from %p to end of free list [%p]\n",nodeNumber,cur,endAddress);
-
-    //printf("End of freeList at address: %p\n",freeList + ((void*)freeList+total - (void*)cur));
-
-    //printf("Block %d: %p with a hard limit at %p [due to size %d]\n",nodeNumber,cur,(int*)(freeList - cur + cur->totalSize),cur->size);
-    //printf("post: cur %p",cur);
+    printf("\tBlock %d is FREE from %p to end of free list [%p]\n",nodeNumber,cur,endAddress);
 
 }
