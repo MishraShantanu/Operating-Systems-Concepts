@@ -22,7 +22,7 @@ void M_Display()
 
     while (cur->memptr != magicNumber)
     {
-        printf("\tBlock %d: %p --> %p [due to size %lu]\n",nodeNumber,cur,(void*)cur->memptr - 16,cur->size);
+        printf("\tBlock %d: %p --> %p [due to size %lu]\n",nodeNumber,cur,(void*)cur->memptr,cur->size);
         cur = cur->memptr;
         nodeNumber++;
     }

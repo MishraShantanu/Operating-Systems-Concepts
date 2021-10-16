@@ -21,22 +21,25 @@ void *M_Alloc(int size)
 
     //Detect header and footer.
     memStruct *header = (void*) currentBlock;
-    memStruct *footer = (void*) currentBlock + 16 + memChunks; //Move past the header + allocated length of node.
+    memStruct *footer = (void*) currentBlock + memChunks; //Move past the header + allocated length of node.
 
     //Set footer values:
-    footer->size = currentBlock->size - (memChunks + 16); //Subtract size of node + room for footer from the free space.
-    footer->memptr = currentBlock;
+    footer->size = currentBlock->size - (memChunks + 32); //Subtract size of node + room for footer from the free space.
+    footer->memptr = (void*)header;
       //Set header values.
     header->size = memChunks;
-    header->memptr = footer;
+    header->memptr = (void*)currentBlock + currentBlock->size;
+
+
+
+    void* out = currentBlock;
+    currentBlock = (void*)footer+16;
+    currentBlock->memptr = magicNumber;
+    currentBlock->size = footer->size;
 
 
     printf("\tNew header address: [%p] size: [%lu]  points to:[%p]\n",header,header->size,header->memptr);
     printf("\tNew footer address: [%p] size: [%lu]  points to:[%p]\n\n",footer,footer->size,footer->memptr);
 
-
-    void* out = currentBlock;
-    currentBlock = currentBlock->memptr;
-    currentBlock->memptr = magicNumber;
     return out+16;
 }

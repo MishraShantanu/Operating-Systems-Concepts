@@ -18,11 +18,14 @@ int main(int argc, char *argv[])
     void* ptr4 = M_Alloc(10);
     void* ptr5 = M_Alloc(134);
 
+
+    //M_Display();
+
     M_Free(ptr);
     M_Free(ptr2);
     M_Free(ptr3);
     M_Free(ptr4);
     M_Free(ptr5);
 
-    M_Display();
+
 }

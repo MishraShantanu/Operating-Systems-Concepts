@@ -14,24 +14,38 @@
  */
 int M_Free(void *pointer)
 {
-    memStruct *header = pointer-16; //Step back to the header for the current block.
-    memStruct *footer = pointer + header->size;
-
-    printf("\nblock[header]:    %p --> %p [due to size %lu]\n",header,header->memptr,header->size);
-    printf("block[footer]:    %p --> %p [due to size %lu]\n",footer, footer->memptr,footer->size);
+    memStruct *current = pointer-16; //Step back to the header for the current block.
+    memStruct *next = pointer + current->size;
 
 
-    if (header->memptr->memptr != magicNumber)
-        printf("There is NOT free space after the node!\n");
+    printf("\nYOU WANT TO CLEAR:\t\t%p --> %p [due to size %lu]\n",current,current->memptr,current->size);
+    printf("  NEXT BLOCK:\t\t\t%p --> %p [due to size %lu]\n",next, next->memptr,next->size);
+
+    if (current != freeList)
+    {
+        memStruct *prev = pointer-32;
+        prev = prev->memptr;
+        printf("  PREVIOUS BLOCK:\t\t%p --> %p [due to size %lu]\n",prev, prev->memptr,prev->size);
+    }
     else
-        printf("There is free space after the node!\n");
+    {
+        printf("There is no previous block to clear.\n");
+    }
 
 
-    if (footer->memptr != magicNumber || (void*) footer + (footer->size) == freeList + freeListSize)
-        printf("There is NOT free space before the node!\n");
-    else
-        printf("There is free space before the node!\n");
 
+
+//    if (current->memptr->memptr != magicNumber)
+//        printf("There is NOT free space after the node!\n");
+//    else
+//        printf("There is free space after the node!\n");
+//
+//
+//    if (footer->memptr != magicNumber || (void*) footer + (footer->size) == freeList + freeListSize)
+//        printf("There is NOT free space before the node!\n");
+//    else
+//        printf("There is free space before the node!\n");
+//
 
     return 0; //return 1 on fail.
 }
