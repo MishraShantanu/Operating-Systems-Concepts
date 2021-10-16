@@ -2,7 +2,7 @@
 #include "M_Init.h"
 #include "M_Display.h"
 #include "M_Alloc.h"
-//#include "M_Free.h"
+#include "M_Free.h"
 
 int main(int argc, char *argv[])
 {
@@ -29,8 +29,8 @@ int main(int argc, char *argv[])
     void* ptr5 = M_Alloc(134);
     //printf("Alloc pointer is pointing at: %p with a hard limit at %p [due to size %d]\n",ptr4,ptr4->next,ptr4->size);
     M_Display();
-    //M_Free(ptr4);
-
+    //M_Free(ptr);
+    M_Free(ptr5);
     //printf("Does seg fault happen before here?\n");
     //void* ptr5 = M_Alloc(3012);
 
