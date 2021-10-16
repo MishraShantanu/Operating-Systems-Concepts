@@ -51,7 +51,7 @@ int M_Init(int size)
     head->size = freeListSize;
 
     //Define the last footer.
-    memStruct *end = freeList + (freeListSize);
+    memStruct *end = freeList + (freeListSize)-16;
     end->size = 0;
     end->memptr = freeList;
 

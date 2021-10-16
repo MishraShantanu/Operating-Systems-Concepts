@@ -14,24 +14,28 @@
  */
 int M_Free(void *pointer)
 {
-    memStruct *current = pointer-16; //Step back to the header for the current block.
-    memStruct *next = pointer + current->size;
-
-
+    //memStruct *next = pointer + current->size;
+    memStruct *current = pointer-16;
+    memStruct *next = pointer + current->size + 16;
+    memStruct *prev = pointer-32;
     printf("\nYOU WANT TO CLEAR:\t\t%p --> %p [due to size %lu]\n",current,current->memptr,current->size);
-    printf("  NEXT BLOCK:\t\t\t%p --> %p [due to size %lu]\n",next, next->memptr,next->size);
 
-    if (current != freeList)
-    {
-        memStruct *prev = pointer-32;
-        prev = prev->memptr;
-        printf("  PREVIOUS BLOCK:\t\t%p --> %p [due to size %lu]\n",prev, prev->memptr,prev->size);
-    }
-    else
-    {
-        printf("There is no previous block to clear.\n");
-    }
 
+
+//    printf("\nYOU WANT TO CLEAR:\t\t%p --> %p [due to size %lu]\n",current,current->memptr,current->size);
+//    printf("  NEXT BLOCK:\t\t\t%p --> %p [due to size %lu]\n",next, next->memptr,next->size);
+//
+//    if (current != freeList)
+//    {
+//        memStruct *prev = pointer-32;
+//        prev = prev->memptr;
+//        printf("  PREVIOUS BLOCK:\t\t%p --> %p [due to size %lu]\n",prev, prev->memptr,prev->size);
+//    }
+//    else
+//    {
+//        printf("There is no previous block to clear.\n");
+//    }
+//
 
 
 

@@ -18,24 +18,33 @@ void *M_Alloc(int size)
 
     printf("Current address: [%p] size: [%lu]  points to:[%p]\n",currentBlock,currentBlock->size,currentBlock->memptr);
 
+    long unsigned currentSize = currentBlock->size;
+
 
     //Detect header and footer.
     memStruct *header = (void*) currentBlock;
-    memStruct *footer = (void*) currentBlock + memChunks; //Move past the header + allocated length of node.
+    memStruct *footer = (void*) currentBlock + 16 + memChunks; //Move past the header + allocated length of node.
+
+    header->size = memChunks; //Size of this block.
+    footer->size = memChunks;
+    header->memptr = (void*)currentBlock + 32 + memChunks; //Point to next header. [past head, past node, past footer].
 
     //Set footer values:
-    footer->size = currentBlock->size - (memChunks + 32); //Subtract size of node + room for footer from the free space.
-    footer->memptr = (void*)header;
-      //Set header values.
-    header->size = memChunks;
-    header->memptr = (void*)currentBlock + currentBlock->size;
 
 
+    if (currentBlock != freeList) //Do this unless we're on the first block.
+    {
+        footer->memptr = (void*)currentBlock-16; //Point to previous footer.
+    }
+    else //Link to the end of the freeList.
+    {
+        footer->memptr = (void*)freeList+ (freeListSize-16);
+    }
+    void* out = (void*)currentBlock;
 
-    void* out = currentBlock;
-    currentBlock = (void*)footer+16;
-    currentBlock->memptr = magicNumber;
-    currentBlock->size = footer->size;
+    currentBlock = (void*)currentBlock + 32 + memChunks; //Move to the next header space.
+    currentBlock->memptr = magicNumber; //Mark this area as unallocated.
+    currentBlock->size = currentSize - (memChunks + 32); //Subtract the size of this entire node from following freespace.
 
 
     printf("\tNew header address: [%p] size: [%lu]  points to:[%p]\n",header,header->size,header->memptr);
