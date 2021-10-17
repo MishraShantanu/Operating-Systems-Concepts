@@ -15,17 +15,17 @@ int main(int argc, char *argv[])
     void* ptr = M_Alloc(200);
     void* ptr2 = M_Alloc(50);
     void* ptr3 = M_Alloc(145);
-    void* ptr4 = M_Alloc(10);
+    void* ptr4 = M_Alloc(344);
     void* ptr5 = M_Alloc(134);
 
 
-    //M_Display();
+    M_Display();
 
     //M_Free(ptr);
-    M_Free(ptr2);
+    //M_Free(ptr2);
     //M_Free(ptr3);
-    //M_Free(ptr4);
+    M_Free(ptr4);
     //M_Free(ptr5);
-
+    //M_Display();
 
 }

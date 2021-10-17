@@ -15,21 +15,55 @@
 int M_Free(void *pointer)
 {
     //memStruct *next = pointer + current->size;
-    memStruct *current = pointer-16;
-    memStruct *next = pointer + current->size + 16;
-    memStruct *prev = pointer-32;
-    printf("\nYOU WANT TO CLEAR:\t\t%p --> %p [due to size %lu]\n",current,current->memptr,current->size);
+    memStruct *currentHeader = pointer-16;
+    memStruct *currentFooter = pointer + currentHeader->size;
+
+
+    memStruct *nextBlockHeader = pointer + currentHeader->size + 16;
+    memStruct *nextBlockFooter = (void*) nextBlockHeader + (nextBlockHeader->size + 16);
+
+
+
+    memStruct *prevBlockFooter = pointer-32;
+    memStruct *prevBlockHeader = pointer-32 - (prevBlockFooter->size + 16);
+
+
+    printf("\n\nROUND 1 BEFORE DELETE!!!!\n");
+    printf("  CURRENT BLOCK HEADER:\t\t%p --> %p [due to size %lu]\n",currentHeader,currentHeader->memptr,currentHeader->size);
+    printf("  CURRENT BLOCK FOOTER:\t\t%p --> %p [due to size %lu]\n\n",currentFooter,currentFooter->memptr,currentFooter->size);
+
+    printf("  NEXT BLOCK HEADER:\t\t\t%p --> %p [due to size %lu]\n",nextBlockHeader, nextBlockHeader->memptr,nextBlockHeader->size);
+    printf("  NEXT BLOCK FOOTER:\t\t\t%p --> %p [due to size %lu]\n\n",nextBlockFooter, nextBlockFooter->memptr,nextBlockFooter->size);
+
+    printf("  PREVIOUS BLOCK HEADER:\t\t%p --> %p [due to size %lu]\n",prevBlockHeader, prevBlockHeader->memptr,prevBlockHeader->size);
+    printf("  PREVIOUS BLOCK FOOTER:\t\t%p --> %p [due to size %lu]\n",prevBlockFooter, prevBlockFooter->memptr,prevBlockFooter->size);
+
+
+    //prevBlockHeader->memptr = magicNumber;
+    //nextBlockFooter->memptr = magicNumber;
+
+    currentHeader->memptr = magicNumber;
+    currentFooter->memptr = magicNumber;
+
+
+    printf("\n\nROUND 1 AFTER DELETE!!!!\n");
+    printf("  CURRENT BLOCK HEADER:\t\t%p --> %p [due to size %lu]\n",currentHeader,currentHeader->memptr,currentHeader->size);
+    printf("  CURRENT BLOCK FOOTER:\t\t%p --> %p [due to size %lu]\n\n",currentFooter,currentFooter->memptr,currentFooter->size);
+
+    printf("  NEXT BLOCK HEADER:\t\t\t%p --> %p [due to size %lu]\n",nextBlockHeader, nextBlockHeader->memptr,nextBlockHeader->size);
+    printf("  NEXT BLOCK FOOTER:\t\t\t%p --> %p [due to size %lu]\n\n",nextBlockFooter, nextBlockFooter->memptr,nextBlockFooter->size);
+
+    printf("  PREVIOUS BLOCK HEADER:\t\t%p --> %p [due to size %lu]\n",prevBlockHeader, prevBlockHeader->memptr,prevBlockHeader->size);
+    printf("  PREVIOUS BLOCK FOOTER:\t\t%p --> %p [due to size %lu]\n",prevBlockFooter, prevBlockFooter->memptr,prevBlockFooter->size);
 
 
 
 //    printf("\nYOU WANT TO CLEAR:\t\t%p --> %p [due to size %lu]\n",current,current->memptr,current->size);
-//    printf("  NEXT BLOCK:\t\t\t%p --> %p [due to size %lu]\n",next, next->memptr,next->size);
 //
 //    if (current != freeList)
 //    {
 //        memStruct *prev = pointer-32;
 //        prev = prev->memptr;
-//        printf("  PREVIOUS BLOCK:\t\t%p --> %p [due to size %lu]\n",prev, prev->memptr,prev->size);
 //    }
 //    else
 //    {

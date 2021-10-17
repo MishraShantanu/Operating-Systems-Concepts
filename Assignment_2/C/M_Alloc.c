@@ -46,9 +46,5 @@ void *M_Alloc(int size)
     currentBlock->memptr = magicNumber; //Mark this area as unallocated.
     currentBlock->size = currentSize - (memChunks + 32); //Subtract the size of this entire node from following freespace.
 
-
-    printf("\tNew header address: [%p] size: [%lu]  points to:[%p]\n",header,header->size,header->memptr);
-    printf("\tNew footer address: [%p] size: [%lu]  points to:[%p]\n\n",footer,footer->size,footer->memptr);
-
     return out+16;
 }
