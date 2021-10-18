@@ -28,6 +28,8 @@ int M_Free(void *pointer)
         memStruct *endBlockFooter = (void*)freeList+freeListSize - 16;
         prevBlockFooter = (void*)endBlockFooter;
         prevBlockHeader = (void*)endBlockFooter - endBlockFooter->size;
+        //prevBlockHeader = endBlockFooter - endBlockFooter->size;
+
 
     }
     else
@@ -35,39 +37,86 @@ int M_Free(void *pointer)
         prevBlockFooter = pointer-32;
         prevBlockHeader = pointer-32 - (prevBlockFooter->size + 16);
     }
+
+
     memStruct *nextBlockHeader = pointer + currentHeader->size + 16;
-    memStruct *nextBlockFooter = (void*) nextBlockHeader + (nextBlockHeader->size + 16);
+    memStruct *nextBlockFooter = (void*) nextBlockHeader + (nextBlockHeader->size) +32;
 
 
+    printf("\tFor block %p --> %p [due to size %lu]\n",currentHeader,(void*)currentHeader + currentHeader->size,currentHeader->size);
+
+    //Detect for coalescing:
+        //Is next free?
+    if (nextBlockHeader->memptr == magicNumber)
+    {
+        //printf("\tNEXT is FREE:  block %p --> %p [due to size %lu]\n",nextBlockHeader,(void*)nextBlockHeader + nextBlockHeader->size,nextBlockHeader->size);
+        // What is combined size of current and next block?
+        //Pointer manipulation -- change mempointer from current to the mempointer for next.
+        //long unsigned combinedSize = currentHeader->size + nextBlockHeader->size+64;
+        long unsigned combinedSize = currentHeader->size + nextBlockHeader->size+32;
+        //currentHeader->memptr = (void*) currentHeader + combinedSize+;
+        //currentHeader->memptr = nextBlockHeader->memptr+16;
+        currentHeader->memptr = (void*) nextBlockHeader->memptr;
+        currentHeader->size = combinedSize;
+
+        nextBlockFooter->memptr = (void*)currentFooter->memptr;
+        //nextBlockFooter->size = combinedSize;
+
+        nextBlockHeader = currentHeader;
 
 
+        printf("test");
+    }
+    else
+    {
+        printf("\tNEXT is NOT FREE:  block %p --> %p [due to size %lu]\n",nextBlockHeader,(void*)nextBlockHeader + nextBlockHeader->size,nextBlockHeader->size);
+    }
 
-    printf("\n\nROUND 1 BEFORE DELETE!!!!\n");
-    printf("  CURRENT BLOCK HEADER:\t\t%p --> %p [due to size %lu]\n",currentHeader,currentHeader->memptr,currentHeader->size);
-    printf("  CURRENT BLOCK FOOTER:\t\t%p --> %p [due to size %lu]\n\n",currentFooter,currentFooter->memptr,currentFooter->size);
+    if (prevBlockHeader->memptr == magicNumber)
+    {
+        //printf("\tPREV is FREE:  block %p --> %p [due to size %lu]\n",prevBlockHeader,(void*)prevBlockHeader + prevBlockHeader->size,prevBlockHeader->size);
 
-    printf("  NEXT BLOCK HEADER:\t\t\t%p --> %p [due to size %lu]\n",nextBlockHeader, nextBlockHeader->memptr,nextBlockHeader->size);
-    printf("  NEXT BLOCK FOOTER:\t\t\t%p --> %p [due to size %lu]\n\n",nextBlockFooter, nextBlockFooter->memptr,nextBlockFooter->size);
+    }
+    else
+    {
+        //printf("\tPREV is NOT FREE:  block %p --> %p [due to size %lu]\n",prevBlockHeader,(void*)prevBlockHeader + prevBlockHeader->size,prevBlockHeader->size);
+    }
+            //Combine size, adjust pointers.
+        //Is prev free?
+            //Combine size, adjust pointers/
+    //Do I need a separate case for when both? Or can I just solve this in two if else statements?
 
-    printf("  PREVIOUS BLOCK HEADER:\t\t%p --> %p [due to size %lu]\n",prevBlockHeader, prevBlockHeader->memptr,prevBlockHeader->size);
-    printf("  PREVIOUS BLOCK FOOTER:\t\t%p --> %p [due to size %lu]\n",prevBlockFooter, prevBlockFooter->memptr,prevBlockFooter->size);
 
+    printf("\n");
+
+
+//
+//    printf("\n\nROUND 1 BEFORE DELETE!!!!\n");
+//    printf("  CURRENT BLOCK HEADER:\t\t%p --> %p [due to size %lu]\n",currentHeader,currentHeader->memptr,currentHeader->size);
+//    printf("  CURRENT BLOCK FOOTER:\t\t%p --> %p [due to size %lu]\n\n",currentFooter,currentFooter->memptr,currentFooter->size);
+//
+//    printf("  NEXT BLOCK HEADER:\t\t\t%p --> %p [due to size %lu]\n",nextBlockHeader, nextBlockHeader->memptr,nextBlockHeader->size);
+//    printf("  NEXT BLOCK FOOTER:\t\t\t%p --> %p [due to size %lu]\n\n",nextBlockFooter, nextBlockFooter->memptr,nextBlockFooter->size);
+//
+//    printf("  PREVIOUS BLOCK HEADER:\t\t%p --> %p [due to size %lu]\n",prevBlockHeader, prevBlockHeader->memptr,prevBlockHeader->size);
+//    printf("  PREVIOUS BLOCK FOOTER:\t\t%p --> %p [due to size %lu]\n",prevBlockFooter, prevBlockFooter->memptr,prevBlockFooter->size);
+//
 
     //prevBlockHeader->memptr = magicNumber;
     //nextBlockFooter->memptr = magicNumber;
 
     currentHeader->memptr = magicNumber;
     currentFooter->memptr = magicNumber;
-
-    printf("\n\nROUND 1 AFTER DELETE!!!!\n");
-    printf("  CURRENT BLOCK HEADER:\t\t%p --> %p [due to size %lu]\n",currentHeader,currentHeader->memptr,currentHeader->size);
-    printf("  CURRENT BLOCK FOOTER:\t\t%p --> %p [due to size %lu]\n\n",currentFooter,currentFooter->memptr,currentFooter->size);
-
-    printf("  NEXT BLOCK HEADER:\t\t\t%p --> %p [due to size %lu]\n",nextBlockHeader, nextBlockHeader->memptr,nextBlockHeader->size);
-    printf("  NEXT BLOCK FOOTER:\t\t\t%p --> %p [due to size %lu]\n\n",nextBlockFooter, nextBlockFooter->memptr,nextBlockFooter->size);
-
-    printf("  PREVIOUS BLOCK HEADER:\t\t%p --> %p [due to size %lu]\n",prevBlockHeader, prevBlockHeader->memptr,prevBlockHeader->size);
-    printf("  PREVIOUS BLOCK FOOTER:\t\t%p --> %p [due to size %lu]\n",prevBlockFooter, prevBlockFooter->memptr,prevBlockFooter->size);
+//
+//    printf("\n\nROUND 1 AFTER DELETE!!!!\n");
+//    printf("  CURRENT BLOCK HEADER:\t\t%p --> %p [due to size %lu]\n",currentHeader,currentHeader->memptr,currentHeader->size);
+//    printf("  CURRENT BLOCK FOOTER:\t\t%p --> %p [due to size %lu]\n\n",currentFooter,currentFooter->memptr,currentFooter->size);
+//
+//    printf("  NEXT BLOCK HEADER:\t\t\t%p --> %p [due to size %lu]\n",nextBlockHeader, nextBlockHeader->memptr,nextBlockHeader->size);
+//    printf("  NEXT BLOCK FOOTER:\t\t\t%p --> %p [due to size %lu]\n\n",nextBlockFooter, nextBlockFooter->memptr,nextBlockFooter->size);
+//
+//    printf("  PREVIOUS BLOCK HEADER:\t\t%p --> %p [due to size %lu]\n",prevBlockHeader, prevBlockHeader->memptr,prevBlockHeader->size);
+//    printf("  PREVIOUS BLOCK FOOTER:\t\t%p --> %p [due to size %lu]\n",prevBlockFooter, prevBlockFooter->memptr,prevBlockFooter->size);
 
     //printf("size of next block: %lu, mempointer of next block header: %p\n",prevBlockHeader->memptr->size,prevBlockHeader->memptr->memptr);
 

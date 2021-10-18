@@ -16,7 +16,7 @@ void *M_Alloc(int size)
     }
     memChunks = memChunks * 16;
 
-    printf("Current address: [%p] size: [%lu]  points to:[%p]\n",currentBlock,currentBlock->size,currentBlock->memptr);
+    //printf("Current address: [%p] size: [%lu]  points to:[%p]\n",currentBlock,currentBlock->size,currentBlock->memptr);
 
     long unsigned currentSize = currentBlock->size;
 
@@ -45,6 +45,10 @@ void *M_Alloc(int size)
     currentBlock = (void*)currentBlock + 32 + memChunks; //Move to the next header space.
     currentBlock->memptr = magicNumber; //Mark this area as unallocated.
     currentBlock->size = currentSize - (memChunks + 32); //Subtract the size of this entire node from following freespace.
+
+    //Check size of wanted block vs size of current.
+        //Iterate through blocks until entire list, or insert succeeds.
+
 
     return out+16;
 }
