@@ -20,7 +20,6 @@ void *M_Alloc(int size)
 
     long unsigned currentSize = currentBlock->size;
 
-
     //Detect header and footer.
     memStruct *header = (void*) currentBlock;
     memStruct *footer = (void*) currentBlock + 16 + memChunks; //Move past the header + allocated length of node.
@@ -42,7 +41,7 @@ void *M_Alloc(int size)
     }
     void* out = (void*)currentBlock;
 
-    currentBlock = (void*)currentBlock + 32 + memChunks; //Move to the next header space.
+    currentBlock = (void*)currentBlock + (32 + memChunks); //Move to the next header space.
     currentBlock->memptr = magicNumber; //Mark this area as unallocated.
     currentBlock->size = currentSize - (memChunks + 32); //Subtract the size of this entire node from following freespace.
 

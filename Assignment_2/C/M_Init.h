@@ -17,7 +17,7 @@ typedef struct memStruct
 }memStruct;
 
 void* freeList;
-int freeListSize;
+unsigned long freeListSize;
 void* magicNumber;
 memStruct* currentBlock;
 

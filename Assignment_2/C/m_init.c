@@ -43,7 +43,7 @@ int M_Init(int size)
 
     //Define global variables for magic number, and the total size of freeList.
     magicNumber = (void *) 123456789;
-    freeListSize = memChunks;
+    freeListSize = memChunks - (2*sizeof(memStruct));
 
     //Define the first header.
     memStruct *head = freeList;
@@ -51,7 +51,7 @@ int M_Init(int size)
     head->size = freeListSize;
 
     //Define the last footer.
-    memStruct *end = freeList + (freeListSize)-16;
+    memStruct *end = freeList + (freeListSize);
     end->size = 0;
     end->memptr = freeList;
 

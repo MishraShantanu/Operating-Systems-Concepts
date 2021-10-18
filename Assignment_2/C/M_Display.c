@@ -16,13 +16,14 @@ void M_Display()
     memStruct *cur = freeList;
     void* endAddress = (void*)freeList+freeListSize;
     printf("\nM_Display triggered.\n"
-           "Freelist total size: %d\n"
+           "Freelist total size: %lu\n"
            "Freelist starts at %p and ends at %p\n",
         freeListSize,freeList,freeList+freeListSize);
 
     while (cur->size != 0)
     {
         //printf("\tCurr %d: %p --> %p [due to size %lu]\n",nodeNumber,cur,(void*)cur->memptr,cur->size);
+        //printf("\tBlock %d: %p --> %p [due to size %lu]\n",nodeNumber,cur,(void*)cur->memptr,cur->size);
 
         if (cur->memptr == magicNumber)
         {
@@ -33,11 +34,8 @@ void M_Display()
         {
             printf("\tBlock %d: %p --> %p [due to size %lu]\n",nodeNumber,cur,(void*)cur->memptr,cur->size);
         }
-        cur = (void*) cur + cur->size+32;
+        cur = (void*) cur + (cur->size+32);
         //printf("New cur: %p\n",cur);
         nodeNumber++;
     }
-
-    //printf("\tBlock %d is FREE from %p to end of free list [%p]\n",nodeNumber,cur,endAddress);
-
 }
