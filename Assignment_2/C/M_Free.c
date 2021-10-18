@@ -19,13 +19,27 @@ int M_Free(void *pointer)
     memStruct *currentFooter = pointer + currentHeader->size;
 
 
+    memStruct *prevBlockFooter = NULL;
+    memStruct *prevBlockHeader = NULL;
+
+
+    if (pointer - 16 == freeList)
+    {
+        memStruct *endBlockFooter = (void*)freeList+freeListSize - 16;
+        prevBlockFooter = (void*)endBlockFooter;
+        prevBlockHeader = (void*)endBlockFooter - endBlockFooter->size;
+
+    }
+    else
+    {
+        prevBlockFooter = pointer-32;
+        prevBlockHeader = pointer-32 - (prevBlockFooter->size + 16);
+    }
     memStruct *nextBlockHeader = pointer + currentHeader->size + 16;
     memStruct *nextBlockFooter = (void*) nextBlockHeader + (nextBlockHeader->size + 16);
 
 
 
-    memStruct *prevBlockFooter = pointer-32;
-    memStruct *prevBlockHeader = pointer-32 - (prevBlockFooter->size + 16);
 
 
     printf("\n\nROUND 1 BEFORE DELETE!!!!\n");
@@ -44,7 +58,6 @@ int M_Free(void *pointer)
 
     currentHeader->memptr = magicNumber;
     currentFooter->memptr = magicNumber;
-
 
     printf("\n\nROUND 1 AFTER DELETE!!!!\n");
     printf("  CURRENT BLOCK HEADER:\t\t%p --> %p [due to size %lu]\n",currentHeader,currentHeader->memptr,currentHeader->size);

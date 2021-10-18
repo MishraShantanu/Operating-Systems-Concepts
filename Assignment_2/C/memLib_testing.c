@@ -24,7 +24,7 @@ int main(int argc, char *argv[])
     //M_Free(ptr);
     //M_Free(ptr2);
     //M_Free(ptr3);
-    M_Free(ptr4);
+    M_Free(ptr);
     //M_Free(ptr5);
     //M_Display();
     //M_Display();
