@@ -56,6 +56,9 @@ int M_Free(void *pointer)
     printf("  PREVIOUS BLOCK HEADER:\t\t%p --> %p [due to size %lu]\n",prevBlockHeader, prevBlockHeader->memptr,prevBlockHeader->size);
     printf("  PREVIOUS BLOCK FOOTER:\t\t%p --> %p [due to size %lu]\n",prevBlockFooter, prevBlockFooter->memptr,prevBlockFooter->size);
 
+    //printf("size of next block: %lu, mempointer of next block header: %p\n",prevBlockHeader->memptr->size,prevBlockHeader->memptr->memptr);
+
+    //printf("Next footer = %p with size %lu --- header at: %p with size:",nextBlockFooter->memptr,nextBlockFooter->memptr->size,(void*)nextBlockFooter->memptr - nextBlockFooter->memptr->size - 16);
 
 
 //    printf("\nYOU WANT TO CLEAR:\t\t%p --> %p [due to size %lu]\n",current,current->memptr,current->size);

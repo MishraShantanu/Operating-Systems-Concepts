@@ -20,13 +20,24 @@ void M_Display()
            "Freelist starts at %p and ends at %p\n",
         freeListSize,freeList,freeList+freeListSize);
 
-    while (cur->memptr != magicNumber)
+    while (cur->size != 0)
     {
-        printf("\tBlock %d: %p --> %p [due to size %lu]\n",nodeNumber,cur,(void*)cur->memptr,cur->size);
-        cur = cur->memptr;
+        //printf("\tCurr %d: %p --> %p [due to size %lu]\n",nodeNumber,cur,(void*)cur->memptr,cur->size);
+
+        if (cur->memptr == magicNumber)
+        {
+            printf("\tFREE block %d: %p --> %p [due to size %lu]\n",nodeNumber,cur,(void*)cur + cur->size,cur->size);
+
+        }
+        else
+        {
+            printf("\tBlock %d: %p --> %p [due to size %lu]\n",nodeNumber,cur,(void*)cur->memptr,cur->size);
+        }
+        cur = (void*) cur + cur->size+32;
+        //printf("New cur: %p\n",cur);
         nodeNumber++;
     }
 
-    printf("\tBlock %d is FREE from %p to end of free list [%p]\n",nodeNumber,cur,endAddress);
+    //printf("\tBlock %d is FREE from %p to end of free list [%p]\n",nodeNumber,cur,endAddress);
 
 }
