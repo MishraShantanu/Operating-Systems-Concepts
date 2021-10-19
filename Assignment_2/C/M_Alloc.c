@@ -34,16 +34,17 @@ void *M_Alloc(int size)
         printf("ERROR! %d requested but current block only has %lu space left.\tTraversing the list...\n",size,currentSize);
         printf("STARTING BLOCK: %p --> %p [due to size %lu]\n",currentBlock,(void*)currentBlock->memptr,currentBlock->size);
 
-        memStruct *walker = (void*) currentBlock + (currentBlock->size +32);
+        //memStruct *walker = (void*) currentBlock + (currentBlock->size +32);
+        memStruct *walker = currentBlock;
         int success = 0;
-        while (walker != (void*) currentBlock)
+        do
         {
             if (walker->size == 0)
             {
                 printf("END OF LIST, RESETTING\n");
                 walker = (void*) freeList;
             }
-            else if (walker->size >= memChunks && walker->memptr == magicNumber)
+            else if (walker->size >= memChunks+32 && walker->memptr == magicNumber)
             {
                 currentBlock = (void*) walker;
                 success = 1;
@@ -55,7 +56,7 @@ void *M_Alloc(int size)
                 printf("TRAVERSE: %p --> %p [due to size %lu]\n",walker,(void*)walker->memptr,walker->size);
                 walker = (void*) walker + (walker->size +32);
             }
-        }
+        }while (walker != (void*) currentBlock);
         if (success != 1)
         {
             printf("No suitable block found for the request of %d bytes. Sorry!\n",size);

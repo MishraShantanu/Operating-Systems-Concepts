@@ -15,7 +15,7 @@ void M_Display()
     int nodeNumber = 1;
     memStruct *cur = freeList;
     void* endAddress = (void*)freeList+freeListSize;
-    printf("\nM_Display triggered.\n"
+    printf("\nM_Display triggered. * NOTE * Each block includes a 16-byte header and footer.\n"
            "Freelist total size: %lu\n"
            "Freelist starts at %p and ends at %p\n",
         freeListSize,freeList,freeList+freeListSize);
@@ -30,7 +30,7 @@ void M_Display()
         {
 
 
-            if ((void*)cur + cur->size != freeList + freeListSize)
+            if ((void*)cur + cur->size > freeList + freeListSize)
                 printf("\tFREE block %d: %p --> %p [due to size %lu]\n",nodeNumber,cur,(void*)cur + cur->size+32,cur->size);
             else
                 printf("\tFREE block %d: %p --> %p [due to size %lu]\n",nodeNumber,cur,(void*)cur + cur->size,cur->size);

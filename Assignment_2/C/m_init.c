@@ -33,7 +33,7 @@ int M_Init(int size)
     memChunks = memChunks * 16;
 
     //Create the mmap space for storing nodes.
-    freeList = mmap((void *) 0xdead0000, memChunks, PROT_READ |
+    freeList = mmap((void *) 0xdead0000, memChunks  + (2*sizeof(memStruct)), PROT_READ |
                                          PROT_WRITE, MAP_ANON | MAP_SHARED, -1, 0);
     if(freeList == MAP_FAILED) //Check and report failure to allocate.
     {
@@ -43,7 +43,8 @@ int M_Init(int size)
 
     //Define global variables for magic number, and the total size of freeList.
     magicNumber = (void *) 123456789;
-    freeListSize = memChunks;
+    freeListSize = memChunks - (2*sizeof(memStruct));
+    //freeListSize = memChunks;
     //freeListSize = memChunks - (2*sizeof(memStruct));
 
     //Define the first header.

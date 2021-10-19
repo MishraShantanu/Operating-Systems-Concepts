@@ -21,22 +21,29 @@ int main(int argc, char *argv[])
     void* ptr7 = M_Alloc(866);
     void* ptr8 = M_Alloc(6);
     M_Display();
-    //void* ptr9 = M_Alloc(287);
-    void* ptr10 = M_Alloc(304);
+    void* ptr9 = M_Alloc(256);
+    void* ptr10 = M_Alloc(320);
+
+//Test for coalescence from both sides:
+    M_Free(ptr3);
+    M_Free(ptr5);
+    M_Free(ptr4);
+
+    M_Display();
 
 
+//Test for coalescence from a following block:
+    M_Free(ptr2);
+    M_Free(ptr);
+    M_Display();
 
-    //M_Free(ptr);
-    //M_Free(ptr3);
-    //M_Free(ptr5);
-    //M_Free(ptr2);
-    //M_Free(ptr4);
-    //M_Free(ptr9);
-    //M_Free(ptr6);
-    //M_Display();
+//Test for coalescence from a preceding block.
+    M_Free(ptr7);
+    M_Free(ptr8);
+    M_Display();
 
 
-    //void* ptr11 = M_Alloc(15000);
+    void* ptr11 = M_Alloc(15000);
 
 
     M_Display();
