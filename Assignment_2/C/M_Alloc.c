@@ -9,6 +9,9 @@
  */
 void *M_Alloc(int size)
 {
+
+
+
     long unsigned memChunks = size/16;
     if (size%16 != 0)
     {
@@ -19,6 +22,47 @@ void *M_Alloc(int size)
     //printf("Current address: [%p] size: [%lu]  points to:[%p]\n",currentBlock,currentBlock->size,currentBlock->memptr);
 
     long unsigned currentSize = currentBlock->size;
+
+    //Check: Does the current node have enough space for this?
+    if (currentBlock->memptr != magicNumber) //Is this block already allocated?
+    {
+        printf("ERROR! THIS BLOCK IS ALREADY ALLOCATED.\n");
+    }
+
+    if (currentSize < (memChunks +32)) //If the current block can't fit this node, can any?
+    {
+        printf("ERROR! %d requested but current block only has %lu space left.\tTraversing the list...\n",size,currentSize);
+        printf("STARTING BLOCK: %p --> %p [due to size %lu]\n",currentBlock,(void*)currentBlock->memptr,currentBlock->size);
+
+        memStruct *walker = (void*) currentBlock + (currentBlock->size +32);
+        int success = 0;
+        while (walker != (void*) currentBlock)
+        {
+            if (walker->size == 0)
+            {
+                printf("END OF LIST, RESETTING\n");
+                walker = (void*) freeList;
+            }
+
+            else if (walker->size >= memChunks)
+            {
+                currentBlock = (void*) walker;
+                success = 1;
+                printf("MATCH FOUND! yay: %p --> %p [due to size %lu]\n",walker,(void*)walker->memptr,walker->size);
+
+            }
+            else
+            {
+                printf("TRAVERSE: %p --> %p [due to size %lu]\n",walker,(void*)walker->memptr,walker->size);
+                walker = (void*) walker + (walker->size +32);
+            }
+        }
+        if (success != 1)
+        {
+            printf("No suitable block found for the request of %d bytes. Sorry!\n",size);
+            return NULL;
+        }
+    }
 
     //Detect header and footer.
     memStruct *header = (void*) currentBlock;

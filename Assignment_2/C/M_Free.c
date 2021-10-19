@@ -14,6 +14,12 @@
  */
 int M_Free(void *pointer)
 {
+
+    if (pointer == NULL)
+    {
+        printf("M_Free given a null pointer! Failure.\n");
+        return -1;
+    }
     //memStruct *next = pointer + current->size;
     memStruct *currentHeader = pointer-16;
     memStruct *currentFooter = pointer + currentHeader->size;
@@ -40,7 +46,7 @@ int M_Free(void *pointer)
     memStruct *nextBlockHeader = pointer + currentHeader->size + 16;
     memStruct *nextBlockFooter = (void*) nextBlockHeader + (nextBlockHeader->size) +16;
 
-    printf("\tFor block %p --> %p [due to size %lu]\n",currentHeader,(void*)currentHeader + currentHeader->size,currentHeader->size);
+    //printf("\tFor block %p --> %p [due to size %lu]\n",currentHeader,(void*)currentHeader + currentHeader->size,currentHeader->size);
 
 
     if (nextBlockHeader->memptr == magicNumber) //Next block is free. Combine with next block.
@@ -53,7 +59,7 @@ int M_Free(void *pointer)
     }
     else
     {
-        printf("\tNEXT is NOT FREE:  block %p --> %p [due to size %lu]\n",nextBlockHeader,(void*)nextBlockHeader + nextBlockHeader->size,nextBlockHeader->size);
+        //printf("\tNEXT is NOT FREE:  block %p --> %p [due to size %lu]\n",nextBlockHeader,(void*)nextBlockHeader + nextBlockHeader->size,nextBlockHeader->size);
     }
 
 
@@ -61,7 +67,7 @@ int M_Free(void *pointer)
     if (prevBlockHeader->memptr == magicNumber)
     {
         long unsigned combinedSize = currentHeader->size + prevBlockHeader->size+32;
-        printf("\tPREV is FREE:  block %p --> %p [due to size %lu]\n",prevBlockHeader,(void*)prevBlockHeader + prevBlockHeader->size,prevBlockHeader->size);
+        //printf("\tPREV is FREE:  block %p --> %p [due to size %lu]\n",prevBlockHeader,(void*)prevBlockHeader + prevBlockHeader->size,prevBlockHeader->size);
 
         prevBlockHeader->memptr = currentHeader->memptr;
         prevBlockHeader->size = combinedSize;
@@ -71,7 +77,7 @@ int M_Free(void *pointer)
     }
     else
     {
-        printf("\tPREV is NOT FREE:  block %p --> %p [due to size %lu]\n",prevBlockHeader,(void*)prevBlockHeader + prevBlockHeader->size,prevBlockHeader->size);
+        //printf("\tPREV is NOT FREE:  block %p --> %p [due to size %lu]\n",prevBlockHeader,(void*)prevBlockHeader + prevBlockHeader->size,prevBlockHeader->size);
     }
 
 
@@ -83,8 +89,6 @@ int M_Free(void *pointer)
 
     currentHeader->memptr = magicNumber;
     currentFooter->memptr = magicNumber;
-
-    printf("\n");
 
 
 //

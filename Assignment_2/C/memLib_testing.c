@@ -7,7 +7,7 @@ int main(int argc, char *argv[])
 {
 
     //Pick an arbitrary size to init, exit if failed.
-    if (M_Init(16000) == -1)
+    if (M_Init(3000) == -1)
     {
         return -1;
     }
@@ -18,27 +18,26 @@ int main(int argc, char *argv[])
     void* ptr4 = M_Alloc(344);
     void* ptr5 = M_Alloc(134);
     void* ptr6 = M_Alloc(605);
-    void* ptr7 = M_Alloc(2001);
+    void* ptr7 = M_Alloc(866);
     void* ptr8 = M_Alloc(6);
-    void* ptr9 = M_Alloc(800);
-    void* ptr10 = M_Alloc(222);
+    //void* ptr9 = M_Alloc(420);
+    //void* ptr10 = M_Alloc(222);
 
 
-   // M_Display();
 
-    M_Free(ptr);
-    M_Free(ptr3);
-    M_Free(ptr5);
-    M_Free(ptr2);
-    M_Free(ptr9);
-    M_Free(ptr10);
-    M_Free(ptr4);
-    M_Free(ptr7);
-    M_Free(ptr8);
-
+    //M_Free(ptr);
     //M_Free(ptr3);
+    //M_Free(ptr5);
     //M_Free(ptr2);
+    //M_Free(ptr4);
+    //M_Free(ptr9);
+    //M_Free(ptr6);
     //M_Display();
+
+
+    //void* ptr11 = M_Alloc(15000);
+
+
     M_Display();
-    //M_Display();
+    //M_Free(ptr2);
 }
