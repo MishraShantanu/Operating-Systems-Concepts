@@ -22,14 +22,18 @@ void M_Display()
 
     while (cur->size != 0)
     {
+
         //printf("\tCurr %d: %p --> %p [due to size %lu]\n",nodeNumber,cur,(void*)cur->memptr,cur->size);
         //printf("\tBlock %d: %p --> %p [due to size %lu]\n",nodeNumber,cur,(void*)cur->memptr,cur->size);
 
         if (cur->memptr == magicNumber)
         {
 
-            printf("\tFREE block %d: %p --> %p [due to size %lu]\n",nodeNumber,cur,(void*)cur + cur->size,cur->size);
 
+            if ((void*)cur + cur->size != freeList + freeListSize)
+                printf("\tFREE block %d: %p --> %p [due to size %lu]\n",nodeNumber,cur,(void*)cur + cur->size+32,cur->size);
+            else
+                printf("\tFREE block %d: %p --> %p [due to size %lu]\n",nodeNumber,cur,(void*)cur + cur->size,cur->size);
         }
         else
         {
