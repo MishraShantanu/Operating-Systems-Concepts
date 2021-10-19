@@ -20,15 +20,16 @@ int main(int argc, char *argv[])
     void* ptr6 = M_Alloc(605);
     void* ptr7 = M_Alloc(866);
     void* ptr8 = M_Alloc(6);
-    //void* ptr9 = M_Alloc(420);
-    //void* ptr10 = M_Alloc(222);
+    M_Display();
+    void* ptr9 = M_Alloc(287);
+    void* ptr10 = M_Alloc(222);
 
 
 
-    //M_Free(ptr);
-    //M_Free(ptr3);
+    M_Free(ptr);
+    M_Free(ptr3);
     //M_Free(ptr5);
-    //M_Free(ptr2);
+    M_Free(ptr2);
     //M_Free(ptr4);
     //M_Free(ptr9);
     //M_Free(ptr6);

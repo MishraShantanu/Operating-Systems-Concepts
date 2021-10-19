@@ -43,8 +43,7 @@ void *M_Alloc(int size)
                 printf("END OF LIST, RESETTING\n");
                 walker = (void*) freeList;
             }
-
-            else if (walker->size >= memChunks)
+            else if (walker->size >= memChunks && walker->memptr == magicNumber)
             {
                 currentBlock = (void*) walker;
                 success = 1;
@@ -86,8 +85,13 @@ void *M_Alloc(int size)
     void* out = (void*)currentBlock;
 
     currentBlock = (void*)currentBlock + (32 + memChunks); //Move to the next header space.
-    currentBlock->memptr = magicNumber; //Mark this area as unallocated.
-    currentBlock->size = currentSize - (memChunks + 32); //Subtract the size of this entire node from following freespace.
+    if ((void*) currentBlock < (void*) freeList + freeListSize)
+    {
+        currentBlock->memptr = magicNumber; //Mark this area as unallocated.
+        currentBlock->size = currentSize - (memChunks + 32); //Subtract the size of this entire node from following freespace.
+    }
+    //else printf("oof");
+
 
     //Check size of wanted block vs size of current.
         //Iterate through blocks until entire list, or insert succeeds.

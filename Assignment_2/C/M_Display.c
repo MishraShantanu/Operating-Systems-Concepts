@@ -27,6 +27,7 @@ void M_Display()
 
         if (cur->memptr == magicNumber)
         {
+
             printf("\tFREE block %d: %p --> %p [due to size %lu]\n",nodeNumber,cur,(void*)cur + cur->size,cur->size);
 
         }
