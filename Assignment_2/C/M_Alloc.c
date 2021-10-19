@@ -1,3 +1,14 @@
+/*
+Assignment 2 Part C.
+
+Computer Science 332.3
+Prof: Dr. Derek Eager
+University of Saskatchewan - Arts & Science
+	Department of Computer Science
+A project by: Spencer Tracy | Spt631 | 11236962 and Shantanu Mishra | Shm572 | 11255997
+__________________________________________________
+ */
+
 #include "M_Alloc.h"
 
 /* PURPOSE: To allocate a new memory block for use by the caller.
@@ -19,10 +30,8 @@ void *M_Alloc(int size)
     if (size%16 != 0) memChunks++;
     memChunks = memChunks * 16;
 
-    long unsigned currentSize = currentBlock->size; //Save me for later (and easier reading).
-
     //Check if the current block is suitable.
-    if (currentSize < (memChunks +32) || currentBlock->memptr != magicNumber) //Fails this test? Start searching.
+    if (currentBlock->size < (memChunks +32) || currentBlock->memptr != magicNumber) //Fails this test? Start searching.
     {
         memStruct *walker = currentBlock;
         int success = 0;
@@ -42,15 +51,15 @@ void *M_Alloc(int size)
             return NULL;
         }
     }
+    long unsigned currentSize = currentBlock->size; //Save me for later (and easier reading).
     //Detect & set header and footer.
     memStruct *header = (void*) currentBlock;
     memStruct *footer = (void*) currentBlock + 16 + memChunks; //Move past the header + allocated length of node.
-
     header->size = memChunks;
     footer->size = memChunks;
     header->memptr = (void*)currentBlock + 32 + memChunks; //Point to next header. [past head, past block, past footer].
 
-    if (currentBlock != freeList) //Do this unless we're on the very first block.
+    if (currentBlock != (void*) freeList) //Do this unless we're on the very first block.
     {
         footer->memptr = (void*)currentBlock-16; //Point to previous footer.
     }

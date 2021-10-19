@@ -1,9 +1,22 @@
+/*
+Assignment 2 Part C.
+
+Computer Science 332.3
+Prof: Dr. Derek Eager
+University of Saskatchewan - Arts & Science
+	Department of Computer Science
+A project by: Spencer Tracy | Spt631 | 11236962 and Shantanu Mishra | Shm572 | 11255997
+__________________________________________________
+ */
+
+
 #include <stdio.h>
 #include "M_Init.h"
 
 
 /* PURPOSE: To print to the console each block stored in freeList [Defined in M_Init].
  * PRE-CONDITIONS: freeList cannot be null.
+ *                 M_Init must have already been called by program.
  * POST-CONDITIONS: Blocks of memory and their size are printed to the console.
  * RETURN: None.
  */

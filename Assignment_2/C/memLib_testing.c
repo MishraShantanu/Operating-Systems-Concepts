@@ -1,3 +1,16 @@
+/*
+Assignment 2 Part C.
+
+Computer Science 332.3
+Prof: Dr. Derek Eager
+University of Saskatchewan - Arts & Science
+	Department of Computer Science
+A project by: Spencer Tracy | Spt631 | 11236962 and Shantanu Mishra | Shm572 | 11255997
+__________________________________________________
+ */
+
+
+
 #include "M_Init.h"
 #include "M_Display.h"
 #include "M_Alloc.h"
@@ -12,6 +25,8 @@ int main(int argc, char *argv[])
         return -1;
     }
 
+    M_Display();
+
     void* ptr = M_Alloc(200);
     void* ptr2 = M_Alloc(50);
     void* ptr3 = M_Alloc(145);
@@ -20,14 +35,19 @@ int main(int argc, char *argv[])
     void* ptr6 = M_Alloc(605);
     void* ptr7 = M_Alloc(866);
     void* ptr8 = M_Alloc(6);
-    M_Display();
+    //M_Display();
     void* ptr9 = M_Alloc(256);
-    void* ptr10 = M_Alloc(320);
+    //void* ptr10 = M_Alloc(320);
 
 //Test for coalescence from both sides:
     M_Free(ptr3);
     M_Free(ptr5);
     M_Free(ptr4);
+
+    M_Alloc(424);
+    M_Alloc(745);
+    M_Alloc(111);
+
 
     M_Display();
 
@@ -35,22 +55,20 @@ int main(int argc, char *argv[])
 //Test for coalescence from a following block:
     M_Free(ptr2);
     M_Free(ptr);
-    M_Display();
+    //M_Display();
 
 //Test for coalescence from a preceding block.
     M_Free(ptr7);
     M_Free(ptr8);
-    M_Display();
+    //M_Display();
 
 //Test for an allocation that simply will not work.
     void* ptr11 = M_Alloc(15000);
 
 
     M_Display();
-    M_Alloc(424);
-    M_Alloc(745);
-    M_Alloc(111);
-    M_Display();
+
+    //M_Display();
 
     //M_Free(ptr2);
 }
