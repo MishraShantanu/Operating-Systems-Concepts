@@ -42,10 +42,15 @@ int main(int argc, char *argv[])
     M_Free(ptr8);
     M_Display();
 
-
+//Test for an allocation that simply will not work.
     void* ptr11 = M_Alloc(15000);
 
 
     M_Display();
+    M_Alloc(424);
+    M_Alloc(745);
+    M_Alloc(111);
+    M_Display();
+
     //M_Free(ptr2);
 }

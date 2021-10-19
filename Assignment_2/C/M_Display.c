@@ -1,6 +1,3 @@
-//
-// Created by Spencer on 2021-10-13.
-//
 #include <stdio.h>
 #include "M_Init.h"
 
@@ -12,35 +9,35 @@
  */
 void M_Display()
 {
+    if (freeList == NULL)
+    {
+        printf("Failure! M_Init has not been called yet.\n");
+        return;
+    }
+
     int nodeNumber = 1;
     memStruct *cur = freeList;
-    void* endAddress = (void*)freeList+freeListSize;
-    printf("\nM_Display triggered. * NOTE * Each block includes a 16-byte header and footer.\n"
+    printf("\nM_Display triggered. \n"
            "Freelist total size: %lu\n"
-           "Freelist starts at %p and ends at %p\n",
+           "Freelist starts at %p and ends at %p\t\t All blocks have 32-bytes for header and footer.\n",
         freeListSize,freeList,freeList+freeListSize);
 
     while (cur->size != 0)
     {
-
-        //printf("\tCurr %d: %p --> %p [due to size %lu]\n",nodeNumber,cur,(void*)cur->memptr,cur->size);
-        //printf("\tBlock %d: %p --> %p [due to size %lu]\n",nodeNumber,cur,(void*)cur->memptr,cur->size);
-
         if (cur->memptr == magicNumber)
         {
-
-
-            if ((void*)cur + cur->size > freeList + freeListSize)
-                printf("\tFREE block %d: %p --> %p [due to size %lu]\n",nodeNumber,cur,(void*)cur + cur->size+32,cur->size);
+            if ((void*)cur + cur->size > freeList + freeListSize-16)
+                printf("\tFREE block %d: %p --> %p [due to size %lu]\n",
+                       nodeNumber,cur,(void*)cur + cur->size,cur->size);
             else
-                printf("\tFREE block %d: %p --> %p [due to size %lu]\n",nodeNumber,cur,(void*)cur + cur->size,cur->size);
+                printf("\tFREE block %d: %p --> %p [due to size %lu]\n",
+                       nodeNumber,cur,(void*)cur + cur->size+32,cur->size);
         }
         else
         {
             printf("\tBlock %d: %p --> %p [due to size %lu]\n",nodeNumber,cur,(void*)cur->memptr,cur->size);
         }
         cur = (void*) cur + (cur->size+32);
-        //printf("New cur: %p\n",cur);
         nodeNumber++;
     }
 }

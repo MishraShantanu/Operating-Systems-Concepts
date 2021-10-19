@@ -26,10 +26,7 @@ int M_Init(int size)
     }
     //Round up to the nearest multiple of 16.
     int memChunks = size/16;
-    if (size%16 != 0)
-    {
-        memChunks++;
-    }
+    if (size%16 != 0) memChunks++;
     memChunks = memChunks * 16;
 
     //Create the mmap space for storing nodes.
@@ -43,16 +40,14 @@ int M_Init(int size)
 
     //Define global variables for magic number, and the total size of freeList.
     magicNumber = (void *) 123456789;
-    freeListSize = memChunks - (2*sizeof(memStruct));
-    //freeListSize = memChunks;
-    //freeListSize = memChunks - (2*sizeof(memStruct));
+    freeListSize = memChunks;
 
     //Define the first header.
     memStruct *head = freeList;
     head->memptr = magicNumber;
     head->size = freeListSize;
 
-    //Define the last footer.
+    //Define the last footer -- loop it back to the first block.
     memStruct *end = freeList + (freeListSize);
     end->size = 0;
     end->memptr = freeList;
