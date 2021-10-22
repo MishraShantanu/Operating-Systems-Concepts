@@ -8,12 +8,18 @@ University of Saskatchewan - Arts & Science
 A project by: Spencer Tracy | Spt631 | 11236962 and Shantanu Mishra | Shm572 | 11255997
 __________________________________________________
  */
+#ifndef MEMORYLIBRARY_A_MEMORYLIBRARY_H
+#define MEMORYLIBRARY_A_MEMORYLIBRARY_H
 
 
-#ifndef C_M_FREE_H
-#define C_M_FREE_H
-#include "M_Init.h"
+int M_Init(int size);
+
+void *M_Alloc(int size);
+
+void M_Display();
 
 int M_Free(void *pointer);
 
-#endif //C_M_FREE_H
+
+
+#endif //MEMORYLIBRARY_A_MEMORYLIBRARY_H
