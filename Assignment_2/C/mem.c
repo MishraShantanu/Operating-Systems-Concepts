@@ -11,8 +11,7 @@ __________________________________________________
  
 #include <sys/mman.h> //mmap
 #include <stdio.h>
-
-#include "mem.h"
+#include "mem.h" //Header for Library.
 
 typedef struct memStruct  //Structure for all headers and footers.
 {
@@ -21,7 +20,6 @@ typedef struct memStruct  //Structure for all headers and footers.
 }memStruct;
 
 //Global variables relied upon by M_Display, M_Alloc, M_Free and M_Init.
-
 void* freeList;
 unsigned long freeListSize;
 void* magicNumber;
@@ -51,7 +49,7 @@ int M_Init(int size)
     //Create the mmap space for storing nodes.
     //   freeList = mmap((void *) 0xdead0000,    //<-- EXTREMELY useful for debugging!!
     freeList = mmap(NULL,
-                    memChunks  + (2*sizeof(memStruct)),
+                    memChunks,
                     PROT_READ |PROT_WRITE, MAP_ANON | MAP_SHARED,
                     -1, 0);
     if(freeList == MAP_FAILED) //Check and report failure to allocate.
@@ -62,7 +60,7 @@ int M_Init(int size)
 
     //Define global variables for magic number, and the total size of freeList.
     magicNumber = (void *) 123456789;
-    freeListSize = memChunks;
+    freeListSize = memChunks - (2*sizeof(memStruct));
 
     //Define the first header.
     memStruct *head = freeList;

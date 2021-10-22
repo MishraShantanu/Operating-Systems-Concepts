@@ -1,3 +1,15 @@
+/*
+Assignment 2 Part C.
+
+Computer Science 332.3
+Prof: Dr. Derek Eager
+University of Saskatchewan - Arts & Science
+	Department of Computer Science
+A project by: Spencer Tracy | Spt631 | 11236962 and Shantanu Mishra | Shm572 | 11255997
+__________________________________________________
+ */
+
+
 #include "mem.h"
 
 int main()
@@ -16,12 +28,9 @@ int main()
     void* ptr3 = M_Alloc(145);
     void* ptr4 = M_Alloc(344);
     void* ptr5 = M_Alloc(134);
-//void* ptr6 = M_Alloc(605);
+	//void* ptr6 = M_Alloc(605);
     void* ptr7 = M_Alloc(866);
     void* ptr8 = M_Alloc(6);
-    //M_Display();
-    //void* ptr9 = M_Alloc(256);
-    //void* ptr10 = M_Alloc(320);
 
 //Test for coalescence from both sides:
     M_Free(ptr3);
@@ -46,13 +55,7 @@ int main()
     M_Free(ptr8);
     //M_Display();
 
-//Test for an allocation that simply will not work.
-    // void* ptr11 = M_Alloc(15000);
-
 
     M_Display();
-
-    //M_Display();
-
-    //M_Free(ptr2);
+	
 }
