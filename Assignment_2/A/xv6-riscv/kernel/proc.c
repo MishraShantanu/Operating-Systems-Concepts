@@ -670,29 +670,6 @@ procdump(void)
 }
 
 
-// int 
-// waitstat(void){
-//      struct proc *p;
-//     char name[4] = "test";
-//     int count = 0;
-
-//   for(p = proc; p < &proc[NPROC]; p++){
-//     acquire(&p->lock);
-      
-//       if(strncmp((const char*)&p->name,name,4)==0){
-//           // printf("process name %s\n %", &p->name );
-//           printf("process start time: %d, process end time: %d, process run time: %d \n", p->created, p->ended, p->running);
-//           count++;
-//       }
-      
-        
-       
-//     release(&p->lock);
-//  }
-//     return 101;
-// }
-
-//,uint64* turnaroundTime, uint64* runTime
 
 int waitstat(uint64 addr,uint64 turnaroundTime, uint64 runTime ){
 

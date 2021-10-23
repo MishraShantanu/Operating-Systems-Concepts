@@ -1,0 +1,145 @@
+/*
+Assignment 2 Part B.
+	
+Computer Science 332.3
+Prof: Dr. Derek Eager
+University of Saskatchewan - Arts & Science
+	Department of Computer Science
+A project by: Spencer Tracy | Spt631 | 11236962 and Shantanu Mishra | Shm572 | 11255997
+__________________________________________________
+ */
+ 
+ 
+ 
+
+
+Features of MLFQ scheduling:
+       Every process is assigned with High priority at the start of process, once its schulded for one time its priority is reduced to medium 
+       later when the process is scheduled m number of times then its moved to low priority. After a certain schulded (moveup) all the process priority 
+       is set as High. 
+      
+
+Features of waitstat system call:
+        It is used to eveluate the system performance.It wait for the child process to complete same as the regular wait sys call and return pid. In addition this sys call 
+        also return the Turn around time and run time of the process. 
+    
+Features of test.c a user program:
+        1. It forks the process 45 times and perform computation for each for based upon the args pass (K,L,M,N)
+       
+	2. For the 1st 15 processes it performs computation usig K and L 
+           for next 15 it uses K and M 
+           and for last 15 it uses K and N. 
+	
+        3. After forking all the 45 processes parent wait for child processes to complete their job using waitstat (syscall)
+	   Once a child exit its workflow parent recives its pid, turn arround time and run time
+        
+        4. Main appends the turn around time and run time for each group process together and then at the end it print outs the 
+           result of turn around time and run time as per the group. 
+
+		
+performance  comparison for new MLFQ scheduling with old scheduling in Xv6
+     
+    * Old scheduling in Xv6 run result
+		$ test 50000 50000 50000 50000
+		Group 1 where K = 50000 & L = 50000 Turn Around Time: 13727, Run Time: 943
+		Group 2 where K = 50000 & M = 50000 Turn Around Time: 13748, Run Time: 945
+		Group 3 where K = 50000 & N = 50000 Turn Around Time: 13688, Run Time: 940
+   
+    * New MLFQ scheduling in Xv6 run result
+                $ test 50000 50000 50000 50000
+		Group 1 where K = 50000 & L = 50000 Turn Around Time: 4122, Run Time: 945
+		Group 2 where K = 50000 & M = 50000 Turn Around Time: 8175, Run Time: 944
+		Group 3 where K = 50000 & N = 50000 Turn Around Time: 12270, Run Time: 937
+    It can be clearly seen that the new MLFQ scheduler has imporved the the total turn around time by 59.68%
+    Changing the moveup and mtimes values further can also help to reduce the turn around time. But the run time 
+    almost remains the same. 
+        
+How to run:
+
+    1. call make qemu 
+    2. once the shell is ready call test with 4 argument 
+        example. test 5000 3000 2000 1000
+        Sample output 
+        $ test 5000 3000 2000 1000
+	Group 1 where K = 5000 & L = 3000 Turn Around Time: 13, Run Time: 18
+	Group 2 where K = 5000 & M = 2000 Turn Around Time: 33, Run Time: 20
+	Group 3 where K = 5000 & N = 1000 Turn Around Time: 45, Run Time: 15
+        
+ 
+     
+
+Known bugs:
+	-NA
+
+
+Known limitations:
+      User needs to pass 4 arguments every time to run the program 
+
+
+Changes made in xv6-riscv
+
+
+        kernel/defs.h
+          Added int             waitstat(uint64,uint64,uint64);
+        
+ 	kernel/proc.c
+	   added a global variable to keep track of total number schulded runs, 
+           used to perform priority refresh when moveup is equal to schedulerCounter.
+				uint64 schedulerCounter = 0;
+        kernel/proc.c:allocproc
+            added   acquire(&tickslock);
+    		    p->created = ticks;
+    		    release(&tickslock);
+                    p->runtime = 0;
+		   
+ 		    p->priority = HIGH;
+                    p->running = 0;
+
+        kernel/proc.c:exit
+          added    acquire(&tickslock);
+  		   p->ended = ticks;
+                   release(&tickslock);
+
+        kernel/proc.c:scheduler
+          updated the scheduler with MLFQ scheduling 
+
+        kernel/proc.c
+	  added syscall waitstat
+
+        kernel/proc.h 
+          added    int created;                //process creation timestamp 
+ 		   int ended;                  //process end timestamp 
+                   int runtime;                //total process run time
+                   enum procpriority priority;  // Priority of the process  
+                   int running;                 // number of times a process has been schedule
+       		   enum procpriority {HIGH, MEDIUM, LOW};
+
+        kernel/syscall.c
+          added       extern uint64 sys_waitstat(void);
+	             [SYS_waitstat] sys_waitstat,
+
+        kernel/syscall.h
+          Added       #define SYS_waitstat 22
+
+        kernel/sysproc.c 
+            Added uint64 sys_waitstat(void)
+                 which return waitstat(p,turnaroundTime,runningTime);
+
+
+
+        user/test.c
+            added user program to test the new sys call
+
+        user/user.h
+            added int waitstat(int* , int * , int* );
+
+
+        user/usys.pl
+           added entry("waitstat");
+
+        Makefile 
+		added /_test under UPROGS
+	
+	
+	
+

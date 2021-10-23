@@ -15,8 +15,6 @@ int main(int argc, char *argv[]){
                // printf("closing child %d ",i);
                     exit(-1);
             }
-           
-            
             
         }
          

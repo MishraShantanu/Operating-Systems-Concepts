@@ -1,0 +1,114 @@
+/*
+Assignment 2 Part A.
+	
+Computer Science 332.3
+Prof: Dr. Derek Eager
+University of Saskatchewan - Arts & Science
+	Department of Computer Science
+A project by: Spencer Tracy | Spt631 | 11236962 and Shantanu Mishra | Shm572 | 11255997
+__________________________________________________
+ */
+ 
+ 
+ 
+
+
+Features of waitstat system call:
+        It wait for the child process to complete same as the regular wait sys call and return pid. In addition this sys call 
+        also return the Turn around time and run time of the process. 
+    
+Features of test.c a user program:
+        1. It forks the process 45 times and perform computation for each for based upon the args pass (K,L,M,N)
+       
+	2. For the 1st 15 processes it performs computation usig K and L 
+           for next 15 it uses K and M 
+           and for last 15 it uses K and N. 
+	
+        3. After forking all the 45 processes parent wait for child processes to complete their job using waitstat (new syscall)
+	   Once a child exit its workflow parent recives its pid, turn arround time and run time
+        
+        4. Main appends the turn around time and run time for each group process together and then at the end it print outs the 
+           result of turn around time and run time as per the group. 
+
+		
+		
+        
+How to run:
+
+    1. call make qemu 
+    2. once the shell is ready call test with 4 argument 
+        example. test 5000 3000 2000 1000
+        Sample output 
+        $ test 5000 3000 2000 1000
+	Group 1 where K = 5000 & L = 3000 Turn Around Time: 13, Run Time: 18
+	Group 2 where K = 5000 & M = 2000 Turn Around Time: 33, Run Time: 20
+	Group 3 where K = 5000 & N = 1000 Turn Around Time: 45, Run Time: 15
+        
+ 
+
+
+Known bugs:
+	-NA
+
+
+Known limitations:
+      User needs to pass 4 arguments every time to run the program 
+
+
+Changes made in xv6-riscv
+
+        kernel/defs.h
+          Added int             waitstat(uint64,uint64,uint64);
+
+        kernel/proc.c:allocproc
+            added   acquire(&tickslock);
+    		    p->created = ticks;
+    		    release(&tickslock);
+                    p->running = 0;
+
+        kernel/proc.c:exit
+          added    acquire(&tickslock);
+  		   p->ended = ticks;
+                   release(&tickslock);
+
+        kernel/proc.c:scheduler
+          added    p->running++;
+
+        kernel/proc.c
+	  added syscall waitstat
+
+       kernel/proc.h 
+          added    int created;                //process creation timestamp 
+ 		   int ended;                  //process end timestamp 
+        
+
+
+        kernel/syscall.c
+          added       extern uint64 sys_waitstat(void);
+	             [SYS_waitstat] sys_waitstat,
+
+        kernel/syscall.h
+          Added       #define SYS_waitstat 22
+
+        kernel/sysproc.c 
+            Added uint64 sys_waitstat(void)
+                 which return waitstat(p,turnaroundTime,runningTime);
+
+
+
+        user/test.c
+            added user program to test the new sys call
+
+        user/user.h
+            added int waitstat(int* , int * , int* );
+
+
+        user/usys.pl
+           added entry("waitstat");
+
+        Makefile 
+		added /_test under UPROGS
+	
+	
+	
+

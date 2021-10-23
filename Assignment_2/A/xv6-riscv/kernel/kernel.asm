@@ -5174,10 +5174,8 @@ procdump(void)
     800025bc:	8082                	ret
 
 00000000800025be <waitstat>:
-//     return 101;
-// }
 
-//,uint64* turnaroundTime, uint64* runTime
+
 
 int waitstat(uint64 addr,uint64 turnaroundTime, uint64 runTime ){
     800025be:	7159                	addi	sp,sp,-112
