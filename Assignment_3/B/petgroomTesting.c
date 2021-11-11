@@ -192,7 +192,7 @@ struct Groom* staticGenerate()
     return staticGen;
 }
 
-void* newThread (pet_t pet)
+void* newThread ()
 {
     sleep(rand()%5);
     int randPetID = rand()%3;
@@ -216,7 +216,7 @@ void* parseArray(struct Groom *me)
     {
         pthread_attr_t attr;
         pthread_attr_init(&attr);
-        pthread_create(&threadIDs[i], &attr,(void *) newThread, (void *) me->petArray[i]);
+        pthread_create(&threadIDs[i], &attr,(void *) newThread, NULL);
     }
     for (int i = 0; i < me->petTotal;i++)
     {
