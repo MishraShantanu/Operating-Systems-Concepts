@@ -82,12 +82,13 @@ int newpet(pet_t pet)
     //printf("Open Mutex locked successfully\n");
 
 
-    while (openStations <= 0)
+    while (openStations == 0)
     {
         printf("No open stations, waiting.\n");
         pthread_mutex_unlock(&openMutex);
         pthread_cond_wait(&openCond, &openMutex);
     }
+    openStations -= 1;
 
     // pthread_mutex_lock(&catDogExclusion);
     if (pet == 2)
@@ -158,7 +159,6 @@ int newpet(pet_t pet)
 
     //
     // printf("New %s.\t cats: %d, dogs: %d, other: %d.\n",output,currentCats,currentDogs,currentOthers);
-    openStations -= 1;
 
     printf("%s recieved.\tRooms open: %d.\t cats: %d, dogs: %d, other: %d. Thread complete, unlocking...\n",output,openStations,currentCats,currentDogs,currentOthers);
     pthread_mutex_unlock(&openMutex);
@@ -265,9 +265,9 @@ int petdone(pet_t pet)
 
     //pthread_mutex_unlock(&catDogExclusion)
     printf("\t\t\t%s done.\n",output);
-    pthread_cond_signal(&openCond);
-    pthread_mutex_unlock(&openMutex);
 
+    pthread_mutex_unlock(&openMutex);
+    pthread_cond_signal(&openCond);
 
 
     //Modify grooming station -- set as free.
