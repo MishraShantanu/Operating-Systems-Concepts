@@ -175,13 +175,13 @@ struct Groom* autoGenerate()
 struct Groom* staticGenerate()
 {
     struct Groom *staticGen = malloc(sizeof(Groom));
-    staticGen->stations = 5;
-    staticGen->petTotal = 9;
-    staticGen->catTotal=3;
+    staticGen->stations = 10;
+    staticGen->petTotal = 45;
+    staticGen->catTotal=15;
     staticGen->catTime=3;
-    staticGen->dogTotal=2;
+    staticGen->dogTotal=20;
     staticGen->dogTime= 2;
-    staticGen->otherTotal=4;
+    staticGen->otherTotal=10;
     staticGen->otherTime= 1;
     populateArray(staticGen);
 
@@ -195,7 +195,7 @@ struct Groom* staticGenerate()
 
 void* newThread (pet_t pet)
 {
-    sleep(rand()%10);
+    sleep(rand()%7);
     newpet(pet);
     sleep(rand()%5);
     petdone(pet);
@@ -223,8 +223,8 @@ int main()
 {
 
     //struct Groom *GroomingSalon = promptUser();
-    //struct Groom *GroomingSalon = staticGenerate();
-    struct Groom *GroomingSalon = autoGenerate();
+    struct Groom *GroomingSalon = staticGenerate();
+    //struct Groom *GroomingSalon = autoGenerate();
 
     //pthread_t startMe;
     //pthread_create(&startMe, NULL,(void *) parseArray, (void *) GroomingSalon);

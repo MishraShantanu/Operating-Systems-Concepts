@@ -28,7 +28,7 @@ pthread_mutex_t openMutex;
 pthread_mutex_t catDogExclusion;
 
 
-
+volatile int blockedAttempts;
 volatile int currentCats;
 volatile int currentDogs;
 volatile int currentOthers;
@@ -55,6 +55,7 @@ int petgroom_init(int numstations)
     currentCats = 0;
     currentDogs = 0;
     currentOthers = 0;
+    blockedAttempts = 0;
     //printf("Petgroom called with %d stations. Array is populated\n",numstations);
     pthread_mutex_init(&openMutex,NULL);
     pthread_mutex_init(&catDogExclusion,NULL);
@@ -79,19 +80,40 @@ int newpet(pet_t pet)
     if (pet == 2) output = "other";
 
     pthread_mutex_lock(&openMutex);
+    //printf("Blocked attempts: %d\n",blockedAttempts);
+    //while (openStations <= 0 || blockedAttempts > 5)
     while (openStations <= 0)
     {
         pthread_cond_wait(&openCond, &openMutex);
     }
 
+    while (blockedAttempts > 5)
+    {
+        printf("Too many blocks, switching.\n");
+        pthread_cond_wait(&dogsBeingGroomed, &openMutex);
+
+    }
+
     if (pet == 0)
     {
-        while (currentDogs > 0) pthread_cond_wait(&dogsBeingGroomed, &openMutex);
+        while (currentDogs > 0)
+        {
+            blockedAttempts++;
+            pthread_cond_wait(&dogsBeingGroomed, &openMutex);
+            pthread_cond_wait(&catsBeingGroomed, &openMutex);
+
+        }
+        blockedAttempts = 0;
         currentCats++;
     }
     if (pet == 1)
     {
-        while (currentCats > 0) pthread_cond_wait(&catsBeingGroomed, &openMutex);
+        while (currentCats > 0)
+        {
+            blockedAttempts++;
+            pthread_cond_wait(&catsBeingGroomed, &openMutex);
+        }
+        blockedAttempts = 0;
         currentDogs++;
     }
 
@@ -118,7 +140,7 @@ int petdone(pet_t pet)
     if (pet == 1) output = "dog";
     if (pet == 2) output = "other";
 
-    printf("%s done.\n",output);
+    //printf("%s done.\n",output);
     //pthread_mutex_lock(&catDogExclusion);
     if (pet == 0) currentCats--;
     if (pet == 1) currentDogs--;
@@ -130,7 +152,7 @@ int petdone(pet_t pet)
         //printf("trapped3?");
         pthread_cond_broadcast(&catsBeingGroomed);
     }
-    else if (currentCats == 0)
+    if (currentCats == 0)
     {
         //printf("trapped4?");
         pthread_cond_broadcast(&dogsBeingGroomed);
