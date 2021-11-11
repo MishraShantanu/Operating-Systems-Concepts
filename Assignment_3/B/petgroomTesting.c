@@ -155,7 +155,7 @@ struct Groom* autoGenerate()
     autoGen->petTotal = (rand() % (autoGen->stations*2) + autoGen->stations);
 
     int temp = autoGen->petTotal;
-    autoGen->catTotal = rand() % (temp/2);
+    autoGen->catTotal = rand() % temp;
     temp -= autoGen->catTotal;
     autoGen->dogTotal = rand() % temp;
     temp -= autoGen->dogTotal;
@@ -195,7 +195,7 @@ struct Groom* staticGenerate()
 
 void* newThread (pet_t pet)
 {
-    sleep(rand()%5);
+    sleep(rand()%10);
     newpet(pet);
     sleep(rand()%5);
     petdone(pet);
@@ -223,8 +223,8 @@ int main()
 {
 
     //struct Groom *GroomingSalon = promptUser();
-    struct Groom *GroomingSalon = staticGenerate();
-    //struct Groom *GroomingSalon = autoGenerate();
+    //struct Groom *GroomingSalon = staticGenerate();
+    struct Groom *GroomingSalon = autoGenerate();
 
     //pthread_t startMe;
     //pthread_create(&startMe, NULL,(void *) parseArray, (void *) GroomingSalon);

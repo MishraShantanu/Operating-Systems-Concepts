@@ -79,50 +79,27 @@ int newpet(pet_t pet)
     if (pet == 2) output = "other";
 
     pthread_mutex_lock(&openMutex);
-    //pthread_mutex_lock(&catDogExclusion);
-
     while (openStations <= 0)
     {
-        //printf("trapped0");
         pthread_cond_wait(&openCond, &openMutex);
     }
 
     if (pet == 0)
     {
-        while (currentDogs != 0)
-        {
-            //printf("trapped1.");
-            pthread_cond_wait(&dogsBeingGroomed, &openMutex);
-        }
-        //printf("Detected no dogs being groomed, correct? cats: %d, dogs: %d, other: %d.\n",currentCats,currentDogs,currentOthers);
+        while (currentDogs > 0) pthread_cond_wait(&dogsBeingGroomed, &openMutex);
         currentCats++;
-
     }
-    //pthread_mutex_unlock(&catDogExclusion);
-    //pthread_mutex_lock(&catDogExclusion);
     if (pet == 1)
     {
-        //pthread_mutex_lock(&catDogExclusion);
-        while (currentCats != 0)
-        {
-            //printf("trapped2.");
-            pthread_cond_wait(&catsBeingGroomed, &openMutex);
-        }
-        //pthread_mutex_lock(&catDogExclusion);
-
-        //printf("Detected no cats being groomed, correct? cats: %d, dogs: %d, other: %d.\n",currentCats,currentDogs,currentOthers);
-
+        while (currentCats > 0) pthread_cond_wait(&catsBeingGroomed, &openMutex);
         currentDogs++;
-        //pthread_cond_signal(&dogsBeingGroomed);
-
     }
 
 
     if (pet == 2) currentOthers++;
     //printf("%s recieved.\tRooms open: %d.\t cats: %d, dogs: %d, other: %d.\n",output,openStations,currentCats,currentDogs,currentOthers);
-    //pthread_mutex_unlock(&catDogExclusion);
+    printf("New %s.\t cats: %d, dogs: %d, other: %d.\n",output,currentCats,currentDogs,currentOthers);
     openStations -= 1;
-    //pthread_mutex_unlock(&catDogExclusion);
     pthread_mutex_unlock(&openMutex);
     return 1;
 }
@@ -155,7 +132,7 @@ int petdone(pet_t pet)
     }
     else if (currentCats == 0)
     {
-        printf("trapped4?");
+        //printf("trapped4?");
         pthread_cond_broadcast(&dogsBeingGroomed);
     }
     //pthread_mutex_unlock(&catDogExclusion);
