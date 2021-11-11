@@ -148,8 +148,7 @@ struct Groom* autoGenerate()
 {
 
     struct Groom *autoGen = malloc(sizeof(Groom));
-    unsigned int seed = time(NULL);
-    srand(seed);
+
 
     autoGen->stations = rand() % 50 +3;
     autoGen->petTotal = (rand() % (autoGen->stations*2) + autoGen->stations);
@@ -196,8 +195,15 @@ struct Groom* staticGenerate()
 void* newThread (pet_t pet)
 {
     sleep(rand()%5);
-    newpet(pet);
-    sleep(5);
+    int randPetID = rand()%3;
+    char *output;
+    if (randPetID == 0) output = "cat";
+    if (randPetID == 1) output = "dog";
+    if (randPetID == 2) output = "other";
+    //printf("Randpet was a: %s.\n",output);
+    //printf("Randpets should still be a: %s.\n",output);
+    newpet(randPetID);
+    sleep(rand()%5);
     petdone(pet);
     pthread_exit(0);
 }
@@ -221,6 +227,11 @@ void* parseArray(struct Groom *me)
 
 int main()
 {
+    unsigned int seed = time(NULL);
+    srand(seed);
+
+    int randpet = rand()%3;
+    printf("randpet: %d\n\n",randpet);
 
     //struct Groom *GroomingSalon = promptUser();
     struct Groom *GroomingSalon = staticGenerate();
