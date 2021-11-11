@@ -89,7 +89,7 @@ int newpet(pet_t pet)
 
     while (blockedAttempts > 5)
     {
-        printf("Too many blocks, switching.\n");
+        //printf("Too many blocks, switching.\n");
         pthread_cond_wait(&dogsBeingGroomed, &openMutex);
 
     }
@@ -120,7 +120,7 @@ int newpet(pet_t pet)
 
     if (pet == 2) currentOthers++;
     //printf("%s recieved.\tRooms open: %d.\t cats: %d, dogs: %d, other: %d.\n",output,openStations,currentCats,currentDogs,currentOthers);
-    printf("New %s.\t cats: %d, dogs: %d, other: %d.\n",output,currentCats,currentDogs,currentOthers);
+    //printf("New %s.\t cats: %d, dogs: %d, other: %d.\n",output,currentCats,currentDogs,currentOthers);
     openStations -= 1;
     pthread_mutex_unlock(&openMutex);
     return 1;
@@ -140,7 +140,7 @@ int petdone(pet_t pet)
     if (pet == 1) output = "dog";
     if (pet == 2) output = "other";
 
-    //printf("%s done.\n",output);
+    printf("\t\t\t%s done.\n",output);
     //pthread_mutex_lock(&catDogExclusion);
     if (pet == 0) currentCats--;
     if (pet == 1) currentDogs--;
