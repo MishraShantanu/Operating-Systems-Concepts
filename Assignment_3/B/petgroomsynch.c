@@ -77,7 +77,15 @@ int newpet(pet_t pet)
     if (pet == 2) output = "other";
 
     pthread_mutex_lock(&openMutex);
-
+    while (blockedAttempts > 5 && currentCats > 0)
+    {
+        printf("Too many blocks, waiting for cats and dogs to clear before switching.\n");
+        //while (currentCats > 0)  pthread_cond_wait(&noCats, &openMutex);
+        pthread_cond_wait(&noCats, &openMutex);
+        //while (currentDogs > 0)  pthread_cond_wait(&noDogs, &openMutex);
+        pthread_cond_wait(&noDogs, &openMutex);
+    }
+    blockedAttempts = 0;
 
     while (openStations <= 0)
     {
@@ -92,7 +100,10 @@ int newpet(pet_t pet)
         {
             printf("Attempted to receive cat, but there were dogs. Blocked attempts: %d\n",blockedAttempts);
             blockedAttempts++;
+
+            pthread_mutex_unlock(&openMutex);
             pthread_cond_wait(&noDogs, &openMutex);
+
             //pthread_cond_wait(&noCats, &openMutex);
         }
         currentCats++;
@@ -110,15 +121,7 @@ int newpet(pet_t pet)
     //pthread_mutex_unlock(&catDogExclusion);
     if (pet == 2) currentOthers++;
 
-    while (blockedAttempts > 5)
-    {
-        printf("Too many blocks, waiting for cats and dogs to clear before switching.\n");
-        //while (currentCats > 0)  pthread_cond_wait(&noCats, &openMutex);
-        pthread_cond_wait(&noCats, &openMutex);
-        //while (currentDogs > 0)  pthread_cond_wait(&noDogs, &openMutex);
-        pthread_cond_wait(&noDogs, &openMutex);
-    }
-    blockedAttempts = 0;
+
 
     //printf("New %s.\t cats: %d, dogs: %d, other: %d.\n",output,currentCats,currentDogs,currentOthers);
     openStations -= 1;
@@ -147,14 +150,20 @@ int petdone(pet_t pet)
     if (pet == 1) currentDogs--;
     if (pet == 2) currentOthers--;
 
+//    if (currentCats == 0 && currentDogs == 0)
+//    {
+//        printf("\t\t\tAny allowed.\n");
+//        pthread_cond_signal(&noCats);
+//        pthread_cond_signal(&noDogs);
+//    }
     if (currentCats == 0)
     {
-        printf("noCats... dogs allowed.  \n");
+        printf("\t\t\tnoCats... dogs allowed.  \n");
         pthread_cond_signal(&noCats);
     }
     if (currentDogs == 0)
     {
-        printf("noDogs... cats allowed.  \n");
+        printf("\t\t\tnoDogs... cats allowed.  \n");
         pthread_cond_signal(&noDogs);
     }
 
