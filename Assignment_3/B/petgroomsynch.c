@@ -69,58 +69,62 @@ int petgroom_init(int numstations)
  * POST-CONDITIONS: Blocks until the given pet can be allocated to a grooming station.
  * RETURN: 0 --> Success.    -1 --> Failure.
  */
-int newpet(pet_t pet)
-{
+int newpet(pet_t pet) {
     char *output;
     if (pet == 0) output = "cat";
     if (pet == 1) output = "dog";
     if (pet == 2) output = "other";
 
     pthread_mutex_lock(&openMutex);
-    while (blockedAttempts > 5 && currentCats > 0)
-    {
-        printf("Too many blocks, waiting for cats and dogs to clear before switching.\n");
-        //while (currentCats > 0)  pthread_cond_wait(&noCats, &openMutex);
-        pthread_cond_wait(&noCats, &openMutex);
-        //while (currentDogs > 0)  pthread_cond_wait(&noDogs, &openMutex);
-        pthread_cond_wait(&noDogs, &openMutex);
-    }
-    blockedAttempts = 0;
 
-    while (openStations <= 0)
-    {
+
+    while (openStations <= 0) {
         printf("No open stations, waiting.\n");
         pthread_cond_wait(&openCond, &openMutex);
     }
 
-   // pthread_mutex_lock(&catDogExclusion);
-    if (pet == 0)
-    {
-        while (currentDogs > 0)
-        {
-            printf("Attempted to receive cat, but there were dogs. Blocked attempts: %d\n",blockedAttempts);
+    // pthread_mutex_lock(&catDogExclusion);
+    if (pet == 0) {
+        while (currentDogs > 0) {
+            printf("Attempted to receive cat, but there were dogs. Blocked attempts: %d\n", blockedAttempts);
             blockedAttempts++;
 
-            pthread_mutex_unlock(&openMutex);
+            //pthread_mutex_unlock(&openMutex);
             pthread_cond_wait(&noDogs, &openMutex);
-
+            //pthread_mutex_lock(&openMutex);
             //pthread_cond_wait(&noCats, &openMutex);
         }
         currentCats++;
     }
-    if (pet == 1)
-    {
-        while (currentCats > 0)
-        {
-            printf("Attempted to receive dog, but there were cats. Blocked attempts: %d\n",blockedAttempts);
+    if (pet == 1) {
+        while (currentCats > 0) {
+            printf("Attempted to receive dog, but there were cats. Blocked attempts: %d\n", blockedAttempts);
             blockedAttempts++;
+            //pthread_mutex_unlock(&openMutex);
             pthread_cond_wait(&noCats, &openMutex);
+            //pthread_mutex_lock(&openMutex);
+
         }
         currentDogs++;
     }
     //pthread_mutex_unlock(&catDogExclusion);
     if (pet == 2) currentOthers++;
 
+    if (currentDogs > 0 || currentCats > 0)
+    {
+        while (blockedAttempts > 5 && currentDogs > 0)
+        {
+            printf("New cats blocked too much. Wait for dogs to be done.\n");
+            //while (currentCats > 0)  pthread_cond_wait(&noCats, &openMutex);
+            pthread_cond_wait(&noDogs, &openMutex);
+        }
+        while (blockedAttempts > 5 && currentCats > 0)
+        {
+        printf("New dogs blocked too much. Wait for cats to be done.\n");
+        pthread_cond_wait(&noCats, &openMutex);
+        }
+    }
+    blockedAttempts = 0;
 
 
     //printf("New %s.\t cats: %d, dogs: %d, other: %d.\n",output,currentCats,currentDogs,currentOthers);
@@ -150,22 +154,25 @@ int petdone(pet_t pet)
     if (pet == 1) currentDogs--;
     if (pet == 2) currentOthers--;
 
-//    if (currentCats == 0 && currentDogs == 0)
-//    {
-//        printf("\t\t\tAny allowed.\n");
-//        pthread_cond_signal(&noCats);
-//        pthread_cond_signal(&noDogs);
-//    }
-    if (currentCats == 0)
+    if (currentCats == 0 && currentDogs == 0)
+    {
+        printf("\t\t\tAny allowed.\n");
+        pthread_cond_signal(&noCats);
+        pthread_cond_signal(&noDogs);
+        //blockedAttempts = 0;
+    }
+    if (currentCats == 0 && blockedAttempts < 5)
     {
         printf("\t\t\tnoCats... dogs allowed.  \n");
         pthread_cond_signal(&noCats);
     }
-    if (currentDogs == 0)
+    if (currentDogs == 0 && blockedAttempts < 5)
     {
         printf("\t\t\tnoDogs... cats allowed.  \n");
         pthread_cond_signal(&noDogs);
     }
+
+
 
     //pthread_mutex_unlock(&catDogExclusion);
     pthread_cond_signal(&openCond);

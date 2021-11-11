@@ -197,7 +197,7 @@ void* newThread (pet_t pet)
 {
     sleep(rand()%5);
     newpet(pet);
-    sleep(rand()%10);
+    sleep(5);
     petdone(pet);
     pthread_exit(0);
 }
