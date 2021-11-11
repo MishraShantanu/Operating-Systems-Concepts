@@ -203,7 +203,7 @@ void* newThread (pet_t pet)
     //printf("Randpet was a: %s.\n",output);
     //printf("Randpets should still be a: %s.\n",output);
     newpet(randPetID);
-    sleep(rand()%5);
+    sleep(rand()%7);
     petdone(randPetID);
     pthread_exit(0);
 }
@@ -229,10 +229,6 @@ int main()
 {
     unsigned int seed = time(NULL);
     srand(seed);
-
-    int randpet = rand()%3;
-    printf("randpet: %d\n\n",randpet);
-
     //struct Groom *GroomingSalon = promptUser();
     struct Groom *GroomingSalon = staticGenerate();
     //struct Groom *GroomingSalon = autoGenerate();
@@ -241,5 +237,4 @@ int main()
     //pthread_create(&startMe, NULL,(void *) parseArray, (void *) GroomingSalon);
     //pthread_join(startMe,NULL);
     parseArray(GroomingSalon);
-
 }
