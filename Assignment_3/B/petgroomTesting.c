@@ -189,7 +189,7 @@ struct Groom* staticGenerate()
             ,staticGen->stations,staticGen->petTotal,staticGen->catTotal,staticGen->dogTotal,staticGen->otherTotal);
     populateArray(staticGen);
 
-    petgroom_init(5);
+    petgroom_init(staticGen->stations);
     return staticGen;
 }
 

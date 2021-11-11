@@ -56,14 +56,11 @@ int petgroom_init(int numstations)
     currentDogs = 0;
     currentOthers = 0;
     blockedAttempts = 0;
-    //printf("Petgroom called with %d stations. Array is populated\n",numstations);
     pthread_mutex_init(&openMutex,NULL);
     pthread_mutex_init(&catDogExclusion,NULL);
-
-    //pthread_cond_init(&catsBeingGroomed,NULL);
-    //pthread_cond_init(&dogsBeingGroomed,NULL);
-    //pthread_mutex_unlock(&stationArray[1].occupuied);
-    //pthread_mutex_lock(&stationArray[1].occupuied);
+    pthread_cond_init(&openCond,NULL);
+    pthread_cond_init(&catsBeingGroomed,NULL);
+    pthread_cond_init(&dogsBeingGroomed,NULL);
     return 1;
 }
 
@@ -80,28 +77,25 @@ int newpet(pet_t pet)
     if (pet == 2) output = "other";
 
     pthread_mutex_lock(&openMutex);
-    //printf("Blocked attempts: %d\n",blockedAttempts);
-    //while (openStations <= 0 || blockedAttempts > 5)
-    while (openStations <= 0)
-    {
-        pthread_cond_wait(&openCond, &openMutex);
-    }
 
     while (blockedAttempts > 5)
     {
         //printf("Too many blocks, switching.\n");
         pthread_cond_wait(&dogsBeingGroomed, &openMutex);
-
+    }
+    while (openStations <= 0)
+    {
+        pthread_cond_wait(&openCond, &openMutex);
     }
 
     if (pet == 0)
     {
         while (currentDogs > 0)
         {
+            printf("Blocked, waiting for cat or dog to clear.\n");
             blockedAttempts++;
             pthread_cond_wait(&dogsBeingGroomed, &openMutex);
             pthread_cond_wait(&catsBeingGroomed, &openMutex);
-
         }
         blockedAttempts = 0;
         currentCats++;
@@ -116,10 +110,8 @@ int newpet(pet_t pet)
         blockedAttempts = 0;
         currentDogs++;
     }
-
-
     if (pet == 2) currentOthers++;
-    //printf("%s recieved.\tRooms open: %d.\t cats: %d, dogs: %d, other: %d.\n",output,openStations,currentCats,currentDogs,currentOthers);
+    printf("%s recieved.\tRooms open: %d.\t cats: %d, dogs: %d, other: %d.\n",output,openStations,currentCats,currentDogs,currentOthers);
     //printf("New %s.\t cats: %d, dogs: %d, other: %d.\n",output,currentCats,currentDogs,currentOthers);
     openStations -= 1;
     pthread_mutex_unlock(&openMutex);
@@ -158,9 +150,9 @@ int petdone(pet_t pet)
         pthread_cond_broadcast(&dogsBeingGroomed);
     }
     //pthread_mutex_unlock(&catDogExclusion);
-
-    pthread_cond_signal(&openCond);
     pthread_mutex_unlock(&openMutex);
+    pthread_cond_signal(&openCond);
+
 
     //Modify grooming station -- set as free.
     //check/modify if cat or dog has been completed.
