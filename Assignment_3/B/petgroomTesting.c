@@ -204,7 +204,7 @@ void* newThread (pet_t pet)
     //printf("Randpets should still be a: %s.\n",output);
     newpet(randPetID);
     sleep(rand()%5);
-    petdone(pet);
+    petdone(randPetID);
     pthread_exit(0);
 }
 

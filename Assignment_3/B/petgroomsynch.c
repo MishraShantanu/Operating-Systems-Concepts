@@ -142,12 +142,13 @@ int newpet(pet_t pet) {
 int petdone(pet_t pet)
 {
     pthread_mutex_lock(&openMutex);
+    openStations++;
     if (blockedAttempts > MAX_BLOCKS)
     {
         printf("decrementing from max attempts: \n");
-        if (pet == 0) currentCats--;
-        if (pet == 1) currentDogs--;
-        if (pet == 2) currentOthers--;
+        //if (pet == 0) currentCats--;
+        //if (pet == 1) currentDogs--;
+        //if (pet == 2) currentOthers--;
         openStations++;
         blockedAttempts = 0;
 
@@ -178,7 +179,7 @@ int petdone(pet_t pet)
     if (pet == 0) currentCats--;
     else if (pet == 1) currentDogs--;
     else if (pet == 2) currentOthers--;
-    openStations++;
+
 
 
     //printf("\t\t\t%s done.\n",output);
@@ -187,24 +188,25 @@ int petdone(pet_t pet)
 
     if (currentCats == 0 && currentDogs == 0)
     {
-        //printf("\t\t\tAny allowed.\n");
+        printf("\t\t\tAny allowed.\n");
         pthread_cond_signal(&noCats);
         pthread_cond_signal(&noDogs);
         //blockedAttempts = 0;
     }
     else if (currentCats == 0 && blockedAttempts < MAX_BLOCKS)
     {
-        //printf("\t\t\tnoCats... dogs allowed.  \n");
+        printf("\t\t\tnoCats... dogs allowed.  \n");
         pthread_cond_signal(&noCats);
     }
     else if (currentDogs == 0 && blockedAttempts < MAX_BLOCKS)
     {
-        //printf("\t\t\tnoDogs... cats allowed.  \n");
+        printf("\t\t\tnoDogs... cats allowed.  \n");
         pthread_cond_signal(&noDogs);
     }
 
     //pthread_mutex_unlock(&catDogExclusion);
     printf("\t\t%s done.\t\tRooms open: %d.\t cats: %d, dogs: %d, other: %d.\n\n",output,openStations,currentCats,currentDogs,currentOthers);
+
     pthread_cond_signal(&openCond);
     pthread_mutex_unlock(&openMutex);
 
