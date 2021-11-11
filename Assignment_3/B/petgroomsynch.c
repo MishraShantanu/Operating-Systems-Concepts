@@ -100,8 +100,6 @@ int newpet(pet_t pet)
 
         printf("New other allocated.\n");
     }
-    else if (currentDogs > 0 || currentCats > 0)
-    {
 
         printf("Either no dogs or no cats\n");
         while (blockedAttempts > MAX_ATTEMPTS && currentDogs > 0)
@@ -121,7 +119,6 @@ int newpet(pet_t pet)
             pthread_cond_wait(&noCats, &openMutex);
             blockedAttempts = 0;
         }
-    }
     //blockedAttempts = 0;
 
 
@@ -181,7 +178,7 @@ int newpet(pet_t pet)
 int petdone(pet_t pet)
 {
     pthread_mutex_lock(&openMutex);
-    openStations++;
+
     char *output;
     if (pet == 0) output = "cat";
     if (pet == 1) output = "dog";
@@ -189,6 +186,13 @@ int petdone(pet_t pet)
     printf("\t\t\t%s done.\n",output);
     //pthread_mutex_lock(&catDogExclusion);
 
+    if (pet == 0) currentCats--;
+    if (pet == 1) currentDogs--;
+    if (pet == 2) currentOthers--;
+
+    openStations++;
+    if (currentDogs == 0) pthread_cond_signal(&noDogs);
+    if (currentCats == 0) pthread_cond_signal(&noCats);
 
     if (currentCats == 0 && currentDogs == 0)
     {
@@ -229,17 +233,29 @@ int petdone(pet_t pet)
 
                 printf("\t cats in trap 2\n");
 
-                pthread_mutex_unlock(&openMutex);
-                while (currentCats > 0) pthread_cond_wait(&noCats,&openMutex);
 
-                blockedAttempts = 0;
+                while (currentCats > 0)
+                {
+                    printf("Cur cats > 0...\n");
+                    pthread_mutex_unlock(&openMutex);
+                    pthread_cond_wait(&noCats,&openMutex);
+                    blockedAttempts = 0;
+                    printf("... cur cats back to 0!\n");
+                }
             }
             if (currentDogs > 0)
             {
                 printf("\t dogs in trap 2\n");
-                pthread_mutex_unlock(&openMutex);
-                while (currentDogs > 0) pthread_cond_wait(&noDogs,&openMutex);
-                blockedAttempts = 0;
+
+                while (currentDogs > 0)
+                {
+                    printf("Cur dogs > 0...\n");
+                    pthread_mutex_unlock(&openMutex);
+                    pthread_cond_wait(&noDogs,&openMutex);
+                    printf("... cur dogs back to 0!\n");
+                    blockedAttempts = 0;
+                }
+                //blockedAttempts = 0;
             }
             blockedAttempts = 0;
             printf("end of trap2.");
@@ -250,13 +266,11 @@ int petdone(pet_t pet)
     }
 
 
-    if (pet == 0) currentCats--;
-    if (pet == 1) currentDogs--;
-    if (pet == 2) currentOthers--;
     //pthread_mutex_unlock(&catDogExclusion)
     printf("\t\t\t%s done.\n",output);
-    pthread_mutex_unlock(&openMutex);
     pthread_cond_signal(&openCond);
+    pthread_mutex_unlock(&openMutex);
+
 
 
     //Modify grooming station -- set as free.
