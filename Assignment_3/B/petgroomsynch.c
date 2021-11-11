@@ -72,20 +72,18 @@ int petgroom_init(int numstations)
 int newpet(pet_t pet)
 {
 
-    printf("Newthread. locking mutex...\n");
+    //printf("Newthread. locking mutex...\n");
     char *output;
     if (pet == 0) output = "cat";
     if (pet == 1) output = "dog";
     if (pet == 2) output = "other";
 
     pthread_mutex_lock(&openMutex);
+    //printf("Open Mutex locked successfully\n");
 
-    printf("Open Mutex locked successfully\n");
 
-
-    while (openStations == 0)
+    while (openStations <= 0)
     {
-
         printf("No open stations, waiting.\n");
         pthread_mutex_unlock(&openMutex);
         pthread_cond_wait(&openCond, &openMutex);
@@ -94,31 +92,28 @@ int newpet(pet_t pet)
     // pthread_mutex_lock(&catDogExclusion);
     if (pet == 2)
     {
-
         printf("Allocating new other...\n");
         currentOthers++;
-
         printf("New other allocated.\n");
     }
-
-        printf("Either no dogs or no cats\n");
-        while (blockedAttempts > MAX_ATTEMPTS && currentDogs > 0)
-        {
-
+    else
+    {
+        //printf("Either no dogs or no cats\n");
+        while (blockedAttempts > MAX_ATTEMPTS && currentDogs > 0) {
             printf("New cats blocked too much. Wait for dogs to be done.\n");
             //while (currentCats > 0)  pthread_cond_wait(&noCats, &openMutex);
             pthread_mutex_unlock(&openMutex);
             pthread_cond_wait(&noDogs, &openMutex);
             blockedAttempts = 0;
         }
-        while (blockedAttempts > MAX_ATTEMPTS && currentCats > 0)
-        {
+        while (blockedAttempts > MAX_ATTEMPTS && currentCats > 0) {
 
             printf("New dogs blocked too much. Wait for cats to be done.\n");
             pthread_mutex_unlock(&openMutex);
             pthread_cond_wait(&noCats, &openMutex);
             blockedAttempts = 0;
         }
+    }
     //blockedAttempts = 0;
 
 
@@ -140,7 +135,7 @@ int newpet(pet_t pet)
         printf("Allocated new cat\n");
         currentCats++;
     }
-    if (pet == 1) {
+    else if (pet == 1) {
         while (currentCats > 0) {
 
             printf("Attempted to receive dog, but there were cats. Blocked attempts: %d\n", blockedAttempts);
@@ -197,72 +192,74 @@ int petdone(pet_t pet)
     if (currentCats == 0 && currentDogs == 0)
     {
 
-        printf("\tAny allowed. Signal dog....\t");
+        //printf("\tAny allowed. Signal dog....\t");
+        pthread_mutex_unlock(&openMutex);
         pthread_cond_signal(&noDogs);
 
-        printf("Signal to dog success. Signal to cat...\t");
+        //printf("Signal to dog success. Signal to cat...\t");
+        pthread_mutex_unlock(&openMutex);
         pthread_cond_signal(&noCats);
 
-        printf("Signal to cat success. Resetting attempts...\t");
+        //printf("Signal to cat success. Resetting attempts...\t");
 
         blockedAttempts = 0;
 
-        printf(" attempts reset.\n");
+        //printf(" attempts reset.\n");
     }
     if (currentCats == 0 && blockedAttempts < MAX_ATTEMPTS)
     {
 
-        printf("\t\t\tnoCats... dogs allowed.  \n");
+        //printf("\t\t\tnoCats... dogs allowed.  \n");
         pthread_cond_signal(&noCats);
     }
     if (currentDogs == 0 && blockedAttempts < MAX_ATTEMPTS)
     {
 
-        printf("\t\t\tnoDogs... cats allowed.  \n");
+        //printf("\t\t\tnoDogs... cats allowed.  \n");
         pthread_cond_signal(&noDogs);
     }
     else
     {
 
-        printf("Trap 1. dog count: %d \tcat count: %d \tblocked attempts: %d\n",currentDogs,currentCats,blockedAttempts);
+        //printf("Trap 1. dog count: %d \tcat count: %d \tblocked attempts: %d\n",currentDogs,currentCats,blockedAttempts);
         while (blockedAttempts > MAX_ATTEMPTS)
         {
-            printf("\ttrap 2\t");
+            //printf("\ttrap 2\t");
             if (currentCats > 0)
             {
 
-                printf("\t cats in trap 2\n");
+                //printf("\t cats in trap 2\n");
 
 
                 while (currentCats > 0)
                 {
-                    printf("Cur cats > 0...\n");
+                    //printf("Cur cats > 0...\n");
                     pthread_mutex_unlock(&openMutex);
                     pthread_cond_wait(&noCats,&openMutex);
                     blockedAttempts = 0;
-                    printf("... cur cats back to 0!\n");
+                    //printf("... cur cats back to 0!\n");
                 }
             }
             if (currentDogs > 0)
             {
-                printf("\t dogs in trap 2\n");
+                //printf("\t dogs in trap 2\n");
 
                 while (currentDogs > 0)
                 {
-                    printf("Cur dogs > 0...\n");
+                    //printf("Cur dogs > 0...\n");
                     pthread_mutex_unlock(&openMutex);
                     pthread_cond_wait(&noDogs,&openMutex);
-                    printf("... cur dogs back to 0!\n");
+                    //printf("... cur dogs back to 0!\n");
                     blockedAttempts = 0;
                 }
                 //blockedAttempts = 0;
             }
             blockedAttempts = 0;
-            printf("end of trap2.");
+            //printf("end of trap2.");
         }
 
 
-        printf("End of trap 1.");
+        //printf("End of trap 1.");
     }
 
 
