@@ -175,12 +175,12 @@ struct Groom* staticGenerate()
 {
     struct Groom *staticGen = malloc(sizeof(Groom));
     staticGen->stations = 10;
-    staticGen->petTotal = 45;
+    staticGen->petTotal = 50;
     staticGen->catTotal=15;
     staticGen->catTime=3;
     staticGen->dogTotal=20;
     staticGen->dogTime= 2;
-    staticGen->otherTotal=10;
+    staticGen->otherTotal=15;
     staticGen->otherTime= 1;
     populateArray(staticGen);
 
@@ -195,7 +195,7 @@ struct Groom* staticGenerate()
 void* newThread ()
 {
     //sleep(1);
-    sleep(rand()%3);
+    sleep(rand()%6);
     int randPetID = rand()%3;
     char *output;
     if (randPetID == 0) output = "cat";
@@ -205,7 +205,7 @@ void* newThread ()
     //printf("Randpets should still be a: %s.\n",output);
     newpet(randPetID);
     //sleep(1);
-    sleep(rand()%7);
+    sleep(rand()%5);
     petdone(randPetID);
     pthread_exit(0);
 }

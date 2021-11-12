@@ -66,18 +66,26 @@ int petgroom_init(int numstations)
 int newpet(pet_t pet)
 {
     pthread_mutex_lock(&mutex);
+
     while (openStations <= 0)
     {
         //printf("waiting.");
         pthread_cond_wait(&emptyBeds,&mutex);
     }
+    while (blockedAttempts > 5)
+    {
+        //printf("TOO MANY BLOCKS (%d) I WANT TO SWITCH NOW.\n",blockedAttempts);
+        pthread_cond_wait(&tooManyAttempts,&mutex);
+    }
+
+
+
     if (pet == cat)
     {
         if (dogCount != 0)
         {
             blockedAttempts+=1;
             printf("Attempted to add cat, but had dogs. block#: %d\n",blockedAttempts);
-
         }
         while(dogCount != 0)
         {
@@ -108,6 +116,7 @@ int newpet(pet_t pet)
     }
     openStations -= 1;
     printf("\topen stations: %d\t cats [%d] dogs [%d] other [%d]\n",openStations,catCount,dogCount,otherCount);
+
     pthread_mutex_unlock(&mutex);
 
     return 1;
@@ -142,16 +151,28 @@ int petdone(pet_t pet)
     }
 
 
-    if (catCount == 0)
+    openStations +=1;
+    printf("\t%s done\topen stations: %d\t cats [%d] dogs [%d] other [%d]\n",output,openStations,catCount,dogCount,otherCount);
+
+    if (dogCount == 0 && catCount == 0)
+    {
+        if (blockedAttempts > 5)
+        {
+            blockedAttempts = 0;
+            pthread_cond_signal(&tooManyAttempts);
+        }
+        pthread_cond_signal(&noDogs);
+        pthread_cond_signal(&noCats);
+    }
+    else if (catCount == 0)
     {
         pthread_cond_signal(&noCats);
     }
-    if (dogCount == 0)
+    else if (dogCount == 0)
     {
         pthread_cond_signal(&noDogs);
     }
-    openStations +=1;
-    printf("\t%s done\topen stations: %d\t cats [%d] dogs [%d] other [%d]\n",output,openStations,catCount,dogCount,otherCount);
+
     pthread_cond_signal(&emptyBeds);
     pthread_mutex_unlock(&mutex);
 
