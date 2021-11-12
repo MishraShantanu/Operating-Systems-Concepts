@@ -13,7 +13,7 @@ __________________________________________________
 #include "petgroomsynch.h"
 #include <pthread.h>
 
-#define MAX_BLOCKS 5
+#define MAX_BLOCKS 4
 
 //pet_t   ==    cat = 0       dog = 1     other = 2
 
@@ -70,14 +70,14 @@ int newpet(pet_t pet)
 
     while (openStations <= 0)
     {
-        printf("waiting.");
+        //printf("waiting.");
         pthread_cond_wait(&emptyBeds,&mutex);
     }
-    if (blockedAttempts > 5)
+    if (blockedAttempts > MAX_BLOCKS)
     {
-        while (blockedAttempts > 5)
+        while (blockedAttempts > MAX_BLOCKS)
         {
-            printf("TOO MANY BLOCKS (%d) I WANT TO SWITCH NOW.\n",blockedAttempts);
+            //printf("TOO MANY BLOCKS (%d) I WANT TO SWITCH NOW.\n",blockedAttempts);
             pthread_mutex_unlock(&mutex);
             pthread_cond_wait(&tooManyAttempts,&mutex);
         }
@@ -91,12 +91,12 @@ int newpet(pet_t pet)
         {
             blockedAttempts+=1;
             printf("Attempted to add cat, but had dogs. block#: %d\n",blockedAttempts);
+            while(dogCount != 0)
+            {
+                pthread_cond_wait(&noDogs,&mutex);
+            }
         }
-        while(dogCount != 0)
-        {
-            pthread_cond_wait(&noDogs,&mutex);
 
-        }
         printf("cat given\t");
         catCount += 1;
     }
@@ -106,11 +106,12 @@ int newpet(pet_t pet)
         {
             blockedAttempts+=1;
             printf("Attempted to add dog, but had cats. block#: %d\n",blockedAttempts);
+            while(catCount != 0)
+            {
+                pthread_cond_wait(&noCats,&mutex);
+            }
         }
-        while(catCount != 0)
-        {
-            pthread_cond_wait(&noCats,&mutex);
-        }
+
         printf("dog given\t");
         dogCount += 1;
     }
@@ -147,29 +148,26 @@ int petdone(pet_t pet)
     openStations +=1;
     printf("\t%s done\topen stations: %d\t cats [%d] dogs [%d] other [%d]\n",output,openStations,catCount,dogCount,otherCount);
 
-    if (blockedAttempts > 5)
+    if (blockedAttempts > MAX_BLOCKS)
     {
-
-
         if (catCount > 0)
         {
-            printf("\n\n\nit's cats \n\n\n");
+            //printf("\n\n\nit's cats \n\n\n");
             while(catCount != 0)
             {
                 pthread_cond_wait(&noCats,&mutex);
             }
-
         }
-        if (dogCount > 0)
+        else if (dogCount > 0)
         {
-            printf("\n\n\nit's dogs \n\n\n");
+            //printf("\n\n\nit's dogs \n\n\n");
             while(dogCount != 0)
             {
                 pthread_cond_wait(&noDogs,&mutex);
             }
         }
-        blockedAttempts = 0;
-
+        pthread_cond_signal(&tooManyAttempts);
+        //blockedAttempts = 0;
     }
 
 

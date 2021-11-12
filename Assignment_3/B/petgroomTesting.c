@@ -195,7 +195,7 @@ struct Groom* staticGenerate()
 void* newThread ()
 {
     //sleep(1);
-    sleep(rand()%6);
+    sleep(rand()%2);
     int randPetID = rand()%3;
     char *output;
     if (randPetID == 0) output = "cat";
@@ -205,7 +205,7 @@ void* newThread ()
     //printf("Randpets should still be a: %s.\n",output);
     newpet(randPetID);
     //sleep(1);
-    sleep(rand()%5);
+    sleep(rand()%10);
     petdone(randPetID);
     pthread_exit(0);
 }
