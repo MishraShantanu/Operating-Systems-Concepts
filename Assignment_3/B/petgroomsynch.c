@@ -36,15 +36,28 @@ struct Station
 
 struct GroomBusiness
 {
+    pthread_mutex_t attrAccess;
     int totalStations;
     volatile int openStations;
     volatile int blockedAttempts;
+
+    volatile int catCount;
+    volatile int dogCount;
+    volatile int otherCount;
+
+    pthread_cond_t isFull;
     pthread_cond_t hasDogs;
     pthread_cond_t hasCats;
     struct Station *stationArray;
 } GroomBusiness;
 
 struct GroomBusiness *groom;
+
+
+
+
+
+
 
 
 /* PURPOSE: This function is used to instantiate a new pet grooming facility
@@ -59,9 +72,14 @@ int petgroom_init(int numstations)
     groom->totalStations = numstations;
     groom->openStations = numstations;
     groom->blockedAttempts = 0;
+    groom->catCount = 0;
+    groom->dogCount = 0;
+    groom->otherCount = 0;
     pthread_cond_init(&groom->hasCats,NULL);
     pthread_cond_init(&groom->hasDogs,NULL);
+    pthread_cond_init(&groom->isFull,NULL);
     groom->stationArray = malloc(numstations*sizeof(Station));
+    pthread_mutex_init(&groom->attrAccess,NULL);
 
     for (int i = 0; i < numstations; i++)
     {
@@ -86,6 +104,31 @@ int newpet(pet_t pet)
 
     printf("received: %s\n",output);
 
+    pthread_mutex_lock(&groom->attrAccess);
+
+    while(groom->openStations == 0)
+    {
+        pthread_cond_wait(&groom->isFull,&groom->attrAccess);
+    }
+
+    int curOpen = groom->openStations;
+    pthread_mutex_lock(&groom->stationArray[curOpen-1].locked);
+    groom->stationArray[curOpen-1].animalType = pet;
+    if (pet == 0)
+    {
+        groom->catCount += 1;
+        pthread_cond_signal(&groom->hasCats);
+    }
+    if (pet == 1)
+    {
+        groom->dogCount += 1;
+        pthread_cond_signal(&groom->hasDogs);
+    }
+    if (pet == 2) groom->otherCount += 1;
+    groom->openStations -= 1;
+
+    pthread_mutex_unlock(&groom->attrAccess);
+
     return 0;
 }
 
@@ -96,12 +139,13 @@ int newpet(pet_t pet)
  */
 int petdone(pet_t pet)
 {
+
     char *output;
     if (pet == 0) output = "cat";
     if (pet == 1) output = "dog";
     if (pet == 2) output = "other";
 
-    printf("finished: %s",output);
+    printf("finished: %s\n",output);
 
     return 1;
 }
