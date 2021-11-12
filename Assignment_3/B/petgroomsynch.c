@@ -73,59 +73,74 @@ int newpet(pet_t pet)
 
 
 
+
+
+    while (openStations <= 0)
+    {
+        printf("waiting.\n");
+        pthread_cond_wait(&emptyBeds,&mutex);
+    }
+
     if (blockedAttempts > MAX_BLOCKS)
     {
         while (blockedAttempts > MAX_BLOCKS)
         {
+            sleep(1);
             printf("TOO MANY BLOCKS (%d) I WANT TO SWITCH NOW.\n",blockedAttempts);
             //pthread_mutex_unlock(&mutex);
             pthread_cond_wait(&tooManyAttempts,&mutex);
-
         }
-        printf("SUCCESSFULLY WAITED.\n\n\n");
-
+        printf("\nSUCCESSFULLY WAITED.\n");
     }
-
-    while (openStations <= 0)
-    {
-        //printf("waiting.");
-        pthread_cond_wait(&emptyBeds,&mutex);
-    }
-
 
     if (pet == cat)
     {
         if (dogCount != 0)
         {
-            printf("\t\t\t\t+1 to cat queue.\n");
             blockedAttempts+=1;
             catQueue+=1;
+            printf("\t\t\t\t +1 cat queue[%d].\n",catQueue);
             printf("Attempted to add cat, but had dogs. block#: %d\n",blockedAttempts);
             while(dogCount != 0)
             {
+                printf("Blocked waiting on no dogs when adding cat.\n");
                 pthread_cond_wait(&noDogs,&mutex);
+
             }
+            printf("cat given1\t");
+            catCount += 1;
+        }
+        else
+        {
+            printf("cat given2\t");
+            catCount += 1;
         }
 
-        printf("cat given\t");
-        catCount += 1;
     }
     if (pet == dog)
     {
         if (catCount != 0)
         {
-            printf("\t\t\t\t+1 to dog queue.\n");
             blockedAttempts+=1;
             dogQueue+= 1;
+            printf("\t\t\t\t +1 dog queue[%d].\n",dogQueue);
             printf("Attempted to add dog, but had cats. block#: %d\n",blockedAttempts);
             while(catCount != 0)
             {
+                printf("Blocked waiting on no cats when adding dog.\n");
+
                 pthread_cond_wait(&noCats,&mutex);
             }
+            printf("dog given1\t");
+            dogCount += 1;
+        }
+        else
+        {
+            printf("dog given2\t");
+            dogCount += 1;
         }
 
-        printf("dog given\t");
-        dogCount += 1;
+
     }
     if (pet == other)
     {
@@ -192,7 +207,7 @@ int petdone(pet_t pet)
             {
                 printf("Waiting for no cat count\n");
                 pthread_cond_wait(&noCats,&mutex);
-                pthread_cond_signal(&tooManyAttempts);
+                pthread_cond_broadcast(&noCats);
             }
             pthread_cond_broadcast(&noCats);
 
@@ -203,13 +218,13 @@ int petdone(pet_t pet)
         }
         else if (dogCount > 0)
         {
-            printf("Waiting for no dog count\n");
             while(dogCount != 0)
             {
+                printf("Waiting for no dog count\n");
                 pthread_cond_wait(&noDogs,&mutex);
-                pthread_cond_signal(&tooManyAttempts);
+                pthread_cond_broadcast(&noDogs);
             }
-            pthread_cond_broadcast(&noDogs);
+
 
 
         }
@@ -220,21 +235,19 @@ int petdone(pet_t pet)
 
     if (catQueue > 0 && pet == cat)
     {
-        for (int i = 0; i < catQueue;i++)
-        {
-            printf("Queuecat. %d\n",catQueue);
-            catQueue--;
-            //newpet(cat);
-        }
+
+        printf("Queuecat. %d\n",catQueue);
+        catQueue--;
+        //newpet(cat);
+
     }
     if (dogQueue > 0 && pet == dog)
     {
-        for (int i = 0; i < dogQueue;i++)
-        {
-            printf("Queuedog: %d.\n",dogQueue);
-            dogQueue--;
-            //newpet(dog);
-        }
+
+        printf("Queuedog: %d.\n",dogQueue);
+        dogQueue--;
+        //newpet(dog);
+
     }
     pthread_mutex_unlock(&mutex);
 
