@@ -67,16 +67,20 @@ int newpet(pet_t pet)
 {
     pthread_mutex_lock(&mutex);
 
-    while (openStations <= 0)
-    {
-        //printf("waiting.");
-        pthread_cond_wait(&emptyBeds,&mutex);
-    }
+
     while (blockedAttempts > 5)
     {
         //printf("TOO MANY BLOCKS (%d) I WANT TO SWITCH NOW.\n",blockedAttempts);
         pthread_cond_wait(&tooManyAttempts,&mutex);
     }
+    blockedAttempts = 0;
+
+    while (openStations <= 0)
+    {
+        printf("waiting.");
+        pthread_cond_wait(&emptyBeds,&mutex);
+    }
+
 
 
 
@@ -158,7 +162,7 @@ int petdone(pet_t pet)
     {
         if (blockedAttempts > 5)
         {
-            blockedAttempts = 0;
+
             pthread_cond_signal(&tooManyAttempts);
         }
         pthread_cond_signal(&noDogs);
