@@ -68,21 +68,22 @@ int newpet(pet_t pet)
     pthread_mutex_lock(&mutex);
 
 
-    while (blockedAttempts > 5)
-    {
-        //printf("TOO MANY BLOCKS (%d) I WANT TO SWITCH NOW.\n",blockedAttempts);
-        pthread_cond_wait(&tooManyAttempts,&mutex);
-    }
-    blockedAttempts = 0;
-
     while (openStations <= 0)
     {
         printf("waiting.");
         pthread_cond_wait(&emptyBeds,&mutex);
     }
-
-
-
+    if (blockedAttempts > 5)
+    {
+        while (blockedAttempts > 5)
+        {
+            printf("TOO MANY BLOCKS (%d) I WANT TO SWITCH NOW.\n",blockedAttempts);
+            pthread_mutex_unlock(&mutex);
+            pthread_cond_wait(&tooManyAttempts,&mutex);
+        }
+        printf("SUCCESSFULLY WAITED.\n\n\n");
+        blockedAttempts = 0;
+    }
 
     if (pet == cat)
     {
@@ -139,40 +140,48 @@ int petdone(pet_t pet)
     if (pet == 1) output = "dog";
     if (pet == 2) output = "other";
 
-    if (pet == cat)
-    {
-        catCount -= 1;
-
-    }
-    if (pet == dog)
-    {
-        dogCount -= 1;
-
-    }
-    if (pet == other)
-    {
-        otherCount -= 1;
-    }
-
+    if (pet == cat) catCount -= 1;
+    if (pet == dog) dogCount -= 1;
+    if (pet == other) otherCount -= 1;
 
     openStations +=1;
     printf("\t%s done\topen stations: %d\t cats [%d] dogs [%d] other [%d]\n",output,openStations,catCount,dogCount,otherCount);
 
+    if (blockedAttempts > 5)
+    {
+
+
+        if (catCount > 0)
+        {
+            printf("\n\n\nit's cats \n\n\n");
+            while(catCount != 0)
+            {
+                pthread_cond_wait(&noCats,&mutex);
+            }
+
+        }
+        if (dogCount > 0)
+        {
+            printf("\n\n\nit's dogs \n\n\n");
+            while(dogCount != 0)
+            {
+                pthread_cond_wait(&noDogs,&mutex);
+            }
+        }
+        blockedAttempts = 0;
+
+    }
+
+
     if (dogCount == 0 && catCount == 0)
     {
-        if (blockedAttempts > 5)
-        {
-
-            pthread_cond_signal(&tooManyAttempts);
-        }
-        pthread_cond_signal(&noDogs);
-        pthread_cond_signal(&noCats);
+        pthread_cond_signal(&tooManyAttempts);
     }
-    else if (catCount == 0)
+    if (catCount == 0)
     {
         pthread_cond_signal(&noCats);
     }
-    else if (dogCount == 0)
+    if (dogCount == 0)
     {
         pthread_cond_signal(&noDogs);
     }
