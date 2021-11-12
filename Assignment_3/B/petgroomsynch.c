@@ -35,6 +35,8 @@ volatile int catCount;
 volatile int dogCount;
 volatile int otherCount;
 volatile int blockedAttempts;
+volatile int dogQueue;
+volatile int catQueue;
 
 /* PURPOSE: This function is used to instantiate a new pet grooming facility
  *          and initialize the required variables for the facility.
@@ -49,6 +51,8 @@ int petgroom_init(int numstations)
     catCount = 0;
     dogCount = 0;
     otherCount = 0;
+    dogQueue = 0;
+    catQueue = 0;
     pthread_mutex_init(&mutex,NULL);
     pthread_cond_init(&noDogs,NULL);
     pthread_cond_init(&noCats,NULL);
@@ -68,6 +72,7 @@ int newpet(pet_t pet)
     pthread_mutex_lock(&mutex);
 
 
+
     if (blockedAttempts > MAX_BLOCKS)
     {
         while (blockedAttempts > MAX_BLOCKS)
@@ -75,7 +80,7 @@ int newpet(pet_t pet)
             printf("TOO MANY BLOCKS (%d) I WANT TO SWITCH NOW.\n",blockedAttempts);
             //pthread_mutex_unlock(&mutex);
             pthread_cond_wait(&tooManyAttempts,&mutex);
-            blockedAttempts = 0;
+
         }
         printf("SUCCESSFULLY WAITED.\n\n\n");
 
@@ -92,7 +97,9 @@ int newpet(pet_t pet)
     {
         if (dogCount != 0)
         {
+            printf("\t\t\t\t+1 to cat queue.\n");
             blockedAttempts+=1;
+            catQueue+=1;
             printf("Attempted to add cat, but had dogs. block#: %d\n",blockedAttempts);
             while(dogCount != 0)
             {
@@ -107,7 +114,9 @@ int newpet(pet_t pet)
     {
         if (catCount != 0)
         {
+            printf("\t\t\t\t+1 to dog queue.\n");
             blockedAttempts+=1;
+            dogQueue+= 1;
             printf("Attempted to add dog, but had cats. block#: %d\n",blockedAttempts);
             while(catCount != 0)
             {
@@ -146,16 +155,18 @@ int petdone(pet_t pet)
 
 
 
+
     if (dogCount == 0 && catCount == 0)
     {
         printf("Clearing tooManyAttempts because no dogs and no cats.\n");
-        pthread_cond_broadcast(&tooManyAttempts);
+        blockedAttempts = 0;
+        pthread_cond_signal(&tooManyAttempts);
     }
-    if (catCount == 0)
+    else if (catCount == 0)
     {
         pthread_cond_signal(&noCats);
     }
-    if (dogCount == 0)
+    else if (dogCount == 0)
     {
         pthread_cond_signal(&noDogs);
     }
@@ -181,10 +192,11 @@ int petdone(pet_t pet)
             {
                 printf("Waiting for no cat count\n");
                 pthread_cond_wait(&noCats,&mutex);
-                pthread_cond_broadcast(&noCats);
-
+                pthread_cond_signal(&tooManyAttempts);
             }
-            pthread_cond_signal(&tooManyAttempts);
+            pthread_cond_broadcast(&noCats);
+
+
 
 
 
@@ -195,13 +207,34 @@ int petdone(pet_t pet)
             while(dogCount != 0)
             {
                 pthread_cond_wait(&noDogs,&mutex);
-                pthread_cond_broadcast(&noDogs);
+                pthread_cond_signal(&tooManyAttempts);
             }
-            pthread_cond_signal(&tooManyAttempts);
+            pthread_cond_broadcast(&noDogs);
+
 
         }
 
-        //blockedAttempts = 0;
+        blockedAttempts = 0;
+    }
+
+
+    if (catQueue > 0 && pet == cat)
+    {
+        for (int i = 0; i < catQueue;i++)
+        {
+            printf("Queuecat. %d\n",catQueue);
+            catQueue--;
+            //newpet(cat);
+        }
+    }
+    if (dogQueue > 0 && pet == dog)
+    {
+        for (int i = 0; i < dogQueue;i++)
+        {
+            printf("Queuedog: %d.\n",dogQueue);
+            dogQueue--;
+            //newpet(dog);
+        }
     }
     pthread_mutex_unlock(&mutex);
 
