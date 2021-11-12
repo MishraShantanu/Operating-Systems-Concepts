@@ -20,21 +20,32 @@ __________________________________________________
 //Cond variable catDogExclusion -- 0 is open, 1 is cats in grooming, 2 is dogs in grooming.
 //Cond variable -- remaining pets, 1 or 0.   [1 means there is indeed pets remaining].
 
-pthread_mutex_t mutex;
+//pthread_mutex_t mutex;
+//
+//pthread_cond_t emptyBeds;
+//pthread_cond_t noDogs;
+//pthread_cond_t noCats;
+//pthread_cond_t tooManyAttempts;
 
-pthread_cond_t emptyBeds;
-pthread_cond_t noDogs;
-pthread_cond_t noCats;
-pthread_cond_t tooManyAttempts;
+struct Station
+{
+    pthread_mutex_t locked;
+    pthread_cond_t hasAnimal;
+    volatile int animalType;  //0 = cat, 1 = dog, 2 = other, 3 = empty.
+}Station;
 
+struct GroomBusiness
+{
+    int totalStations;
+    volatile int openStations;
+    volatile int blockedAttempts;
+    pthread_cond_t hasDogs;
+    pthread_cond_t hasCats;
+    struct Station *stationArray;
+} GroomBusiness;
 
+struct GroomBusiness *groom;
 
-int totalStations;
-volatile int openStations;
-volatile int catCount;
-volatile int dogCount;
-volatile int otherCount;
-volatile int blockedAttempts;
 
 /* PURPOSE: This function is used to instantiate a new pet grooming facility
  *          and initialize the required variables for the facility.
@@ -44,18 +55,21 @@ volatile int blockedAttempts;
  */
 int petgroom_init(int numstations)
 {
-    totalStations = numstations;
-    openStations = numstations;
-    catCount = 0;
-    dogCount = 0;
-    otherCount = 0;
-    pthread_mutex_init(&mutex,NULL);
-    pthread_cond_init(&noDogs,NULL);
-    pthread_cond_init(&noCats,NULL);
-    pthread_cond_init(&emptyBeds,NULL);
-    pthread_cond_init(&tooManyAttempts,NULL);
+    groom = malloc(sizeof(GroomBusiness));
+    groom->totalStations = numstations;
+    groom->openStations = numstations;
+    groom->blockedAttempts = 0;
+    pthread_cond_init(&groom->hasCats,NULL);
+    pthread_cond_init(&groom->hasDogs,NULL);
+    groom->stationArray = malloc(numstations*sizeof(Station));
 
-    return 1;
+    for (int i = 0; i < numstations; i++)
+    {
+        groom->stationArray[i].animalType = 3;
+        pthread_mutex_init(&groom->stationArray[i].locked,NULL);
+        pthread_cond_init(&groom->stationArray[i].hasAnimal,NULL);
+    }
+    return 0;
 }
 
 /* PURPOSE: Called when a new pet arrives to the facility to be groomed.
@@ -65,67 +79,14 @@ int petgroom_init(int numstations)
  */
 int newpet(pet_t pet)
 {
-    pthread_mutex_lock(&mutex);
+    char *output;
+    if (pet == 0) output = "cat";
+    if (pet == 1) output = "dog";
+    if (pet == 2) output = "other";
 
+    printf("received: %s\n",output);
 
-    while (openStations <= 0)
-    {
-        //printf("waiting.");
-        pthread_cond_wait(&emptyBeds,&mutex);
-    }
-    if (blockedAttempts > MAX_BLOCKS)
-    {
-        while (blockedAttempts > MAX_BLOCKS)
-        {
-            //printf("TOO MANY BLOCKS (%d) I WANT TO SWITCH NOW.\n",blockedAttempts);
-            pthread_mutex_unlock(&mutex);
-            pthread_cond_wait(&tooManyAttempts,&mutex);
-        }
-        printf("SUCCESSFULLY WAITED.\n\n\n");
-        blockedAttempts = 0;
-    }
-
-    if (pet == cat)
-    {
-        if (dogCount != 0)
-        {
-            blockedAttempts+=1;
-            printf("Attempted to add cat, but had dogs. block#: %d\n",blockedAttempts);
-            while(dogCount != 0)
-            {
-                pthread_cond_wait(&noDogs,&mutex);
-            }
-        }
-
-        printf("cat given\t");
-        catCount += 1;
-    }
-    if (pet == dog)
-    {
-        if (catCount != 0)
-        {
-            blockedAttempts+=1;
-            printf("Attempted to add dog, but had cats. block#: %d\n",blockedAttempts);
-            while(catCount != 0)
-            {
-                pthread_cond_wait(&noCats,&mutex);
-            }
-        }
-
-        printf("dog given\t");
-        dogCount += 1;
-    }
-    if (pet == other)
-    {
-        printf("other given\t");
-        otherCount += 1;
-    }
-    openStations -= 1;
-    printf("\topen stations: %d\t cats [%d] dogs [%d] other [%d]\n",openStations,catCount,dogCount,otherCount);
-
-    pthread_mutex_unlock(&mutex);
-
-    return 1;
+    return 0;
 }
 
 /* PURPOSE: Called when a given pet has finished grooming and the station is now free.
@@ -135,57 +96,12 @@ int newpet(pet_t pet)
  */
 int petdone(pet_t pet)
 {
-    pthread_mutex_lock(&mutex);
-    char* output;
+    char *output;
     if (pet == 0) output = "cat";
     if (pet == 1) output = "dog";
     if (pet == 2) output = "other";
 
-    if (pet == cat) catCount -= 1;
-    if (pet == dog) dogCount -= 1;
-    if (pet == other) otherCount -= 1;
-
-    openStations +=1;
-    printf("\t%s done\topen stations: %d\t cats [%d] dogs [%d] other [%d]\n",output,openStations,catCount,dogCount,otherCount);
-
-    if (blockedAttempts > MAX_BLOCKS)
-    {
-        if (catCount > 0)
-        {
-            //printf("\n\n\nit's cats \n\n\n");
-            while(catCount != 0)
-            {
-                pthread_cond_wait(&noCats,&mutex);
-            }
-        }
-        else if (dogCount > 0)
-        {
-            //printf("\n\n\nit's dogs \n\n\n");
-            while(dogCount != 0)
-            {
-                pthread_cond_wait(&noDogs,&mutex);
-            }
-        }
-        pthread_cond_signal(&tooManyAttempts);
-        //blockedAttempts = 0;
-    }
-
-
-    if (dogCount == 0 && catCount == 0)
-    {
-        pthread_cond_signal(&tooManyAttempts);
-    }
-    if (catCount == 0)
-    {
-        pthread_cond_signal(&noCats);
-    }
-    if (dogCount == 0)
-    {
-        pthread_cond_signal(&noDogs);
-    }
-
-    pthread_cond_signal(&emptyBeds);
-    pthread_mutex_unlock(&mutex);
+    printf("finished: %s",output);
 
     return 1;
 }

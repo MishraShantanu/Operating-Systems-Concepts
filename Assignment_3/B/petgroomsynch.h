@@ -12,12 +12,7 @@
 
 typedef enum {cat, dog, other} pet_t;
 
-struct Station
-{
-    int occupied;
-    //pthread_cond_t occupuied;
-}Station;
-struct Station *stationArray;
+
 
 int petgroom_init(int numstations);
 int newpet(pet_t pet);
