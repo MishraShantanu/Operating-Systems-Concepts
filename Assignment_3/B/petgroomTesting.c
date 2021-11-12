@@ -194,10 +194,18 @@ struct Groom* staticGenerate()
 
 void* newThread ()
 {
-
+    //sleep(1);
+    //sleep(rand()%2);
     int randPetID = rand()%3;
+    char *output;
+    if (randPetID == 0) output = "cat";
+    if (randPetID == 1) output = "dog";
+    if (randPetID == 2) output = "other";
+    //printf("Randpet was a: %s.\n",output);
+    //printf("Randpets should still be a: %s.\n",output);
     newpet(randPetID);
-    sleep(rand()%10);
+    //sleep(1);
+    sleep(10);
     petdone(randPetID);
     pthread_exit(0);
 }
@@ -210,7 +218,7 @@ void* parseArray(struct Groom *me)
     {
         pthread_attr_t attr;
         pthread_attr_init(&attr);
-        sleep(2);
+        sleep(1);
         pthread_create(&threadIDs[i], &attr,(void *) newThread, NULL);
     }
     for (int i = 0; i < me->petTotal;i++)
