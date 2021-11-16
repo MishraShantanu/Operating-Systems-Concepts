@@ -229,7 +229,7 @@ int petdone(pet_t pet)
 
         }
 
-        blockedAttempts = 0;
+        //blockedAttempts = 0;
     }
 
 
