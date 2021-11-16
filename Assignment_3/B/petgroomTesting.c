@@ -165,7 +165,7 @@ struct Groom* autoGenerate()
     autoGen->otherTime = 5;
 
     printf("Initialized %d stations and %d pets.\n%d cats (10 sec each), %d dogs (7 sec each), %d others (5 sec each).\n"
-    ,autoGen->stations,autoGen->petTotal,autoGen->catTotal,autoGen->dogTotal,autoGen->otherTotal);
+            ,autoGen->stations,autoGen->petTotal,autoGen->catTotal,autoGen->dogTotal,autoGen->otherTotal);
     populateArray(autoGen);
     petgroom_init(autoGen->stations);
     return autoGen;
@@ -195,7 +195,7 @@ struct Groom* staticGenerate()
 void* newThread ()
 {
     //sleep(1);
-    //sleep(rand()%2);
+    sleep(rand()%6);
     int randPetID = rand()%3;
     char *output;
     if (randPetID == 0) output = "cat";
@@ -205,7 +205,7 @@ void* newThread ()
     //printf("Randpets should still be a: %s.\n",output);
     newpet(randPetID);
     //sleep(1);
-    sleep(10);
+    sleep(rand()%5);
     petdone(randPetID);
     pthread_exit(0);
 }
@@ -218,7 +218,6 @@ void* parseArray(struct Groom *me)
     {
         pthread_attr_t attr;
         pthread_attr_init(&attr);
-        sleep(1);
         pthread_create(&threadIDs[i], &attr,(void *) newThread, NULL);
     }
     for (int i = 0; i < me->petTotal;i++)
@@ -236,7 +235,8 @@ int main()
     struct Groom *GroomingSalon = staticGenerate();
     //struct Groom *GroomingSalon = autoGenerate();
 
-    pthread_t startMe;
-    pthread_create(&startMe, NULL,(void *) parseArray, (void *) GroomingSalon);
-    pthread_join(startMe,NULL);
+    //pthread_t startMe;
+    //pthread_create(&startMe, NULL,(void *) parseArray, (void *) GroomingSalon);
+    //pthread_join(startMe,NULL);
+    parseArray(GroomingSalon);
 }
