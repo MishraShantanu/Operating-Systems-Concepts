@@ -99,32 +99,74 @@ sys_uptime(void)
 
 uint64
 sys_btput(void)
-{
-    printf(" btput in syspoc.c \n");
-    btput();
-    return 0;
+{   // printf(" btput in syspoc.c \n");
+    
+    
+    int tag;
+    char msg[MAXTWEETLENGTH];
+    
+    if(argint(0,&tag)<0){
+        return -1;
+    }
+    if(argstr(1,msg,140)<0){
+        return -1;
+    }
+    
+    
+    return btput(tag,msg);
 }
 
 uint64
 sys_tput(void)
 {
-    printf("tput in syspoc.c \n");
-    tput();
-    return 0;
+   // printf("tput in syspoc.c \n");
+    int tag;
+    char msg[MAXTWEETLENGTH];
+    
+    if(argint(0,&tag)<0){
+        return -1;
+    }
+    if(argstr(1,msg,140)<0){
+        return -1;
+    }
+    
+    
+    return tput(tag,msg);
 }
 
 uint64
 sys_btget(void)
 {
-    printf("btget in syspoc.c \n");
-    btget();
-    return 0;
+  //  printf("btget in syspoc.c \n");
+    
+    int tag;
+    uint64 msgbufaddr;
+    
+    if(argint(0,&tag)<0){
+        return -1;
+    }
+    if(argaddr(1,&msgbufaddr)<0){
+        return -1;
+    }
+    
+    
+    return btget(tag,msgbufaddr);
 }
 
 uint64
 sys_tget(void)
 {
-    printf("tget in syspoc.c \n");
-    tget();
-    return 0;
+  //  printf("tget in syspoc.c \n");
+        int tag;
+    uint64 msgbufaddr;
+    
+    if(argint(0,&tag)<0){
+        return -1;
+    }
+    if(argaddr(1,&msgbufaddr)<0){
+        return -1;
+    }
+    
+    
+    return tget(tag,msgbufaddr);
 }

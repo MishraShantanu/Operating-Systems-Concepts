@@ -10,10 +10,11 @@ struct stat;
 struct superblock;
 
 //tweet.c
-void            btput(void);
-void            tput(void);
-void            btget(void);
-void            tget(void);
+int            btput(topic_t,char*);
+int             tput(topic_t,char*);
+int             btget(topic_t,uint64);
+int             tget(topic_t,uint64);
+void             inittweetlock(void);
 
 
 // bio.c

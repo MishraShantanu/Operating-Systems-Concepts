@@ -14,7 +14,6 @@
 // each test a process and based on the exit status of the process,
 // the test runner reports "OK" or "FAILED".  Some tests result in
 // kernel printing usertrap messages, which can be ignored if test
-// prints "OK".
 //
 
 #define BUFSZ  ((MAXOPBLOCKS+2)*BSIZE)

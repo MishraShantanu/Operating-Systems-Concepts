@@ -23,7 +23,7 @@ int getpid(void);
 char* sbrk(int);
 int sleep(int);
 int uptime(void);
-int btput(void);
+int btput(char*);
 int tput(void);
 int btget(void);
 int tget(void);
