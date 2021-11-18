@@ -93,13 +93,16 @@ int newpet(pet_t pet) {
         {
             blockedAttempts += 1;
             while (catCount != 0) pthread_cond_wait(&noCats, &mutex);
+            while (openStations <= 0) pthread_cond_wait(&emptyBeds, &mutex);
         }
         if (pet == cat && dogCount != 0)
         {
             blockedAttempts += 1;
             while (dogCount != 0) pthread_cond_wait(&noDogs, &mutex);
+            while (openStations <= 0) pthread_cond_wait(&emptyBeds, &mutex);
         }
         while (openStations <= 0) pthread_cond_wait(&emptyBeds, &mutex);
+
         if (pet == cat)
         {
             catCount++;
@@ -169,8 +172,8 @@ int petdone(pet_t pet)
     {
         if (blockedAttempts > MAX_BLOCKS)
         {
-            printf("Max blocks cleared, broadcast as free to waiting threads.\n");
-            pthread_cond_broadcast(&tooManyAttempts);
+            printf("Max blocks cleared, signal as free to waiting threads.\n");
+            pthread_cond_signal(&tooManyAttempts);
             blockedAttempts = 0;
         }
         //blockedAttempts = 0;
