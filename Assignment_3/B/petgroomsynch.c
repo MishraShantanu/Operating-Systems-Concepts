@@ -11,7 +11,7 @@ __________________________________________________
  */
 
 #include "petgroomsynch.h"
-#include <pthread.h>
+//#include <pthread.h>
 
 #define MAX_BLOCKS 5
 
@@ -67,19 +67,22 @@ int newpet(pet_t pet)
 {
     pthread_mutex_lock(&mutex);
 
-
-    while (blockedAttempts > 5)
+    if (blockedAttempts > MAX_BLOCKS)
     {
-        //printf("TOO MANY BLOCKS (%d) I WANT TO SWITCH NOW.\n",blockedAttempts);
-        pthread_cond_wait(&tooManyAttempts,&mutex);
+        while (blockedAttempts > MAX_BLOCKS)
+        {
+            //printf("TOO MANY BLOCKS (%d) I WANT TO SWITCH NOW.\n",blockedAttempts);
+            pthread_cond_wait(&tooManyAttempts,&mutex);
+        }
+
     }
     blockedAttempts = 0;
-
     while (openStations <= 0)
     {
         printf("waiting.");
         pthread_cond_wait(&emptyBeds,&mutex);
     }
+
 
 
 
@@ -160,9 +163,8 @@ int petdone(pet_t pet)
 
     if (dogCount == 0 && catCount == 0)
     {
-        if (blockedAttempts > 5)
+        if (blockedAttempts > MAX_BLOCKS)
         {
-
             pthread_cond_signal(&tooManyAttempts);
         }
         pthread_cond_signal(&noDogs);
