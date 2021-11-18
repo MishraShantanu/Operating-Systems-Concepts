@@ -64,7 +64,8 @@ int petgroom_init(int numstations)
  * POST-CONDITIONS: Blocks until the given pet can be allocated to a grooming station.
  * RETURN: 0 --> Success.    -1 --> Failure.
  */
-int newpet(pet_t pet) {
+int newpet(pet_t pet)
+{
 
     if (pet == other)
     {
@@ -93,13 +94,13 @@ int newpet(pet_t pet) {
         {
             blockedAttempts += 1;
             while (catCount != 0) pthread_cond_wait(&noCats, &mutex);
-            while (openStations <= 0) pthread_cond_wait(&emptyBeds, &mutex);
+            //while (openStations <= 0) pthread_cond_wait(&emptyBeds, &mutex);
         }
         if (pet == cat && dogCount != 0)
         {
             blockedAttempts += 1;
             while (dogCount != 0) pthread_cond_wait(&noDogs, &mutex);
-            while (openStations <= 0) pthread_cond_wait(&emptyBeds, &mutex);
+            //while (openStations <= 0) pthread_cond_wait(&emptyBeds, &mutex);
         }
         while (openStations <= 0) pthread_cond_wait(&emptyBeds, &mutex);
 
@@ -117,12 +118,6 @@ int newpet(pet_t pet) {
         printf("\topen stations: %d\t cats [%d] dogs [%d] other [%d]\n",openStations,catCount,dogCount,otherCount);
         pthread_mutex_unlock(&mutex);
     }
-    //pthread_cond_signal(&emptyBeds);
-
-
-
-
-
     return 1;
 }
 
