@@ -49,6 +49,7 @@ int petgroom_init(int numstations)
     catCount = 0;
     dogCount = 0;
     otherCount = 0;
+    blockedAttempts = 0;
     pthread_mutex_init(&mutex,NULL);
     pthread_cond_init(&noDogs,NULL);
     pthread_cond_init(&noCats,NULL);
@@ -64,30 +65,32 @@ int petgroom_init(int numstations)
  * RETURN: 0 --> Success.    -1 --> Failure.
  */
 int newpet(pet_t pet) {
-    pthread_mutex_lock(&mutex);
 
-    //No open beds? Wait.
-    while (openStations <= 0)
-    {
-        pthread_cond_wait(&emptyBeds, &mutex);
-    }
-
-    //If pet is other, no waiting needed.
     if (pet == other)
     {
+        pthread_mutex_lock(&mutex);
+        while (openStations <= 0)
+        {
+            pthread_cond_wait(&emptyBeds, &mutex);
+        }
         printf("other given\t");
         otherCount++;
         openStations -= 1;
-        //pthread_mutex_unlock(&mutex);
+        pthread_mutex_unlock(&mutex);
     }
     else
     {
         //Check if we've waited more than MAX_BLOCKS amount of time for adding new dog or new cat.
+        pthread_mutex_lock(&mutex);
         while (blockedAttempts > MAX_BLOCKS)
         {
             printf("Too many blocks.\n");
             pthread_cond_wait(&tooManyAttempts, &mutex);
             blockedAttempts = 0;
+        }
+        while (openStations <= 0)
+        {
+            pthread_cond_wait(&emptyBeds, &mutex);
         }
 
         if (pet == dog)
@@ -96,7 +99,7 @@ int newpet(pet_t pet) {
             {
                 blockedAttempts += 1;
             }
-            while (catCount != 0)
+            while (catCount != 0 || openStations <= 0)
             {
                 pthread_cond_wait(&noCats, &mutex);
             }
@@ -110,7 +113,7 @@ int newpet(pet_t pet) {
             {
                 blockedAttempts += 1;
             }
-            while (dogCount != 0)
+            while (dogCount != 0 || openStations <= 0)
             {
                 pthread_cond_wait(&noDogs, &mutex);
             }
@@ -118,12 +121,9 @@ int newpet(pet_t pet) {
             catCount++;
         }
         openStations -= 1;
+        pthread_mutex_unlock(&mutex);
     }
-
-
     printf("\topen stations: %d\t cats [%d] dogs [%d] other [%d]\n",openStations,catCount,dogCount,otherCount);
-    pthread_mutex_unlock(&mutex);
-
     //pthread_cond_signal(&emptyBeds);
 
 
@@ -179,7 +179,7 @@ int petdone(pet_t pet)
     {
         if (blockedAttempts > MAX_BLOCKS)
         {
-            printf("Too many blocks, signal as free.\n");
+            printf("Max blocks cleared, broadcast as free to waiting threads.\n");
             pthread_cond_broadcast(&tooManyAttempts);
         }
         //blockedAttempts = 0;

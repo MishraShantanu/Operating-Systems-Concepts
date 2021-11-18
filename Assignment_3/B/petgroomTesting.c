@@ -216,10 +216,8 @@ void* parseArray(struct Groom *me)
     pthread_t threadIDs[me->petTotal];
     for (int i = 0; i < me->petTotal;i++)
     {
-        pthread_attr_t attr;
-        pthread_attr_init(&attr);
         sleep(1);
-        pthread_create(&threadIDs[i], &attr,(void *) newThread, NULL);
+        pthread_create(&threadIDs[i],NULL,(void *) newThread, NULL);
     }
     for (int i = 0; i < me->petTotal;i++)
     {
@@ -240,5 +238,4 @@ int main()
     pthread_create(&startMe, NULL,(void *) parseArray, (void *) GroomingSalon);
     pthread_join(startMe,NULL);
     //parseArray(GroomingSalon);
-
 }
