@@ -205,7 +205,7 @@ void* newThread ()
     //printf("Randpets should still be a: %s.\n",output);
     newpet(randPetID);
     //sleep(1);
-    sleep(20);
+    sleep(5);
     petdone(randPetID);
     pthread_exit(0);
 }
@@ -221,7 +221,7 @@ void* parseArray(struct Groom *me)
     }
     for (int i = 0; i < me->petTotal;i++)
     {
-        pthread_join(threadIDs[i],NULL);
+        //pthread_join(threadIDs[i],NULL);
     }
     return 0;
 }
