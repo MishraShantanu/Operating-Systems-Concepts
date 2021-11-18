@@ -80,27 +80,25 @@ int newpet(pet_t pet) {
     {
         //Check if we've waited more than MAX_BLOCKS amount of time for adding new dog or new cat.
         pthread_mutex_lock(&mutex);
+        char* typeWaiting = "None";
         while (blockedAttempts > MAX_BLOCKS)
         {
-            char* typeWaiting;
-            if (catCount > 0) typeWaiting="cat";
-            if (dogCount > 0) typeWaiting="dog";
-
-            printf("Too many blocks. waiting for %s to clear. \n",typeWaiting);
+            if (catCount > 0) typeWaiting="cats";
+            if (dogCount > 0) typeWaiting="dogs";
+            printf("Too many blocks. Waiting for %s to clear. \n",typeWaiting);
             pthread_cond_wait(&tooManyAttempts, &mutex);
             blockedAttempts = 0;
         }
-        if (pet == dog)
+        if (pet == dog && catCount != 0)
         {
-            if (catCount != 0) blockedAttempts += 1;
+            blockedAttempts += 1;
             while (catCount != 0) pthread_cond_wait(&noCats, &mutex);
         }
-        if (pet == cat)
+        if (pet == cat && dogCount != 0)
         {
-            if (dogCount != 0) blockedAttempts += 1;
+            blockedAttempts += 1;
             while (dogCount != 0) pthread_cond_wait(&noDogs, &mutex);
         }
-
         while (openStations <= 0) pthread_cond_wait(&emptyBeds, &mutex);
         if (pet == cat)
         {

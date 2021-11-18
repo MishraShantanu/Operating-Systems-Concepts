@@ -10,6 +10,8 @@
 #include <time.h>
 #include <unistd.h>
 #include "common_threads.h"
+#include <string.h>
+
 typedef enum {cat, dog, other} pet_t;
 
 
