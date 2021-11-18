@@ -103,17 +103,30 @@ int newpet(pet_t pet)
             //while (openStations <= 0) pthread_cond_wait(&emptyBeds, &mutex);
         }
         while (openStations <= 0) pthread_cond_wait(&emptyBeds, &mutex);
-
-        if (pet == cat)
+        if (strcmp(typeWaiting,"cats") == 0 && pet == cat)
         {
             catCount++;
             printf("cat given\t");
         }
-        if (pet == dog)
+        else if (strcmp(typeWaiting,"dogs") == 0 && pet == dog)
         {
             dogCount++;
             printf("dog given\t");
         }
+        else
+        {
+            if (pet == cat)
+            {
+                catCount++;
+                printf("cat given\t");
+            }
+            if (pet == dog)
+            {
+                dogCount++;
+                printf("dog given\t");
+            }
+        }
+
         openStations -= 1;
         printf("\topen stations: %d\t cats [%d] dogs [%d] other [%d]\n",openStations,catCount,dogCount,otherCount);
         pthread_mutex_unlock(&mutex);
