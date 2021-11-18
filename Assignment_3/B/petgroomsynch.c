@@ -67,25 +67,30 @@ int newpet(pet_t pet)
 {
     pthread_mutex_lock(&mutex);
 
+
+
+
+
     if (blockedAttempts > MAX_BLOCKS)
     {
         while (blockedAttempts > MAX_BLOCKS)
         {
-            //printf("TOO MANY BLOCKS (%d) I WANT TO SWITCH NOW.\n",blockedAttempts);
+            printf("TOO MANY BLOCKS (%d) I WANT TO SWITCH NOW.\n",blockedAttempts);
             pthread_cond_wait(&tooManyAttempts,&mutex);
         }
 
     }
     blockedAttempts = 0;
-    while (openStations <= 0)
+
+
+
+
+
+    if (pet == other)
     {
-        printf("waiting.");
-        pthread_cond_wait(&emptyBeds,&mutex);
+        printf("other given\t");
+        //otherCount += 1;
     }
-
-
-
-
 
     if (pet == cat)
     {
@@ -96,13 +101,13 @@ int newpet(pet_t pet)
         }
         while(dogCount != 0)
         {
+            printf("Waiting for no dogs.\n");
             pthread_cond_wait(&noDogs,&mutex);
-
         }
         printf("cat given\t");
-        catCount += 1;
+        //catCount += 1;
     }
-    if (pet == dog)
+    else if (pet == dog)
     {
         if (catCount != 0)
         {
@@ -111,17 +116,26 @@ int newpet(pet_t pet)
         }
         while(catCount != 0)
         {
+            printf("Waiting for no dogs.\n");
             pthread_cond_wait(&noCats,&mutex);
         }
         printf("dog given\t");
-        dogCount += 1;
+        //dogCount += 1;
     }
-    if (pet == other)
+    if (pet == dog) dogCount++;
+    if (pet == cat) catCount++;
+    if (pet == other) otherCount++;
+
+    while (openStations <= 0)
     {
-        printf("other given\t");
-        otherCount += 1;
+        printf("waiting for open station...\n");
+        pthread_cond_wait(&emptyBeds,&mutex);
+
     }
     openStations -= 1;
+    pthread_cond_signal(&emptyBeds);
+
+
     printf("\topen stations: %d\t cats [%d] dogs [%d] other [%d]\n",openStations,catCount,dogCount,otherCount);
 
     pthread_mutex_unlock(&mutex);
@@ -142,6 +156,9 @@ int petdone(pet_t pet)
     if (pet == 1) output = "dog";
     if (pet == 2) output = "other";
 
+
+    printf("\t%s done\topen stations: %d\t cats [%d] dogs [%d] other [%d]\n",output,openStations,catCount,dogCount,otherCount);
+
     if (pet == cat)
     {
         catCount -= 1;
@@ -150,7 +167,6 @@ int petdone(pet_t pet)
     if (pet == dog)
     {
         dogCount -= 1;
-
     }
     if (pet == other)
     {
@@ -158,27 +174,34 @@ int petdone(pet_t pet)
     }
 
 
-    openStations +=1;
-    printf("\t%s done\topen stations: %d\t cats [%d] dogs [%d] other [%d]\n",output,openStations,catCount,dogCount,otherCount);
-
+    if (catCount == 0)
+    {
+        printf("No cats, signal nocats.\n");
+        pthread_cond_broadcast(&noCats);
+    }
+    else if (dogCount == 0)
+    {
+        printf("No dogs, signal nodogs.\n");
+        pthread_cond_broadcast(&noDogs);
+    }
     if (dogCount == 0 && catCount == 0)
     {
         if (blockedAttempts > MAX_BLOCKS)
         {
+            printf("Too many blocks, signal as free.");
             pthread_cond_signal(&tooManyAttempts);
         }
+        printf("Nodogs and nocats, signalling\n");
         pthread_cond_signal(&noDogs);
         pthread_cond_signal(&noCats);
     }
-    else if (catCount == 0)
-    {
-        pthread_cond_signal(&noCats);
-    }
-    else if (dogCount == 0)
-    {
-        pthread_cond_signal(&noDogs);
-    }
+    //while(openStations <= 0)
+   // {
+   //     printf("waiting for open station to free")
+   //     pthread_cond_wait(&emptyBeds,&mutex);
 
+   // }
+    openStations +=1;
     pthread_cond_signal(&emptyBeds);
     pthread_mutex_unlock(&mutex);
 
