@@ -180,6 +180,7 @@ int petdone(pet_t pet)
         if (blockedAttempts > MAX_BLOCKS)
         {
             printf("Max blocks cleared, broadcast as free to waiting threads.\n");
+            blockedAttempts = 0;
             pthread_cond_broadcast(&tooManyAttempts);
         }
         //blockedAttempts = 0;
