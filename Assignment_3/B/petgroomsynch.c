@@ -13,7 +13,7 @@ __________________________________________________
 #include "petgroomsynch.h"
 //#include <pthread.h>
 
-#define MAX_BLOCKS 5
+#define MAX_BLOCKS 3
 
 //pet_t   ==    cat = 0       dog = 1     other = 2
 
@@ -179,7 +179,7 @@ int petdone(pet_t pet)
     {
         if (blockedAttempts > MAX_BLOCKS)
         {
-            printf("Too many blocks, signal as free.");
+            printf("Too many blocks, signal as free.\n");
             pthread_cond_broadcast(&tooManyAttempts);
         }
         //blockedAttempts = 0;
