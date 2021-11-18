@@ -12,13 +12,9 @@ __________________________________________________
 
 #include "petgroomsynch.h"
 //#include <pthread.h>
-
-#define MAX_BLOCKS 3
+#define MAX_BLOCKS 5
 
 //pet_t   ==    cat = 0       dog = 1     other = 2
-
-//Cond variable catDogExclusion -- 0 is open, 1 is cats in grooming, 2 is dogs in grooming.
-//Cond variable -- remaining pets, 1 or 0.   [1 means there is indeed pets remaining].
 
 pthread_mutex_t mutex;
 
@@ -30,6 +26,7 @@ pthread_cond_t tooManyAttempts;
 
 
 int totalStations;
+int beenInitialized;
 volatile int openStations;
 volatile int catCount;
 volatile int dogCount;
@@ -50,11 +47,13 @@ int petgroom_init(int numstations)
     dogCount = 0;
     otherCount = 0;
     blockedAttempts = 0;
+
     pthread_mutex_init(&mutex,NULL);
     pthread_cond_init(&noDogs,NULL);
     pthread_cond_init(&noCats,NULL);
     pthread_cond_init(&emptyBeds,NULL);
     pthread_cond_init(&tooManyAttempts,NULL);
+    beenInitialized = 1;
 
     return 1;
 }
@@ -71,10 +70,10 @@ int newpet(pet_t pet)
     {
         pthread_mutex_lock(&mutex);
         while (openStations <= 0) pthread_cond_wait(&emptyBeds, &mutex);
-        printf("other given\t");
+        //printf("other given\t");
         otherCount++;
         openStations -= 1;
-        printf("\topen stations: %d\t cats [%d] dogs [%d] other [%d]\n",openStations,catCount,dogCount,otherCount);
+        //printf("\topen stations: %d\t cats [%d] dogs [%d] other [%d]\n",openStations,catCount,dogCount,otherCount);
         pthread_mutex_unlock(&mutex);
     }
     else
@@ -105,30 +104,34 @@ int newpet(pet_t pet)
         while (openStations <= 0) pthread_cond_wait(&emptyBeds, &mutex);
         if (strcmp(typeWaiting,"cats") == 0 && pet == cat)
         {
+            //printf("CATS GIVEN PRIORITY.\n");
             catCount++;
-            printf("cat given\t");
+            //printf("cat given\t");
+            typeWaiting = "None";
         }
         else if (strcmp(typeWaiting,"dogs") == 0 && pet == dog)
         {
+            //printf("DOGS GIVEN PRIORITY.\n");
             dogCount++;
-            printf("dog given\t");
+            //printf("dog given\t");
+            typeWaiting = "None";
         }
         else
         {
             if (pet == cat)
             {
                 catCount++;
-                printf("cat given\t");
+                //printf("cat given\t");
             }
             if (pet == dog)
             {
                 dogCount++;
-                printf("dog given\t");
+                //printf("dog given\t");
             }
         }
 
         openStations -= 1;
-        printf("\topen stations: %d\t cats [%d] dogs [%d] other [%d]\n",openStations,catCount,dogCount,otherCount);
+        //printf("\topen stations: %d\t cats [%d] dogs [%d] other [%d]\n",openStations,catCount,dogCount,otherCount);
         pthread_mutex_unlock(&mutex);
     }
     return 1;
@@ -141,30 +144,34 @@ int newpet(pet_t pet)
  */
 int petdone(pet_t pet)
 {
-    pthread_mutex_lock(&mutex);
     char* output;
     if (pet == 0) output = "cat";
     if (pet == 1) output = "dog";
     if (pet == 2) output = "other";
+    pthread_mutex_lock(&mutex);
 
-
-
-    if (pet == cat)
+    if (pet == cat && catCount == 0)
     {
-        catCount -= 1;
+        printf("TRIED TO CLEAR A PET CAT WHEN IT WASN'T BEING GROOMED.\n");
+        return -1;
+    }
+    if (pet == dog && dogCount == 0)
+    {
+        printf("TRIED TO CLEAR A PET DOG WHEN IT WASN'T BEING GROOMED.\n");
+        return -1;
+    }
+    if (pet == other && otherCount == 0)
+    {
+        printf("TRIED TO CLEAR A PET OTHER WHEN IT WASN'T BEING GROOMED.\n");
+        return -1;
+    }
 
-    }
-    if (pet == dog)
-    {
-        dogCount -= 1;
-    }
-    if (pet == other)
-    {
-        otherCount -= 1;
-    }
+    if (pet == cat) catCount -= 1;
+    if (pet == dog) dogCount -= 1;
+    if (pet == other) otherCount -= 1;
 
     openStations +=1;
-    printf("\t%s done\topen stations: %d\t cats [%d] dogs [%d] other [%d]\n",output,openStations,catCount,dogCount,otherCount);
+    //printf("\t%s done\topen stations: %d\t cats [%d] dogs [%d] other [%d]\n",output,openStations,catCount,dogCount,otherCount);
     pthread_cond_signal(&emptyBeds);
     if (catCount == 0)
     {
@@ -181,7 +188,7 @@ int petdone(pet_t pet)
         if (blockedAttempts > MAX_BLOCKS)
         {
             printf("Max blocks cleared, signal as free to waiting threads.\n");
-            pthread_cond_signal(&tooManyAttempts);
+            pthread_cond_broadcast(&tooManyAttempts);
             blockedAttempts = 0;
         }
         //blockedAttempts = 0;
@@ -211,7 +218,32 @@ int petdone(pet_t pet)
  */
 int petgroom_done()
 {
-    //Confirm all pets have been cleared.
-    //Deallocate
-    return 1;
+    if (beenInitialized == 0)
+    {
+        printf("ERROR: Tried to call petgroom_done but petgroom has not been initialized.\n");
+        return -1;
+    }
+
+    if (catCount != 0 || dogCount != 0 || otherCount != 0)
+    {
+        printf("ERROR: Tried to de-initialize petgroom while there was still pets.");
+        return -1;
+    }
+
+    totalStations = 0;
+    openStations = 0;
+    catCount = 0;
+    dogCount = 0;
+    otherCount = 0;
+    blockedAttempts = 0;
+
+    pthread_mutex_destroy(&mutex);
+    pthread_cond_destroy(&noDogs);
+    pthread_cond_destroy(&noCats);
+    pthread_cond_destroy(&emptyBeds);
+    pthread_cond_destroy(&tooManyAttempts);
+
+    beenInitialized = 0;
+
+    return 0;
 }
