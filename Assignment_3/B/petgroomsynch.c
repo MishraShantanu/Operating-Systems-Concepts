@@ -82,27 +82,35 @@ int newpet(pet_t pet) {
         pthread_mutex_lock(&mutex);
         while (blockedAttempts > MAX_BLOCKS)
         {
-            printf("Too many blocks.\n");
+            char* typeWaiting;
+            if (catCount > 0) typeWaiting="cat";
+            if (dogCount > 0) typeWaiting="dog";
+
+            printf("Too many blocks. waiting for %s to clear. \n",typeWaiting);
             pthread_cond_wait(&tooManyAttempts, &mutex);
             blockedAttempts = 0;
         }
-
         if (pet == dog)
         {
             if (catCount != 0) blockedAttempts += 1;
             while (catCount != 0) pthread_cond_wait(&noCats, &mutex);
-            while (openStations <= 0) pthread_cond_wait(&emptyBeds, &mutex);
-            printf("dog given\t");
-            dogCount++;
         }
-
         if (pet == cat)
         {
             if (dogCount != 0) blockedAttempts += 1;
             while (dogCount != 0) pthread_cond_wait(&noDogs, &mutex);
-            while (openStations <= 0) pthread_cond_wait(&emptyBeds, &mutex);
-            printf("cat given\t");
+        }
+
+        while (openStations <= 0) pthread_cond_wait(&emptyBeds, &mutex);
+        if (pet == cat)
+        {
             catCount++;
+            printf("cat given\t");
+        }
+        if (pet == dog)
+        {
+            dogCount++;
+            printf("dog given\t");
         }
         openStations -= 1;
         printf("\topen stations: %d\t cats [%d] dogs [%d] other [%d]\n",openStations,catCount,dogCount,otherCount);
