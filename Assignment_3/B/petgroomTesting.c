@@ -195,7 +195,7 @@ struct Groom* staticGenerate()
 void* newThread ()
 {
     //sleep(1);
-    sleep(rand()%2);
+
     int randPetID = rand()%3;
     char *output;
     if (randPetID == 0) output = "cat";
@@ -218,7 +218,9 @@ void* parseArray(struct Groom *me)
     {
         pthread_attr_t attr;
         pthread_attr_init(&attr);
+        sleep(rand()%2);
         pthread_create(&threadIDs[i], &attr,(void *) newThread, NULL);
+
     }
     for (int i = 0; i < me->petTotal;i++)
     {
