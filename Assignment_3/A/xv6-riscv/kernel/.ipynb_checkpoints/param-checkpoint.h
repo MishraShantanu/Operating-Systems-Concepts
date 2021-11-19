@@ -11,7 +11,7 @@
 #define NBUF         (MAXOPBLOCKS*3)  // size of disk block cache
 #define FSSIZE       1000  // size of file system in blocks
 #define MAXPATH      128   // maximum file path name
-#define MAXTWEETTOTAL 10
-#define NUMTWEETTOPICS 3
-#define MAXTWEETLENGTH 140
-#define MAXTAGTWEET   10
+#define MAXTWEETTOTAL 10 //max number of tweets that can be stored in system 
+#define NUMTWEETTOPICS 3 //number of tweet topics 
+#define MAXTWEETLENGTH 140 //max char in the tweet msg 
+#define MAXTAGTWEET   8 //max number of tweet in a topic
