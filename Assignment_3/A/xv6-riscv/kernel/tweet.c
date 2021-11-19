@@ -6,28 +6,39 @@
 #include "defs.h"
 #include "proc.h"
 
-
+int tweetcounter = 0;
 struct tweet{
     topic_t tag;
     char msg[MAXTWEETLENGTH];
-}tweetbuffer[MAXTWEETTOTAL];
+};
 
-struct spinlock tweetlock;
+
+
+struct alltweet{
+    struct tweet tagtweetbuffer[MAXTAGTWEET];
+    struct spinlock tweettaglock;
+        
+} alltweetbuff[NUMTWEETTOPICS];
+
+
 
 int getchan = 10, putchan = 20;
 
 
 void inittweetlock(void){
-    initlock(&tweetlock,"tweetlock");
+    
+    for(int i=0; i<NUMTWEETTOPICS;i++){
+        initlock(&alltweetbuff[i].tweettaglock,"tweetlock");
+    }
+    
 }
 
 
 int gettagindex(topic_t tag){
     
     int index =-1;
-    for(int i=0;i<MAXTWEETTOTAL;i++){
-        //printf("get tag idx msg %d len %d\n",i,strlen(tweetbuffer[i].msg ));
-        if(tweetbuffer[i].tag==tag&&strlen(tweetbuffer[i].msg)>0){
+    for(int i=0;i<MAXTAGTWEET;i++){
+        if(alltweetbuff[tag].tagtweetbuffer[i].tag==tag&&strlen(alltweetbuff[tag].tagtweetbuffer[i].msg)>0){
           index = i;
           break;
           
@@ -39,10 +50,8 @@ int gettagindex(topic_t tag){
 
 int getemptyindex(topic_t tag){
     int index =-1;
-    for(int i=0;i<MAXTWEETTOTAL;i++){
-        
-        //printf("msg %d len %d\n",i,strlen(tweetbuffer[i].msg ));
-        if(strlen(tweetbuffer[i].msg)==0){
+    for(int i=0;i<MAXTAGTWEET;i++){
+        if(strlen(alltweetbuff[tag].tagtweetbuffer[i].msg)==0){
            index = i;
           break;
           
@@ -55,30 +64,32 @@ int getemptyindex(topic_t tag){
 int
 btput(topic_t tag,char* msg)
 {
-
-    //printf("btput Hello world in tweet.c, recvid msg: %s\n",msg);
-    acquire(&tweetlock);
+    acquire(&alltweetbuff[tag].tweettaglock);
     
-   // printf("Acquiring lock\n");
+//    printf("Acquiring lock\n");
     int index = getemptyindex(tag);
-    
-    while(index==-1){
-//         printf("Started sleeping for btput\n");
-        sleep(&getchan,&tweetlock);
+     //    printf("index after sleep %d\n ", index);
+       //  printf("max tweet %d\n",tweetcounter>MAXTWEETTOTAL);
+    while(index==-1||tweetcounter>MAXTWEETTOTAL){
+        
+//       printf("Started sleeping for btput\n");
+        sleep(&getchan,&alltweetbuff[tag].tweettaglock);
         index = getemptyindex(tag);
- //         printf("index after sleep %d \n", index);
+//         printf("index after sleep %d \n", index);
     }
-//     printf("index after wakeup %d0 \n", index);
+   //printf("index after wakeup %d0 \n", index);
 //     if(index!=-1){
-         strncpy(tweetbuffer[index].msg,msg,strlen(msg));
-         tweetbuffer[index].tag=tag;
+         strncpy(alltweetbuff[tag].tagtweetbuffer[index].msg,msg,strlen(msg));
+         alltweetbuff[tag].tagtweetbuffer[index].tag=tag;
+         tweetcounter++;
          wakeup(&putchan);
+         
          //wakeup get
 //     }else{
 //         printf("No space available to put new msg\n");
 //     }
-   // printf("release lock\n");
-    release(&tweetlock);
+  //  printf("release lock\n");
+    release(&alltweetbuff[tag].tweettaglock);
     
     return 0;
 }
@@ -87,22 +98,23 @@ int
 tput(topic_t tag,char* msg){
    // printf("ttput Hello world in tweet.c\n");
    
-    acquire(&tweetlock);
+    acquire(&alltweetbuff[tag].tweettaglock);
    // printf("Acquiring lock\n");
     int index = getemptyindex(tag);
     
-    if(index!=-1){
-         strncpy(tweetbuffer[index].msg,msg,strlen(msg));
-         tweetbuffer[index].tag=tag;
+    if(index!=-1||tweetcounter>MAXTWEETTOTAL){
+         strncpy(alltweetbuff[tag].tagtweetbuffer[index].msg,msg,strlen(msg));
+         alltweetbuff[tag].tagtweetbuffer[index].tag=tag;
+         tweetcounter++;
          //wakeup get
     }else{
         
         printf("No space available to put new msg returing -1\n");
-         release(&tweetlock);
+         release(&alltweetbuff[tag].tweettaglock);
         return -1;
     }
    // printf("release lock\n");
-    release(&tweetlock);
+    release(&alltweetbuff[tag].tweettaglock);
    
     
     return 0;
@@ -117,24 +129,27 @@ btget(topic_t tag,uint64 buf){
    
     struct proc *p = myproc();
    // printf("btget Hello world in tweet.c\n");
-    acquire(&tweetlock);
-  //  printf("Acquiring lock\n");
+    acquire(&alltweetbuff[tag].tweettaglock);
+//   printf("btget Acquiring lock\n");
     int index = gettagindex(tag);
     
      while(index==-1){
-  //      printf("Started sleeping for btget \n");
-        sleep(&putchan,&tweetlock);
+     // printf("Started sleeping for btget \n");
+        sleep(&putchan,&alltweetbuff[tag].tweettaglock);
         index = getemptyindex(tag);
-  //      printf("index after sleep %d\n ", index);
+  //     printf("index after sleep %d\n ", index);
     }
-   // printf("index after wakeup %d \n", index);
+ //  printf("index after wakeup %d \n", index);
 //     if(index!=-1){
 //          printf("tag idx %d \n",index);
 //          printf("at i found: %d\n",index,strlen(tweetbuffer[index].msg ));
-         char *temp = tweetbuffer[index].msg;
+         char *temp = alltweetbuff[tag].tagtweetbuffer[index].msg;
+   //      printf("**** Msg found: %s\n", temp);
          copyout(p->pagetable,buf,temp,strlen(temp));
 
-        memset(tweetbuffer[index].msg, 0, MAXTWEETLENGTH);
+        memset(alltweetbuff[tag].tagtweetbuffer[index].msg, 0, MAXTWEETLENGTH);
+        
+        tweetcounter--;
         wakeup(&getchan);
          
          //wakeup put
@@ -145,8 +160,8 @@ btget(topic_t tag,uint64 buf){
 //         printf("no element msg available to read\n");
 //     }
    
-  //  printf("release lock\n");
-    release(&tweetlock);
+//    printf("btget release lock\n");
+    release(&alltweetbuff[tag].tweettaglock);
     
      return 0;
 }
@@ -159,27 +174,28 @@ tget(topic_t tag,uint64 buf){
    
     struct proc *p = myproc();
 
-    acquire(&tweetlock);
+    acquire(&alltweetbuff[tag].tweettaglock);
    // printf("Acquiring lock\n");
     int index = gettagindex(tag);
     if(index!=-1){
 
-        char *temp = tweetbuffer[index].msg;
+        char *temp = alltweetbuff[tag].tagtweetbuffer[index].msg;
         copyout(p->pagetable,buf,temp,strlen(temp));
 
-        memset(tweetbuffer[index].msg, 0, MAXTWEETLENGTH);
+        memset(alltweetbuff[tag].tagtweetbuffer[index].msg, 0, MAXTWEETLENGTH);
         
-        //wakeup put
+         tweetcounter--;
+      
          
          
     }else{
         printf("no element msg available to read  returing -1\n");
-         release(&tweetlock);
+         release(&alltweetbuff[tag].tweettaglock);
         return -1;
     }
    
   //  printf("release lock\n");
-    release(&tweetlock);
+    release(&alltweetbuff[tag].tweettaglock);
     
      return 0;
 }

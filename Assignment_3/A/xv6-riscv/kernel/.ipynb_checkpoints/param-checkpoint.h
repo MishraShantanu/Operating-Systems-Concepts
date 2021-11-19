@@ -12,5 +12,6 @@
 #define FSSIZE       1000  // size of file system in blocks
 #define MAXPATH      128   // maximum file path name
 #define MAXTWEETTOTAL 10
-#define NUMTWEETTOPICS 4
+#define NUMTWEETTOPICS 3
 #define MAXTWEETLENGTH 140
+#define MAXTAGTWEET   10

@@ -111,7 +111,7 @@ w_mscratch(uint64 x)
     80000094:	300027f3          	csrr	a5,mstatus
   x &= ~MSTATUS_MPP_MASK;
     80000098:	7779                	lui	a4,0xffffe
-    8000009a:	7ff70713          	addi	a4,a4,2047 # ffffffffffffe7ff <end+0xffffffff7ffd8247>
+    8000009a:	7ff70713          	addi	a4,a4,2047 # ffffffffffffe7ff <end+0xffffffff7ffd76d7>
     8000009e:	8ff9                	and	a5,a5,a4
   x |= MSTATUS_MPP_S;
     800000a0:	6705                	lui	a4,0x1
@@ -1332,7 +1332,7 @@ kfree(void *pa)
     800009f2:	ebb9                	bnez	a5,80000a48 <kfree+0x66>
     800009f4:	84aa                	mv	s1,a0
     800009f6:	00026797          	auipc	a5,0x26
-    800009fa:	bc278793          	addi	a5,a5,-1086 # 800265b8 <end>
+    800009fa:	73278793          	addi	a5,a5,1842 # 80027128 <end>
     800009fe:	04f56563          	bltu	a0,a5,80000a48 <kfree+0x66>
     80000a02:	47c5                	li	a5,17
     80000a04:	07ee                	slli	a5,a5,0x1b
@@ -1434,7 +1434,7 @@ kfree(void *pa)
     80000ac4:	45c5                	li	a1,17
     80000ac6:	05ee                	slli	a1,a1,0x1b
     80000ac8:	00026517          	auipc	a0,0x26
-    80000acc:	af050513          	addi	a0,a0,-1296 # 800265b8 <end>
+    80000acc:	66050513          	addi	a0,a0,1632 # 80027128 <end>
     80000ad0:	00000097          	auipc	ra,0x0
     80000ad4:	f88080e7          	jalr	-120(ra) # 80000a58 <freerange>
 }
@@ -1838,7 +1838,7 @@ memmove(void *dst, const void *src, uint n)
     80000d3e:	0585                	addi	a1,a1,1
     80000d40:	0705                	addi	a4,a4,1
     80000d42:	fff5c683          	lbu	a3,-1(a1)
-    80000d46:	fed70fa3          	sb	a3,-1(a4) # ffffffffffffefff <end+0xffffffff7ffd8a47>
+    80000d46:	fed70fa3          	sb	a3,-1(a4) # ffffffffffffefff <end+0xffffffff7ffd7ed7>
     while(n-- > 0)
     80000d4a:	fef59ae3          	bne	a1,a5,80000d3e <memmove+0x16>
 
@@ -3434,7 +3434,7 @@ copyinstr(pagetable_t pagetable, char *dst, uint64 srcva, uint64 max)
     800017fc:	96da                	add	a3,a3,s6
       if(*p == '\0'){
     800017fe:	00f60733          	add	a4,a2,a5
-    80001802:	00074703          	lbu	a4,0(a4) # fffffffffffff000 <end+0xffffffff7ffd8a48>
+    80001802:	00074703          	lbu	a4,0(a4) # fffffffffffff000 <end+0xffffffff7ffd7ed8>
     80001806:	df51                	beqz	a4,800017a2 <copyinstr+0x26>
         *dst = *p;
     80001808:	00e78023          	sb	a4,0(a5)
@@ -6296,7 +6296,7 @@ sys_btput(void)
     80002d6a:	f6040593          	addi	a1,s0,-160
     80002d6e:	fec42503          	lw	a0,-20(s0)
     80002d72:	00003097          	auipc	ra,0x3
-    80002d76:	5a0080e7          	jalr	1440(ra) # 80006312 <btput>
+    80002d76:	5f0080e7          	jalr	1520(ra) # 80006362 <btput>
     80002d7a:	87aa                	mv	a5,a0
 }
     80002d7c:	853e                	mv	a0,a5
@@ -6345,7 +6345,7 @@ sys_tput(void)
     80002dba:	f6040593          	addi	a1,s0,-160
     80002dbe:	fec42503          	lw	a0,-20(s0)
     80002dc2:	00003097          	auipc	ra,0x3
-    80002dc6:	624080e7          	jalr	1572(ra) # 800063e6 <tput>
+    80002dc6:	6b6080e7          	jalr	1718(ra) # 80006478 <tput>
     80002dca:	87aa                	mv	a5,a0
 }
     80002dcc:	853e                	mv	a0,a5
@@ -6394,7 +6394,7 @@ sys_btget(void)
     80002e06:	fe043583          	ld	a1,-32(s0)
     80002e0a:	fec42503          	lw	a0,-20(s0)
     80002e0e:	00003097          	auipc	ra,0x3
-    80002e12:	68e080e7          	jalr	1678(ra) # 8000649c <btget>
+    80002e12:	760080e7          	jalr	1888(ra) # 8000656e <btget>
     80002e16:	87aa                	mv	a5,a0
 }
     80002e18:	853e                	mv	a0,a5
@@ -6441,8 +6441,8 @@ sys_tget(void)
     return tget(tag,msgbufaddr);
     80002e52:	fe043583          	ld	a1,-32(s0)
     80002e56:	fec42503          	lw	a0,-20(s0)
-    80002e5a:	00003097          	auipc	ra,0x3
-    80002e5e:	726080e7          	jalr	1830(ra) # 80006580 <tget>
+    80002e5a:	00004097          	auipc	ra,0x4
+    80002e5e:	814080e7          	jalr	-2028(ra) # 8000666e <tget>
     80002e62:	87aa                	mv	a5,a0
     80002e64:	853e                	mv	a0,a5
     80002e66:	60e2                	ld	ra,24(sp)
@@ -10695,7 +10695,7 @@ argfd(int n, int *pfd, struct file **pf)
     80004fc8:	ffffd097          	auipc	ra,0xffffd
     80004fcc:	9d6080e7          	jalr	-1578(ra) # 8000199e <myproc>
     80004fd0:	fdc42703          	lw	a4,-36(s0)
-    80004fd4:	01a70793          	addi	a5,a4,26 # fffffffffffff01a <end+0xffffffff7ffd8a62>
+    80004fd4:	01a70793          	addi	a5,a4,26 # fffffffffffff01a <end+0xffffffff7ffd7ef2>
     80004fd8:	078e                	slli	a5,a5,0x3
     80004fda:	953e                	add	a0,a0,a5
     80004fdc:	611c                	ld	a5,0(a0)
@@ -11987,7 +11987,7 @@ sys_exec(void)
     80005a6c:	a835                	j	80005aa8 <sys_exec+0xfc>
       argv[i] = 0;
     80005a6e:	0a8e                	slli	s5,s5,0x3
-    80005a70:	fc0a8793          	addi	a5,s5,-64 # ffffffffffffefc0 <end+0xffffffff7ffd8a08>
+    80005a70:	fc0a8793          	addi	a5,s5,-64 # ffffffffffffefc0 <end+0xffffffff7ffd7e98>
     80005a74:	00878ab3          	add	s5,a5,s0
     80005a78:	e80ab023          	sd	zero,-384(s5)
   int ret = exec(path, argv);
@@ -12473,7 +12473,7 @@ free_desc(int i)
     80005e32:	4b98                	lw	a4,16(a5)
   *R(VIRTIO_MMIO_DRIVER_FEATURES) = features;
     80005e34:	c7ffe6b7          	lui	a3,0xc7ffe
-    80005e38:	75f68693          	addi	a3,a3,1887 # ffffffffc7ffe75f <end+0xffffffff47fd81a7>
+    80005e38:	75f68693          	addi	a3,a3,1887 # ffffffffc7ffe75f <end+0xffffffff47fd7637>
     80005e3c:	8f75                	and	a4,a4,a3
     80005e3e:	d398                	sw	a4,32(a5)
   *R(VIRTIO_MMIO_STATUS) = status;
@@ -12854,7 +12854,7 @@ virtio_disk_rw(struct buf *b, int write)
     80006150:	f8442703          	lw	a4,-124(s0)
     80006154:	628c                	ld	a1,0(a3)
     80006156:	962e                	add	a2,a2,a1
-    80006158:	00e61723          	sh	a4,14(a2) # ffffffffffffe00e <end+0xffffffff7ffd7a56>
+    80006158:	00e61723          	sh	a4,14(a2) # ffffffffffffe00e <end+0xffffffff7ffd6ee6>
   disk.desc[idx[1]].addr = (uint64) b->data;
     8000615c:	0712                	slli	a4,a4,0x4
     8000615e:	6290                	ld	a2,0(a3)
@@ -12982,7 +12982,7 @@ virtio_disk_intr()
     8000624e:	2f0080e7          	jalr	752(ra) # 8000053a <panic>
 
 0000000080006252 <inittweetlock>:
-struct spinlock tweetlock;
+
 
 int getchan = 10, putchan = 20;
 
@@ -12992,530 +12992,634 @@ void inittweetlock(void){
     80006254:	e406                	sd	ra,8(sp)
     80006256:	e022                	sd	s0,0(sp)
     80006258:	0800                	addi	s0,sp,16
-    initlock(&tweetlock,"tweetlock");
+    
+    for(int i=0; i<NUMTWEETTOPICS;i++){
+        initlock(&alltweetbuff[i].tweettaglock,"tweetlock");
     8000625a:	00002597          	auipc	a1,0x2
     8000625e:	5d658593          	addi	a1,a1,1494 # 80008830 <syscalls+0x3e8>
     80006262:	00020517          	auipc	a0,0x20
-    80006266:	d9e50513          	addi	a0,a0,-610 # 80026000 <tweetlock>
+    80006266:	33e50513          	addi	a0,a0,830 # 800265a0 <alltweetbuff+0x5a0>
     8000626a:	ffffb097          	auipc	ra,0xffffb
     8000626e:	8d6080e7          	jalr	-1834(ra) # 80000b40 <initlock>
+    80006272:	00002597          	auipc	a1,0x2
+    80006276:	5be58593          	addi	a1,a1,1470 # 80008830 <syscalls+0x3e8>
+    8000627a:	00021517          	auipc	a0,0x21
+    8000627e:	8de50513          	addi	a0,a0,-1826 # 80026b58 <alltweetbuff+0xb58>
+    80006282:	ffffb097          	auipc	ra,0xffffb
+    80006286:	8be080e7          	jalr	-1858(ra) # 80000b40 <initlock>
+    8000628a:	00002597          	auipc	a1,0x2
+    8000628e:	5a658593          	addi	a1,a1,1446 # 80008830 <syscalls+0x3e8>
+    80006292:	00021517          	auipc	a0,0x21
+    80006296:	e7e50513          	addi	a0,a0,-386 # 80027110 <alltweetbuff+0x1110>
+    8000629a:	ffffb097          	auipc	ra,0xffffb
+    8000629e:	8a6080e7          	jalr	-1882(ra) # 80000b40 <initlock>
+    }
+    
 }
-    80006272:	60a2                	ld	ra,8(sp)
-    80006274:	6402                	ld	s0,0(sp)
-    80006276:	0141                	addi	sp,sp,16
-    80006278:	8082                	ret
+    800062a2:	60a2                	ld	ra,8(sp)
+    800062a4:	6402                	ld	s0,0(sp)
+    800062a6:	0141                	addi	sp,sp,16
+    800062a8:	8082                	ret
 
-000000008000627a <gettagindex>:
+00000000800062aa <gettagindex>:
 
 
 int gettagindex(topic_t tag){
-    8000627a:	7179                	addi	sp,sp,-48
-    8000627c:	f406                	sd	ra,40(sp)
-    8000627e:	f022                	sd	s0,32(sp)
-    80006280:	ec26                	sd	s1,24(sp)
-    80006282:	e84a                	sd	s2,16(sp)
-    80006284:	e44e                	sd	s3,8(sp)
-    80006286:	e052                	sd	s4,0(sp)
-    80006288:	1800                	addi	s0,sp,48
-    8000628a:	89aa                	mv	s3,a0
+    800062aa:	7179                	addi	sp,sp,-48
+    800062ac:	f406                	sd	ra,40(sp)
+    800062ae:	f022                	sd	s0,32(sp)
+    800062b0:	ec26                	sd	s1,24(sp)
+    800062b2:	e84a                	sd	s2,16(sp)
+    800062b4:	e44e                	sd	s3,8(sp)
+    800062b6:	e052                	sd	s4,0(sp)
+    800062b8:	1800                	addi	s0,sp,48
+    800062ba:	89aa                	mv	s3,a0
     
     int index =-1;
-    for(int i=0;i<MAXTWEETTOTAL;i++){
-    8000628c:	00020497          	auipc	s1,0x20
-    80006290:	d9048493          	addi	s1,s1,-624 # 8002601c <tweetbuffer+0x4>
-    80006294:	4901                	li	s2,0
-    80006296:	4a29                	li	s4,10
-    80006298:	a031                	j	800062a4 <gettagindex+0x2a>
-    8000629a:	2905                	addiw	s2,s2,1
-    8000629c:	09048493          	addi	s1,s1,144
-    800062a0:	01490e63          	beq	s2,s4,800062bc <gettagindex+0x42>
-        //printf("get tag idx msg %d len %d\n",i,strlen(tweetbuffer[i].msg ));
-        if(tweetbuffer[i].tag==tag&&strlen(tweetbuffer[i].msg)>0){
-    800062a4:	ffc4a783          	lw	a5,-4(s1)
-    800062a8:	ff3799e3          	bne	a5,s3,8000629a <gettagindex+0x20>
-    800062ac:	8526                	mv	a0,s1
-    800062ae:	ffffb097          	auipc	ra,0xffffb
-    800062b2:	b9a080e7          	jalr	-1126(ra) # 80000e48 <strlen>
-    800062b6:	fea052e3          	blez	a0,8000629a <gettagindex+0x20>
-    800062ba:	a011                	j	800062be <gettagindex+0x44>
+    for(int i=0;i<MAXTAGTWEET;i++){
+    800062bc:	02051493          	slli	s1,a0,0x20
+    800062c0:	9081                	srli	s1,s1,0x20
+    800062c2:	5b800793          	li	a5,1464
+    800062c6:	02f484b3          	mul	s1,s1,a5
+    800062ca:	00020797          	auipc	a5,0x20
+    800062ce:	d3a78793          	addi	a5,a5,-710 # 80026004 <alltweetbuff+0x4>
+    800062d2:	94be                	add	s1,s1,a5
+    800062d4:	4901                	li	s2,0
+    800062d6:	4a29                	li	s4,10
+    800062d8:	a031                	j	800062e4 <gettagindex+0x3a>
+    800062da:	2905                	addiw	s2,s2,1
+    800062dc:	09048493          	addi	s1,s1,144
+    800062e0:	01490e63          	beq	s2,s4,800062fc <gettagindex+0x52>
+        if(alltweetbuff[tag].tagtweetbuffer[i].tag==tag&&strlen(alltweetbuff[tag].tagtweetbuffer[i].msg)>0){
+    800062e4:	ffc4a783          	lw	a5,-4(s1)
+    800062e8:	ff3799e3          	bne	a5,s3,800062da <gettagindex+0x30>
+    800062ec:	8526                	mv	a0,s1
+    800062ee:	ffffb097          	auipc	ra,0xffffb
+    800062f2:	b5a080e7          	jalr	-1190(ra) # 80000e48 <strlen>
+    800062f6:	fea052e3          	blez	a0,800062da <gettagindex+0x30>
+    800062fa:	a011                	j	800062fe <gettagindex+0x54>
     int index =-1;
-    800062bc:	597d                	li	s2,-1
+    800062fc:	597d                	li	s2,-1
           
         }
     }
     
     return index;
 }
-    800062be:	854a                	mv	a0,s2
-    800062c0:	70a2                	ld	ra,40(sp)
-    800062c2:	7402                	ld	s0,32(sp)
-    800062c4:	64e2                	ld	s1,24(sp)
-    800062c6:	6942                	ld	s2,16(sp)
-    800062c8:	69a2                	ld	s3,8(sp)
-    800062ca:	6a02                	ld	s4,0(sp)
-    800062cc:	6145                	addi	sp,sp,48
-    800062ce:	8082                	ret
+    800062fe:	854a                	mv	a0,s2
+    80006300:	70a2                	ld	ra,40(sp)
+    80006302:	7402                	ld	s0,32(sp)
+    80006304:	64e2                	ld	s1,24(sp)
+    80006306:	6942                	ld	s2,16(sp)
+    80006308:	69a2                	ld	s3,8(sp)
+    8000630a:	6a02                	ld	s4,0(sp)
+    8000630c:	6145                	addi	sp,sp,48
+    8000630e:	8082                	ret
 
-00000000800062d0 <getemptyindex>:
+0000000080006310 <getemptyindex>:
 
 int getemptyindex(topic_t tag){
-    800062d0:	7179                	addi	sp,sp,-48
-    800062d2:	f406                	sd	ra,40(sp)
-    800062d4:	f022                	sd	s0,32(sp)
-    800062d6:	ec26                	sd	s1,24(sp)
-    800062d8:	e84a                	sd	s2,16(sp)
-    800062da:	e44e                	sd	s3,8(sp)
-    800062dc:	1800                	addi	s0,sp,48
+    80006310:	7179                	addi	sp,sp,-48
+    80006312:	f406                	sd	ra,40(sp)
+    80006314:	f022                	sd	s0,32(sp)
+    80006316:	ec26                	sd	s1,24(sp)
+    80006318:	e84a                	sd	s2,16(sp)
+    8000631a:	e44e                	sd	s3,8(sp)
+    8000631c:	1800                	addi	s0,sp,48
     int index =-1;
-    for(int i=0;i<MAXTWEETTOTAL;i++){
-    800062de:	00020917          	auipc	s2,0x20
-    800062e2:	d3e90913          	addi	s2,s2,-706 # 8002601c <tweetbuffer+0x4>
-    800062e6:	4481                	li	s1,0
-    800062e8:	49a9                	li	s3,10
-        
-        //printf("msg %d len %d\n",i,strlen(tweetbuffer[i].msg ));
-        if(strlen(tweetbuffer[i].msg)==0){
-    800062ea:	854a                	mv	a0,s2
-    800062ec:	ffffb097          	auipc	ra,0xffffb
-    800062f0:	b5c080e7          	jalr	-1188(ra) # 80000e48 <strlen>
-    800062f4:	c519                	beqz	a0,80006302 <getemptyindex+0x32>
-    for(int i=0;i<MAXTWEETTOTAL;i++){
-    800062f6:	2485                	addiw	s1,s1,1
-    800062f8:	09090913          	addi	s2,s2,144
-    800062fc:	ff3497e3          	bne	s1,s3,800062ea <getemptyindex+0x1a>
+    for(int i=0;i<MAXTAGTWEET;i++){
+    8000631e:	02051493          	slli	s1,a0,0x20
+    80006322:	9081                	srli	s1,s1,0x20
+    80006324:	5b800793          	li	a5,1464
+    80006328:	02f484b3          	mul	s1,s1,a5
+    8000632c:	00020797          	auipc	a5,0x20
+    80006330:	cd878793          	addi	a5,a5,-808 # 80026004 <alltweetbuff+0x4>
+    80006334:	94be                	add	s1,s1,a5
+    80006336:	4901                	li	s2,0
+    80006338:	49a9                	li	s3,10
+        if(strlen(alltweetbuff[tag].tagtweetbuffer[i].msg)==0){
+    8000633a:	8526                	mv	a0,s1
+    8000633c:	ffffb097          	auipc	ra,0xffffb
+    80006340:	b0c080e7          	jalr	-1268(ra) # 80000e48 <strlen>
+    80006344:	c519                	beqz	a0,80006352 <getemptyindex+0x42>
+    for(int i=0;i<MAXTAGTWEET;i++){
+    80006346:	2905                	addiw	s2,s2,1
+    80006348:	09048493          	addi	s1,s1,144
+    8000634c:	ff3917e3          	bne	s2,s3,8000633a <getemptyindex+0x2a>
     int index =-1;
-    80006300:	54fd                	li	s1,-1
+    80006350:	597d                	li	s2,-1
           
         }
     }
     
     return index;
 }
-    80006302:	8526                	mv	a0,s1
-    80006304:	70a2                	ld	ra,40(sp)
-    80006306:	7402                	ld	s0,32(sp)
-    80006308:	64e2                	ld	s1,24(sp)
-    8000630a:	6942                	ld	s2,16(sp)
-    8000630c:	69a2                	ld	s3,8(sp)
-    8000630e:	6145                	addi	sp,sp,48
-    80006310:	8082                	ret
+    80006352:	854a                	mv	a0,s2
+    80006354:	70a2                	ld	ra,40(sp)
+    80006356:	7402                	ld	s0,32(sp)
+    80006358:	64e2                	ld	s1,24(sp)
+    8000635a:	6942                	ld	s2,16(sp)
+    8000635c:	69a2                	ld	s3,8(sp)
+    8000635e:	6145                	addi	sp,sp,48
+    80006360:	8082                	ret
 
-0000000080006312 <btput>:
+0000000080006362 <btput>:
 
 int
 btput(topic_t tag,char* msg)
 {
-    80006312:	7139                	addi	sp,sp,-64
-    80006314:	fc06                	sd	ra,56(sp)
-    80006316:	f822                	sd	s0,48(sp)
-    80006318:	f426                	sd	s1,40(sp)
-    8000631a:	f04a                	sd	s2,32(sp)
-    8000631c:	ec4e                	sd	s3,24(sp)
-    8000631e:	e852                	sd	s4,16(sp)
-    80006320:	e456                	sd	s5,8(sp)
-    80006322:	e05a                	sd	s6,0(sp)
-    80006324:	0080                	addi	s0,sp,64
-    80006326:	892a                	mv	s2,a0
-    80006328:	8b2e                	mv	s6,a1
-
-    //printf("btput Hello world in tweet.c, recvid msg: %s\n",msg);
-    acquire(&tweetlock);
-    8000632a:	00020517          	auipc	a0,0x20
-    8000632e:	cd650513          	addi	a0,a0,-810 # 80026000 <tweetlock>
-    80006332:	ffffb097          	auipc	ra,0xffffb
-    80006336:	89e080e7          	jalr	-1890(ra) # 80000bd0 <acquire>
+    80006362:	711d                	addi	sp,sp,-96
+    80006364:	ec86                	sd	ra,88(sp)
+    80006366:	e8a2                	sd	s0,80(sp)
+    80006368:	e4a6                	sd	s1,72(sp)
+    8000636a:	e0ca                	sd	s2,64(sp)
+    8000636c:	fc4e                	sd	s3,56(sp)
+    8000636e:	f852                	sd	s4,48(sp)
+    80006370:	f456                	sd	s5,40(sp)
+    80006372:	f05a                	sd	s6,32(sp)
+    80006374:	ec5e                	sd	s7,24(sp)
+    80006376:	e862                	sd	s8,16(sp)
+    80006378:	e466                	sd	s9,8(sp)
+    8000637a:	1080                	addi	s0,sp,96
+    8000637c:	892a                	mv	s2,a0
+    8000637e:	8cae                	mv	s9,a1
+    acquire(&alltweetbuff[tag].tweettaglock);
+    80006380:	02051c13          	slli	s8,a0,0x20
+    80006384:	020c5c13          	srli	s8,s8,0x20
+    80006388:	5b800793          	li	a5,1464
+    8000638c:	02fc0c33          	mul	s8,s8,a5
+    80006390:	00020997          	auipc	s3,0x20
+    80006394:	21098993          	addi	s3,s3,528 # 800265a0 <alltweetbuff+0x5a0>
+    80006398:	99e2                	add	s3,s3,s8
+    8000639a:	854e                	mv	a0,s3
+    8000639c:	ffffb097          	auipc	ra,0xffffb
+    800063a0:	834080e7          	jalr	-1996(ra) # 80000bd0 <acquire>
     
-   // printf("Acquiring lock\n");
+//    printf("Acquiring lock\n");
     int index = getemptyindex(tag);
-    8000633a:	854a                	mv	a0,s2
-    8000633c:	00000097          	auipc	ra,0x0
-    80006340:	f94080e7          	jalr	-108(ra) # 800062d0 <getemptyindex>
-    80006344:	84aa                	mv	s1,a0
-    
-    while(index==-1){
-    80006346:	57fd                	li	a5,-1
-    80006348:	02f51963          	bne	a0,a5,8000637a <btput+0x68>
-//         printf("Started sleeping for btput\n");
-        sleep(&getchan,&tweetlock);
-    8000634c:	00020a97          	auipc	s5,0x20
-    80006350:	cb4a8a93          	addi	s5,s5,-844 # 80026000 <tweetlock>
-    80006354:	00002a17          	auipc	s4,0x2
-    80006358:	558a0a13          	addi	s4,s4,1368 # 800088ac <getchan>
-    while(index==-1){
-    8000635c:	59fd                	li	s3,-1
-        sleep(&getchan,&tweetlock);
-    8000635e:	85d6                	mv	a1,s5
-    80006360:	8552                	mv	a0,s4
-    80006362:	ffffc097          	auipc	ra,0xffffc
-    80006366:	d00080e7          	jalr	-768(ra) # 80002062 <sleep>
+    800063a4:	854a                	mv	a0,s2
+    800063a6:	00000097          	auipc	ra,0x0
+    800063aa:	f6a080e7          	jalr	-150(ra) # 80006310 <getemptyindex>
+    800063ae:	84aa                	mv	s1,a0
+     //    printf("index after sleep %d\n ", index);
+       //  printf("max tweet %d\n",tweetcounter>MAXTWEETTOTAL);
+    while(index==-1||tweetcounter>MAXTWEETTOTAL){
+    800063b0:	5a7d                	li	s4,-1
+    800063b2:	00003b97          	auipc	s7,0x3
+    800063b6:	c82b8b93          	addi	s7,s7,-894 # 80009034 <tweetcounter>
+    800063ba:	4b29                	li	s6,10
+        
+//       printf("Started sleeping for btput\n");
+        sleep(&getchan,&alltweetbuff[tag].tweettaglock);
+    800063bc:	00002a97          	auipc	s5,0x2
+    800063c0:	4f0a8a93          	addi	s5,s5,1264 # 800088ac <getchan>
+    while(index==-1||tweetcounter>MAXTWEETTOTAL){
+    800063c4:	a829                	j	800063de <btput+0x7c>
+        sleep(&getchan,&alltweetbuff[tag].tweettaglock);
+    800063c6:	85ce                	mv	a1,s3
+    800063c8:	8556                	mv	a0,s5
+    800063ca:	ffffc097          	auipc	ra,0xffffc
+    800063ce:	c98080e7          	jalr	-872(ra) # 80002062 <sleep>
         index = getemptyindex(tag);
-    8000636a:	854a                	mv	a0,s2
-    8000636c:	00000097          	auipc	ra,0x0
-    80006370:	f64080e7          	jalr	-156(ra) # 800062d0 <getemptyindex>
-    80006374:	84aa                	mv	s1,a0
-    while(index==-1){
-    80006376:	ff3504e3          	beq	a0,s3,8000635e <btput+0x4c>
- //         printf("index after sleep %d \n", index);
+    800063d2:	854a                	mv	a0,s2
+    800063d4:	00000097          	auipc	ra,0x0
+    800063d8:	f3c080e7          	jalr	-196(ra) # 80006310 <getemptyindex>
+    800063dc:	84aa                	mv	s1,a0
+    while(index==-1||tweetcounter>MAXTWEETTOTAL){
+    800063de:	ff4484e3          	beq	s1,s4,800063c6 <btput+0x64>
+    800063e2:	000ba783          	lw	a5,0(s7)
+    800063e6:	fefb40e3          	blt	s6,a5,800063c6 <btput+0x64>
+//         printf("index after sleep %d \n", index);
     }
-//     printf("index after wakeup %d0 \n", index);
+   //printf("index after wakeup %d0 \n", index);
 //     if(index!=-1){
-         strncpy(tweetbuffer[index].msg,msg,strlen(msg));
-    8000637a:	855a                	mv	a0,s6
-    8000637c:	ffffb097          	auipc	ra,0xffffb
-    80006380:	acc080e7          	jalr	-1332(ra) # 80000e48 <strlen>
-    80006384:	862a                	mv	a2,a0
-    80006386:	00020a17          	auipc	s4,0x20
-    8000638a:	c7aa0a13          	addi	s4,s4,-902 # 80026000 <tweetlock>
-    8000638e:	00349993          	slli	s3,s1,0x3
-    80006392:	009987b3          	add	a5,s3,s1
-    80006396:	0792                	slli	a5,a5,0x4
-    80006398:	85da                	mv	a1,s6
-    8000639a:	00020517          	auipc	a0,0x20
-    8000639e:	c8250513          	addi	a0,a0,-894 # 8002601c <tweetbuffer+0x4>
-    800063a2:	953e                	add	a0,a0,a5
-    800063a4:	ffffb097          	auipc	ra,0xffffb
-    800063a8:	a34080e7          	jalr	-1484(ra) # 80000dd8 <strncpy>
-         tweetbuffer[index].tag=tag;
-    800063ac:	99a6                	add	s3,s3,s1
-    800063ae:	0992                	slli	s3,s3,0x4
-    800063b0:	99d2                	add	s3,s3,s4
-    800063b2:	0129ac23          	sw	s2,24(s3)
+         strncpy(alltweetbuff[tag].tagtweetbuffer[index].msg,msg,strlen(msg));
+    800063ea:	8566                	mv	a0,s9
+    800063ec:	ffffb097          	auipc	ra,0xffffb
+    800063f0:	a5c080e7          	jalr	-1444(ra) # 80000e48 <strlen>
+    800063f4:	862a                	mv	a2,a0
+    800063f6:	00349a13          	slli	s4,s1,0x3
+    800063fa:	009a07b3          	add	a5,s4,s1
+    800063fe:	0792                	slli	a5,a5,0x4
+    80006400:	0c11                	addi	s8,s8,4
+    80006402:	97e2                	add	a5,a5,s8
+    80006404:	00020a97          	auipc	s5,0x20
+    80006408:	bfca8a93          	addi	s5,s5,-1028 # 80026000 <alltweetbuff>
+    8000640c:	85e6                	mv	a1,s9
+    8000640e:	00fa8533          	add	a0,s5,a5
+    80006412:	ffffb097          	auipc	ra,0xffffb
+    80006416:	9c6080e7          	jalr	-1594(ra) # 80000dd8 <strncpy>
+         alltweetbuff[tag].tagtweetbuffer[index].tag=tag;
+    8000641a:	02091793          	slli	a5,s2,0x20
+    8000641e:	9381                	srli	a5,a5,0x20
+    80006420:	9a26                	add	s4,s4,s1
+    80006422:	0a12                	slli	s4,s4,0x4
+    80006424:	5b800713          	li	a4,1464
+    80006428:	02e787b3          	mul	a5,a5,a4
+    8000642c:	9a3e                	add	s4,s4,a5
+    8000642e:	9ad2                	add	s5,s5,s4
+    80006430:	012aa023          	sw	s2,0(s5)
+         tweetcounter++;
+    80006434:	00003717          	auipc	a4,0x3
+    80006438:	c0070713          	addi	a4,a4,-1024 # 80009034 <tweetcounter>
+    8000643c:	431c                	lw	a5,0(a4)
+    8000643e:	2785                	addiw	a5,a5,1
+    80006440:	c31c                	sw	a5,0(a4)
          wakeup(&putchan);
-    800063b6:	00002517          	auipc	a0,0x2
-    800063ba:	4f250513          	addi	a0,a0,1266 # 800088a8 <putchan>
-    800063be:	ffffc097          	auipc	ra,0xffffc
-    800063c2:	e30080e7          	jalr	-464(ra) # 800021ee <wakeup>
+    80006442:	00002517          	auipc	a0,0x2
+    80006446:	46650513          	addi	a0,a0,1126 # 800088a8 <putchan>
+    8000644a:	ffffc097          	auipc	ra,0xffffc
+    8000644e:	da4080e7          	jalr	-604(ra) # 800021ee <wakeup>
          //wakeup get
 //     }else{
 //         printf("No space available to put new msg\n");
 //     }
-   // printf("release lock\n");
-    release(&tweetlock);
-    800063c6:	8552                	mv	a0,s4
-    800063c8:	ffffb097          	auipc	ra,0xffffb
-    800063cc:	8bc080e7          	jalr	-1860(ra) # 80000c84 <release>
+  //  printf("release lock\n");
+    release(&alltweetbuff[tag].tweettaglock);
+    80006452:	854e                	mv	a0,s3
+    80006454:	ffffb097          	auipc	ra,0xffffb
+    80006458:	830080e7          	jalr	-2000(ra) # 80000c84 <release>
     
     return 0;
 }
-    800063d0:	4501                	li	a0,0
-    800063d2:	70e2                	ld	ra,56(sp)
-    800063d4:	7442                	ld	s0,48(sp)
-    800063d6:	74a2                	ld	s1,40(sp)
-    800063d8:	7902                	ld	s2,32(sp)
-    800063da:	69e2                	ld	s3,24(sp)
-    800063dc:	6a42                	ld	s4,16(sp)
-    800063de:	6aa2                	ld	s5,8(sp)
-    800063e0:	6b02                	ld	s6,0(sp)
-    800063e2:	6121                	addi	sp,sp,64
-    800063e4:	8082                	ret
+    8000645c:	4501                	li	a0,0
+    8000645e:	60e6                	ld	ra,88(sp)
+    80006460:	6446                	ld	s0,80(sp)
+    80006462:	64a6                	ld	s1,72(sp)
+    80006464:	6906                	ld	s2,64(sp)
+    80006466:	79e2                	ld	s3,56(sp)
+    80006468:	7a42                	ld	s4,48(sp)
+    8000646a:	7aa2                	ld	s5,40(sp)
+    8000646c:	7b02                	ld	s6,32(sp)
+    8000646e:	6be2                	ld	s7,24(sp)
+    80006470:	6c42                	ld	s8,16(sp)
+    80006472:	6ca2                	ld	s9,8(sp)
+    80006474:	6125                	addi	sp,sp,96
+    80006476:	8082                	ret
 
-00000000800063e6 <tput>:
+0000000080006478 <tput>:
 
 int
 tput(topic_t tag,char* msg){
-    800063e6:	7139                	addi	sp,sp,-64
-    800063e8:	fc06                	sd	ra,56(sp)
-    800063ea:	f822                	sd	s0,48(sp)
-    800063ec:	f426                	sd	s1,40(sp)
-    800063ee:	f04a                	sd	s2,32(sp)
-    800063f0:	ec4e                	sd	s3,24(sp)
-    800063f2:	e852                	sd	s4,16(sp)
-    800063f4:	e456                	sd	s5,8(sp)
-    800063f6:	0080                	addi	s0,sp,64
-    800063f8:	89aa                	mv	s3,a0
-    800063fa:	8a2e                	mv	s4,a1
+    80006478:	715d                	addi	sp,sp,-80
+    8000647a:	e486                	sd	ra,72(sp)
+    8000647c:	e0a2                	sd	s0,64(sp)
+    8000647e:	fc26                	sd	s1,56(sp)
+    80006480:	f84a                	sd	s2,48(sp)
+    80006482:	f44e                	sd	s3,40(sp)
+    80006484:	f052                	sd	s4,32(sp)
+    80006486:	ec56                	sd	s5,24(sp)
+    80006488:	e85a                	sd	s6,16(sp)
+    8000648a:	e45e                	sd	s7,8(sp)
+    8000648c:	0880                	addi	s0,sp,80
+    8000648e:	89aa                	mv	s3,a0
+    80006490:	8b2e                	mv	s6,a1
    // printf("ttput Hello world in tweet.c\n");
    
-    acquire(&tweetlock);
-    800063fc:	00020517          	auipc	a0,0x20
-    80006400:	c0450513          	addi	a0,a0,-1020 # 80026000 <tweetlock>
-    80006404:	ffffa097          	auipc	ra,0xffffa
-    80006408:	7cc080e7          	jalr	1996(ra) # 80000bd0 <acquire>
+    acquire(&alltweetbuff[tag].tweettaglock);
+    80006492:	02051a13          	slli	s4,a0,0x20
+    80006496:	020a5a13          	srli	s4,s4,0x20
+    8000649a:	5b800793          	li	a5,1464
+    8000649e:	02fa0a33          	mul	s4,s4,a5
+    800064a2:	00020a97          	auipc	s5,0x20
+    800064a6:	0fea8a93          	addi	s5,s5,254 # 800265a0 <alltweetbuff+0x5a0>
+    800064aa:	9ad2                	add	s5,s5,s4
+    800064ac:	8556                	mv	a0,s5
+    800064ae:	ffffa097          	auipc	ra,0xffffa
+    800064b2:	722080e7          	jalr	1826(ra) # 80000bd0 <acquire>
    // printf("Acquiring lock\n");
     int index = getemptyindex(tag);
-    8000640c:	854e                	mv	a0,s3
-    8000640e:	00000097          	auipc	ra,0x0
-    80006412:	ec2080e7          	jalr	-318(ra) # 800062d0 <getemptyindex>
-    80006416:	84aa                	mv	s1,a0
+    800064b6:	854e                	mv	a0,s3
+    800064b8:	00000097          	auipc	ra,0x0
+    800064bc:	e58080e7          	jalr	-424(ra) # 80006310 <getemptyindex>
+    800064c0:	84aa                	mv	s1,a0
     
-    if(index!=-1){
-    80006418:	57fd                	li	a5,-1
-    8000641a:	06f50063          	beq	a0,a5,8000647a <tput+0x94>
-         strncpy(tweetbuffer[index].msg,msg,strlen(msg));
-    8000641e:	8552                	mv	a0,s4
-    80006420:	ffffb097          	auipc	ra,0xffffb
-    80006424:	a28080e7          	jalr	-1496(ra) # 80000e48 <strlen>
-    80006428:	862a                	mv	a2,a0
-    8000642a:	00020a97          	auipc	s5,0x20
-    8000642e:	bd6a8a93          	addi	s5,s5,-1066 # 80026000 <tweetlock>
-    80006432:	00349913          	slli	s2,s1,0x3
-    80006436:	009907b3          	add	a5,s2,s1
-    8000643a:	0792                	slli	a5,a5,0x4
-    8000643c:	85d2                	mv	a1,s4
-    8000643e:	00020517          	auipc	a0,0x20
-    80006442:	bde50513          	addi	a0,a0,-1058 # 8002601c <tweetbuffer+0x4>
-    80006446:	953e                	add	a0,a0,a5
-    80006448:	ffffb097          	auipc	ra,0xffffb
-    8000644c:	990080e7          	jalr	-1648(ra) # 80000dd8 <strncpy>
-         tweetbuffer[index].tag=tag;
-    80006450:	9926                	add	s2,s2,s1
-    80006452:	0912                	slli	s2,s2,0x4
-    80006454:	9956                	add	s2,s2,s5
-    80006456:	01392c23          	sw	s3,24(s2)
+    if(index!=-1||tweetcounter>MAXTWEETTOTAL){
+    800064c2:	57fd                	li	a5,-1
+    800064c4:	00f51963          	bne	a0,a5,800064d6 <tput+0x5e>
+    800064c8:	00003717          	auipc	a4,0x3
+    800064cc:	b6c72703          	lw	a4,-1172(a4) # 80009034 <tweetcounter>
+    800064d0:	47a9                	li	a5,10
+    800064d2:	08e7d063          	bge	a5,a4,80006552 <tput+0xda>
+         strncpy(alltweetbuff[tag].tagtweetbuffer[index].msg,msg,strlen(msg));
+    800064d6:	855a                	mv	a0,s6
+    800064d8:	ffffb097          	auipc	ra,0xffffb
+    800064dc:	970080e7          	jalr	-1680(ra) # 80000e48 <strlen>
+    800064e0:	862a                	mv	a2,a0
+    800064e2:	00349913          	slli	s2,s1,0x3
+    800064e6:	009907b3          	add	a5,s2,s1
+    800064ea:	0792                	slli	a5,a5,0x4
+    800064ec:	0a11                	addi	s4,s4,4
+    800064ee:	9a3e                	add	s4,s4,a5
+    800064f0:	00020b97          	auipc	s7,0x20
+    800064f4:	b10b8b93          	addi	s7,s7,-1264 # 80026000 <alltweetbuff>
+    800064f8:	85da                	mv	a1,s6
+    800064fa:	014b8533          	add	a0,s7,s4
+    800064fe:	ffffb097          	auipc	ra,0xffffb
+    80006502:	8da080e7          	jalr	-1830(ra) # 80000dd8 <strncpy>
+         alltweetbuff[tag].tagtweetbuffer[index].tag=tag;
+    80006506:	02099793          	slli	a5,s3,0x20
+    8000650a:	9381                	srli	a5,a5,0x20
+    8000650c:	9926                	add	s2,s2,s1
+    8000650e:	0912                	slli	s2,s2,0x4
+    80006510:	5b800713          	li	a4,1464
+    80006514:	02e787b3          	mul	a5,a5,a4
+    80006518:	993e                	add	s2,s2,a5
+    8000651a:	9bca                	add	s7,s7,s2
+    8000651c:	013ba023          	sw	s3,0(s7)
+         tweetcounter++;
+    80006520:	00003717          	auipc	a4,0x3
+    80006524:	b1470713          	addi	a4,a4,-1260 # 80009034 <tweetcounter>
+    80006528:	431c                	lw	a5,0(a4)
+    8000652a:	2785                	addiw	a5,a5,1
+    8000652c:	c31c                	sw	a5,0(a4)
         printf("No space available to put new msg returing -1\n");
-         release(&tweetlock);
+         release(&alltweetbuff[tag].tweettaglock);
         return -1;
     }
    // printf("release lock\n");
-    release(&tweetlock);
-    8000645a:	8556                	mv	a0,s5
-    8000645c:	ffffb097          	auipc	ra,0xffffb
-    80006460:	828080e7          	jalr	-2008(ra) # 80000c84 <release>
+    release(&alltweetbuff[tag].tweettaglock);
+    8000652e:	8556                	mv	a0,s5
+    80006530:	ffffa097          	auipc	ra,0xffffa
+    80006534:	754080e7          	jalr	1876(ra) # 80000c84 <release>
    
     
     return 0;
-    80006464:	4481                	li	s1,0
+    80006538:	4481                	li	s1,0
 }
-    80006466:	8526                	mv	a0,s1
-    80006468:	70e2                	ld	ra,56(sp)
-    8000646a:	7442                	ld	s0,48(sp)
-    8000646c:	74a2                	ld	s1,40(sp)
-    8000646e:	7902                	ld	s2,32(sp)
-    80006470:	69e2                	ld	s3,24(sp)
-    80006472:	6a42                	ld	s4,16(sp)
-    80006474:	6aa2                	ld	s5,8(sp)
-    80006476:	6121                	addi	sp,sp,64
-    80006478:	8082                	ret
+    8000653a:	8526                	mv	a0,s1
+    8000653c:	60a6                	ld	ra,72(sp)
+    8000653e:	6406                	ld	s0,64(sp)
+    80006540:	74e2                	ld	s1,56(sp)
+    80006542:	7942                	ld	s2,48(sp)
+    80006544:	79a2                	ld	s3,40(sp)
+    80006546:	7a02                	ld	s4,32(sp)
+    80006548:	6ae2                	ld	s5,24(sp)
+    8000654a:	6b42                	ld	s6,16(sp)
+    8000654c:	6ba2                	ld	s7,8(sp)
+    8000654e:	6161                	addi	sp,sp,80
+    80006550:	8082                	ret
         printf("No space available to put new msg returing -1\n");
-    8000647a:	00002517          	auipc	a0,0x2
-    8000647e:	3c650513          	addi	a0,a0,966 # 80008840 <syscalls+0x3f8>
-    80006482:	ffffa097          	auipc	ra,0xffffa
-    80006486:	102080e7          	jalr	258(ra) # 80000584 <printf>
-         release(&tweetlock);
-    8000648a:	00020517          	auipc	a0,0x20
-    8000648e:	b7650513          	addi	a0,a0,-1162 # 80026000 <tweetlock>
-    80006492:	ffffa097          	auipc	ra,0xffffa
-    80006496:	7f2080e7          	jalr	2034(ra) # 80000c84 <release>
+    80006552:	00002517          	auipc	a0,0x2
+    80006556:	2ee50513          	addi	a0,a0,750 # 80008840 <syscalls+0x3f8>
+    8000655a:	ffffa097          	auipc	ra,0xffffa
+    8000655e:	02a080e7          	jalr	42(ra) # 80000584 <printf>
+         release(&alltweetbuff[tag].tweettaglock);
+    80006562:	8556                	mv	a0,s5
+    80006564:	ffffa097          	auipc	ra,0xffffa
+    80006568:	720080e7          	jalr	1824(ra) # 80000c84 <release>
         return -1;
-    8000649a:	b7f1                	j	80006466 <tput+0x80>
+    8000656c:	b7f9                	j	8000653a <tput+0xc2>
 
-000000008000649c <btget>:
+000000008000656e <btget>:
 
 int 
 btget(topic_t tag,uint64 buf){
-    8000649c:	7139                	addi	sp,sp,-64
-    8000649e:	fc06                	sd	ra,56(sp)
-    800064a0:	f822                	sd	s0,48(sp)
-    800064a2:	f426                	sd	s1,40(sp)
-    800064a4:	f04a                	sd	s2,32(sp)
-    800064a6:	ec4e                	sd	s3,24(sp)
-    800064a8:	e852                	sd	s4,16(sp)
-    800064aa:	e456                	sd	s5,8(sp)
-    800064ac:	e05a                	sd	s6,0(sp)
-    800064ae:	0080                	addi	s0,sp,64
-    800064b0:	84aa                	mv	s1,a0
-    800064b2:	89ae                	mv	s3,a1
+    8000656e:	715d                	addi	sp,sp,-80
+    80006570:	e486                	sd	ra,72(sp)
+    80006572:	e0a2                	sd	s0,64(sp)
+    80006574:	fc26                	sd	s1,56(sp)
+    80006576:	f84a                	sd	s2,48(sp)
+    80006578:	f44e                	sd	s3,40(sp)
+    8000657a:	f052                	sd	s4,32(sp)
+    8000657c:	ec56                	sd	s5,24(sp)
+    8000657e:	e85a                	sd	s6,16(sp)
+    80006580:	e45e                	sd	s7,8(sp)
+    80006582:	0880                	addi	s0,sp,80
+    80006584:	892a                	mv	s2,a0
+    80006586:	89ae                	mv	s3,a1
    
 //    for(int i=0;i<10;i++){
 //     printf("btget %d -- %s\n",i,tweetbuffer[i].msg);
 //    }
    
     struct proc *p = myproc();
-    800064b4:	ffffb097          	auipc	ra,0xffffb
-    800064b8:	4ea080e7          	jalr	1258(ra) # 8000199e <myproc>
-    800064bc:	8a2a                	mv	s4,a0
+    80006588:	ffffb097          	auipc	ra,0xffffb
+    8000658c:	416080e7          	jalr	1046(ra) # 8000199e <myproc>
+    80006590:	8a2a                	mv	s4,a0
    // printf("btget Hello world in tweet.c\n");
-    acquire(&tweetlock);
-    800064be:	00020517          	auipc	a0,0x20
-    800064c2:	b4250513          	addi	a0,a0,-1214 # 80026000 <tweetlock>
-    800064c6:	ffffa097          	auipc	ra,0xffffa
-    800064ca:	70a080e7          	jalr	1802(ra) # 80000bd0 <acquire>
-  //  printf("Acquiring lock\n");
+    acquire(&alltweetbuff[tag].tweettaglock);
+    80006592:	02091a93          	slli	s5,s2,0x20
+    80006596:	020ada93          	srli	s5,s5,0x20
+    8000659a:	5b800793          	li	a5,1464
+    8000659e:	02fa8ab3          	mul	s5,s5,a5
+    800065a2:	00020497          	auipc	s1,0x20
+    800065a6:	ffe48493          	addi	s1,s1,-2 # 800265a0 <alltweetbuff+0x5a0>
+    800065aa:	94d6                	add	s1,s1,s5
+    800065ac:	8526                	mv	a0,s1
+    800065ae:	ffffa097          	auipc	ra,0xffffa
+    800065b2:	622080e7          	jalr	1570(ra) # 80000bd0 <acquire>
+//   printf("btget Acquiring lock\n");
     int index = gettagindex(tag);
-    800064ce:	8526                	mv	a0,s1
-    800064d0:	00000097          	auipc	ra,0x0
-    800064d4:	daa080e7          	jalr	-598(ra) # 8000627a <gettagindex>
+    800065b6:	854a                	mv	a0,s2
+    800065b8:	00000097          	auipc	ra,0x0
+    800065bc:	cf2080e7          	jalr	-782(ra) # 800062aa <gettagindex>
     
      while(index==-1){
-    800064d8:	57fd                	li	a5,-1
-    800064da:	02f51863          	bne	a0,a5,8000650a <btget+0x6e>
-  //      printf("Started sleeping for btget \n");
-        sleep(&putchan,&tweetlock);
-    800064de:	00020b17          	auipc	s6,0x20
-    800064e2:	b22b0b13          	addi	s6,s6,-1246 # 80026000 <tweetlock>
-    800064e6:	00002a97          	auipc	s5,0x2
-    800064ea:	3c2a8a93          	addi	s5,s5,962 # 800088a8 <putchan>
+    800065c0:	57fd                	li	a5,-1
+    800065c2:	02f51463          	bne	a0,a5,800065ea <btget+0x7c>
+     // printf("Started sleeping for btget \n");
+        sleep(&putchan,&alltweetbuff[tag].tweettaglock);
+    800065c6:	00002b97          	auipc	s7,0x2
+    800065ca:	2e2b8b93          	addi	s7,s7,738 # 800088a8 <putchan>
      while(index==-1){
-    800064ee:	597d                	li	s2,-1
-        sleep(&putchan,&tweetlock);
-    800064f0:	85da                	mv	a1,s6
-    800064f2:	8556                	mv	a0,s5
-    800064f4:	ffffc097          	auipc	ra,0xffffc
-    800064f8:	b6e080e7          	jalr	-1170(ra) # 80002062 <sleep>
+    800065ce:	5b7d                	li	s6,-1
+        sleep(&putchan,&alltweetbuff[tag].tweettaglock);
+    800065d0:	85a6                	mv	a1,s1
+    800065d2:	855e                	mv	a0,s7
+    800065d4:	ffffc097          	auipc	ra,0xffffc
+    800065d8:	a8e080e7          	jalr	-1394(ra) # 80002062 <sleep>
         index = getemptyindex(tag);
-    800064fc:	8526                	mv	a0,s1
-    800064fe:	00000097          	auipc	ra,0x0
-    80006502:	dd2080e7          	jalr	-558(ra) # 800062d0 <getemptyindex>
+    800065dc:	854a                	mv	a0,s2
+    800065de:	00000097          	auipc	ra,0x0
+    800065e2:	d32080e7          	jalr	-718(ra) # 80006310 <getemptyindex>
      while(index==-1){
-    80006506:	ff2505e3          	beq	a0,s2,800064f0 <btget+0x54>
+    800065e6:	ff6505e3          	beq	a0,s6,800065d0 <btget+0x62>
     }
-   // printf("index after wakeup %d \n", index);
+ //  printf("index after wakeup %d \n", index);
 //     if(index!=-1){
 //          printf("tag idx %d \n",index);
 //          printf("at i found: %d\n",index,strlen(tweetbuffer[index].msg ));
-         char *temp = tweetbuffer[index].msg;
-    8000650a:	00351493          	slli	s1,a0,0x3
-    8000650e:	94aa                	add	s1,s1,a0
-    80006510:	0492                	slli	s1,s1,0x4
-    80006512:	00020797          	auipc	a5,0x20
-    80006516:	b0a78793          	addi	a5,a5,-1270 # 8002601c <tweetbuffer+0x4>
-    8000651a:	94be                	add	s1,s1,a5
+         char *temp = alltweetbuff[tag].tagtweetbuffer[index].msg;
+    800065ea:	00351913          	slli	s2,a0,0x3
+    800065ee:	992a                	add	s2,s2,a0
+    800065f0:	0912                	slli	s2,s2,0x4
+    800065f2:	0a91                	addi	s5,s5,4
+    800065f4:	9956                	add	s2,s2,s5
+    800065f6:	00020797          	auipc	a5,0x20
+    800065fa:	a0a78793          	addi	a5,a5,-1526 # 80026000 <alltweetbuff>
+    800065fe:	993e                	add	s2,s2,a5
+   //      printf("**** Msg found: %s\n", temp);
          copyout(p->pagetable,buf,temp,strlen(temp));
-    8000651c:	050a3903          	ld	s2,80(s4)
-    80006520:	8526                	mv	a0,s1
-    80006522:	ffffb097          	auipc	ra,0xffffb
-    80006526:	926080e7          	jalr	-1754(ra) # 80000e48 <strlen>
-    8000652a:	86aa                	mv	a3,a0
-    8000652c:	8626                	mv	a2,s1
-    8000652e:	85ce                	mv	a1,s3
-    80006530:	854a                	mv	a0,s2
-    80006532:	ffffb097          	auipc	ra,0xffffb
-    80006536:	130080e7          	jalr	304(ra) # 80001662 <copyout>
+    80006600:	050a3a03          	ld	s4,80(s4)
+    80006604:	854a                	mv	a0,s2
+    80006606:	ffffb097          	auipc	ra,0xffffb
+    8000660a:	842080e7          	jalr	-1982(ra) # 80000e48 <strlen>
+    8000660e:	86aa                	mv	a3,a0
+    80006610:	864a                	mv	a2,s2
+    80006612:	85ce                	mv	a1,s3
+    80006614:	8552                	mv	a0,s4
+    80006616:	ffffb097          	auipc	ra,0xffffb
+    8000661a:	04c080e7          	jalr	76(ra) # 80001662 <copyout>
 
-        memset(tweetbuffer[index].msg, 0, MAXTWEETLENGTH);
-    8000653a:	08c00613          	li	a2,140
-    8000653e:	4581                	li	a1,0
-    80006540:	8526                	mv	a0,s1
-    80006542:	ffffa097          	auipc	ra,0xffffa
-    80006546:	78a080e7          	jalr	1930(ra) # 80000ccc <memset>
+        memset(alltweetbuff[tag].tagtweetbuffer[index].msg, 0, MAXTWEETLENGTH);
+    8000661e:	08c00613          	li	a2,140
+    80006622:	4581                	li	a1,0
+    80006624:	854a                	mv	a0,s2
+    80006626:	ffffa097          	auipc	ra,0xffffa
+    8000662a:	6a6080e7          	jalr	1702(ra) # 80000ccc <memset>
+        
+        tweetcounter--;
+    8000662e:	00003717          	auipc	a4,0x3
+    80006632:	a0670713          	addi	a4,a4,-1530 # 80009034 <tweetcounter>
+    80006636:	431c                	lw	a5,0(a4)
+    80006638:	37fd                	addiw	a5,a5,-1
+    8000663a:	c31c                	sw	a5,0(a4)
         wakeup(&getchan);
-    8000654a:	00002517          	auipc	a0,0x2
-    8000654e:	36250513          	addi	a0,a0,866 # 800088ac <getchan>
-    80006552:	ffffc097          	auipc	ra,0xffffc
-    80006556:	c9c080e7          	jalr	-868(ra) # 800021ee <wakeup>
+    8000663c:	00002517          	auipc	a0,0x2
+    80006640:	27050513          	addi	a0,a0,624 # 800088ac <getchan>
+    80006644:	ffffc097          	auipc	ra,0xffffc
+    80006648:	baa080e7          	jalr	-1110(ra) # 800021ee <wakeup>
 //     }else{
 //         printf("no element msg available to read\n");
 //     }
    
-  //  printf("release lock\n");
-    release(&tweetlock);
-    8000655a:	00020517          	auipc	a0,0x20
-    8000655e:	aa650513          	addi	a0,a0,-1370 # 80026000 <tweetlock>
-    80006562:	ffffa097          	auipc	ra,0xffffa
-    80006566:	722080e7          	jalr	1826(ra) # 80000c84 <release>
+//    printf("btget release lock\n");
+    release(&alltweetbuff[tag].tweettaglock);
+    8000664c:	8526                	mv	a0,s1
+    8000664e:	ffffa097          	auipc	ra,0xffffa
+    80006652:	636080e7          	jalr	1590(ra) # 80000c84 <release>
     
      return 0;
 }
-    8000656a:	4501                	li	a0,0
-    8000656c:	70e2                	ld	ra,56(sp)
-    8000656e:	7442                	ld	s0,48(sp)
-    80006570:	74a2                	ld	s1,40(sp)
-    80006572:	7902                	ld	s2,32(sp)
-    80006574:	69e2                	ld	s3,24(sp)
-    80006576:	6a42                	ld	s4,16(sp)
-    80006578:	6aa2                	ld	s5,8(sp)
-    8000657a:	6b02                	ld	s6,0(sp)
-    8000657c:	6121                	addi	sp,sp,64
-    8000657e:	8082                	ret
+    80006656:	4501                	li	a0,0
+    80006658:	60a6                	ld	ra,72(sp)
+    8000665a:	6406                	ld	s0,64(sp)
+    8000665c:	74e2                	ld	s1,56(sp)
+    8000665e:	7942                	ld	s2,48(sp)
+    80006660:	79a2                	ld	s3,40(sp)
+    80006662:	7a02                	ld	s4,32(sp)
+    80006664:	6ae2                	ld	s5,24(sp)
+    80006666:	6b42                	ld	s6,16(sp)
+    80006668:	6ba2                	ld	s7,8(sp)
+    8000666a:	6161                	addi	sp,sp,80
+    8000666c:	8082                	ret
 
-0000000080006580 <tget>:
+000000008000666e <tget>:
 
 int
 tget(topic_t tag,uint64 buf){
-    80006580:	7179                	addi	sp,sp,-48
-    80006582:	f406                	sd	ra,40(sp)
-    80006584:	f022                	sd	s0,32(sp)
-    80006586:	ec26                	sd	s1,24(sp)
-    80006588:	e84a                	sd	s2,16(sp)
-    8000658a:	e44e                	sd	s3,8(sp)
-    8000658c:	e052                	sd	s4,0(sp)
-    8000658e:	1800                	addi	s0,sp,48
-    80006590:	84aa                	mv	s1,a0
-    80006592:	8a2e                	mv	s4,a1
+    8000666e:	7139                	addi	sp,sp,-64
+    80006670:	fc06                	sd	ra,56(sp)
+    80006672:	f822                	sd	s0,48(sp)
+    80006674:	f426                	sd	s1,40(sp)
+    80006676:	f04a                	sd	s2,32(sp)
+    80006678:	ec4e                	sd	s3,24(sp)
+    8000667a:	e852                	sd	s4,16(sp)
+    8000667c:	e456                	sd	s5,8(sp)
+    8000667e:	e05a                	sd	s6,0(sp)
+    80006680:	0080                	addi	s0,sp,64
+    80006682:	84aa                	mv	s1,a0
+    80006684:	8aae                	mv	s5,a1
    // printf("tget Hello world in tweet.c\n");
       
 
    
     struct proc *p = myproc();
-    80006594:	ffffb097          	auipc	ra,0xffffb
-    80006598:	40a080e7          	jalr	1034(ra) # 8000199e <myproc>
-    8000659c:	89aa                	mv	s3,a0
+    80006686:	ffffb097          	auipc	ra,0xffffb
+    8000668a:	318080e7          	jalr	792(ra) # 8000199e <myproc>
+    8000668e:	8b2a                	mv	s6,a0
 
-    acquire(&tweetlock);
-    8000659e:	00020517          	auipc	a0,0x20
-    800065a2:	a6250513          	addi	a0,a0,-1438 # 80026000 <tweetlock>
-    800065a6:	ffffa097          	auipc	ra,0xffffa
-    800065aa:	62a080e7          	jalr	1578(ra) # 80000bd0 <acquire>
+    acquire(&alltweetbuff[tag].tweettaglock);
+    80006690:	02049993          	slli	s3,s1,0x20
+    80006694:	0209d993          	srli	s3,s3,0x20
+    80006698:	5b800793          	li	a5,1464
+    8000669c:	02f989b3          	mul	s3,s3,a5
+    800066a0:	00020a17          	auipc	s4,0x20
+    800066a4:	f00a0a13          	addi	s4,s4,-256 # 800265a0 <alltweetbuff+0x5a0>
+    800066a8:	9a4e                	add	s4,s4,s3
+    800066aa:	8552                	mv	a0,s4
+    800066ac:	ffffa097          	auipc	ra,0xffffa
+    800066b0:	524080e7          	jalr	1316(ra) # 80000bd0 <acquire>
    // printf("Acquiring lock\n");
     int index = gettagindex(tag);
-    800065ae:	8526                	mv	a0,s1
-    800065b0:	00000097          	auipc	ra,0x0
-    800065b4:	cca080e7          	jalr	-822(ra) # 8000627a <gettagindex>
-    800065b8:	892a                	mv	s2,a0
+    800066b4:	8526                	mv	a0,s1
+    800066b6:	00000097          	auipc	ra,0x0
+    800066ba:	bf4080e7          	jalr	-1036(ra) # 800062aa <gettagindex>
+    800066be:	892a                	mv	s2,a0
     if(index!=-1){
-    800065ba:	57fd                	li	a5,-1
-    800065bc:	06f50463          	beq	a0,a5,80006624 <tget+0xa4>
+    800066c0:	57fd                	li	a5,-1
+    800066c2:	06f50c63          	beq	a0,a5,8000673a <tget+0xcc>
 
-        char *temp = tweetbuffer[index].msg;
-    800065c0:	00351493          	slli	s1,a0,0x3
-    800065c4:	94aa                	add	s1,s1,a0
-    800065c6:	0492                	slli	s1,s1,0x4
-    800065c8:	00020797          	auipc	a5,0x20
-    800065cc:	a5478793          	addi	a5,a5,-1452 # 8002601c <tweetbuffer+0x4>
-    800065d0:	94be                	add	s1,s1,a5
+        char *temp = alltweetbuff[tag].tagtweetbuffer[index].msg;
+    800066c6:	00351493          	slli	s1,a0,0x3
+    800066ca:	94aa                	add	s1,s1,a0
+    800066cc:	0492                	slli	s1,s1,0x4
+    800066ce:	0991                	addi	s3,s3,4
+    800066d0:	94ce                	add	s1,s1,s3
+    800066d2:	00020797          	auipc	a5,0x20
+    800066d6:	92e78793          	addi	a5,a5,-1746 # 80026000 <alltweetbuff>
+    800066da:	94be                	add	s1,s1,a5
         copyout(p->pagetable,buf,temp,strlen(temp));
-    800065d2:	0509b903          	ld	s2,80(s3)
-    800065d6:	8526                	mv	a0,s1
-    800065d8:	ffffb097          	auipc	ra,0xffffb
-    800065dc:	870080e7          	jalr	-1936(ra) # 80000e48 <strlen>
-    800065e0:	86aa                	mv	a3,a0
-    800065e2:	8626                	mv	a2,s1
-    800065e4:	85d2                	mv	a1,s4
-    800065e6:	854a                	mv	a0,s2
-    800065e8:	ffffb097          	auipc	ra,0xffffb
-    800065ec:	07a080e7          	jalr	122(ra) # 80001662 <copyout>
+    800066dc:	050b3903          	ld	s2,80(s6)
+    800066e0:	8526                	mv	a0,s1
+    800066e2:	ffffa097          	auipc	ra,0xffffa
+    800066e6:	766080e7          	jalr	1894(ra) # 80000e48 <strlen>
+    800066ea:	86aa                	mv	a3,a0
+    800066ec:	8626                	mv	a2,s1
+    800066ee:	85d6                	mv	a1,s5
+    800066f0:	854a                	mv	a0,s2
+    800066f2:	ffffb097          	auipc	ra,0xffffb
+    800066f6:	f70080e7          	jalr	-144(ra) # 80001662 <copyout>
 
-        memset(tweetbuffer[index].msg, 0, MAXTWEETLENGTH);
-    800065f0:	08c00613          	li	a2,140
-    800065f4:	4581                	li	a1,0
-    800065f6:	8526                	mv	a0,s1
-    800065f8:	ffffa097          	auipc	ra,0xffffa
-    800065fc:	6d4080e7          	jalr	1748(ra) # 80000ccc <memset>
-         release(&tweetlock);
+        memset(alltweetbuff[tag].tagtweetbuffer[index].msg, 0, MAXTWEETLENGTH);
+    800066fa:	08c00613          	li	a2,140
+    800066fe:	4581                	li	a1,0
+    80006700:	8526                	mv	a0,s1
+    80006702:	ffffa097          	auipc	ra,0xffffa
+    80006706:	5ca080e7          	jalr	1482(ra) # 80000ccc <memset>
+        
+         tweetcounter--;
+    8000670a:	00003717          	auipc	a4,0x3
+    8000670e:	92a70713          	addi	a4,a4,-1750 # 80009034 <tweetcounter>
+    80006712:	431c                	lw	a5,0(a4)
+    80006714:	37fd                	addiw	a5,a5,-1
+    80006716:	c31c                	sw	a5,0(a4)
+         release(&alltweetbuff[tag].tweettaglock);
         return -1;
     }
    
   //  printf("release lock\n");
-    release(&tweetlock);
-    80006600:	00020517          	auipc	a0,0x20
-    80006604:	a0050513          	addi	a0,a0,-1536 # 80026000 <tweetlock>
-    80006608:	ffffa097          	auipc	ra,0xffffa
-    8000660c:	67c080e7          	jalr	1660(ra) # 80000c84 <release>
+    release(&alltweetbuff[tag].tweettaglock);
+    80006718:	8552                	mv	a0,s4
+    8000671a:	ffffa097          	auipc	ra,0xffffa
+    8000671e:	56a080e7          	jalr	1386(ra) # 80000c84 <release>
     
      return 0;
-    80006610:	4901                	li	s2,0
+    80006722:	4901                	li	s2,0
 }
-    80006612:	854a                	mv	a0,s2
-    80006614:	70a2                	ld	ra,40(sp)
-    80006616:	7402                	ld	s0,32(sp)
-    80006618:	64e2                	ld	s1,24(sp)
-    8000661a:	6942                	ld	s2,16(sp)
-    8000661c:	69a2                	ld	s3,8(sp)
-    8000661e:	6a02                	ld	s4,0(sp)
-    80006620:	6145                	addi	sp,sp,48
-    80006622:	8082                	ret
+    80006724:	854a                	mv	a0,s2
+    80006726:	70e2                	ld	ra,56(sp)
+    80006728:	7442                	ld	s0,48(sp)
+    8000672a:	74a2                	ld	s1,40(sp)
+    8000672c:	7902                	ld	s2,32(sp)
+    8000672e:	69e2                	ld	s3,24(sp)
+    80006730:	6a42                	ld	s4,16(sp)
+    80006732:	6aa2                	ld	s5,8(sp)
+    80006734:	6b02                	ld	s6,0(sp)
+    80006736:	6121                	addi	sp,sp,64
+    80006738:	8082                	ret
         printf("no element msg available to read  returing -1\n");
-    80006624:	00002517          	auipc	a0,0x2
-    80006628:	24c50513          	addi	a0,a0,588 # 80008870 <syscalls+0x428>
-    8000662c:	ffffa097          	auipc	ra,0xffffa
-    80006630:	f58080e7          	jalr	-168(ra) # 80000584 <printf>
-         release(&tweetlock);
-    80006634:	00020517          	auipc	a0,0x20
-    80006638:	9cc50513          	addi	a0,a0,-1588 # 80026000 <tweetlock>
-    8000663c:	ffffa097          	auipc	ra,0xffffa
-    80006640:	648080e7          	jalr	1608(ra) # 80000c84 <release>
+    8000673a:	00002517          	auipc	a0,0x2
+    8000673e:	13650513          	addi	a0,a0,310 # 80008870 <syscalls+0x428>
+    80006742:	ffffa097          	auipc	ra,0xffffa
+    80006746:	e42080e7          	jalr	-446(ra) # 80000584 <printf>
+         release(&alltweetbuff[tag].tweettaglock);
+    8000674a:	8552                	mv	a0,s4
+    8000674c:	ffffa097          	auipc	ra,0xffffa
+    80006750:	538080e7          	jalr	1336(ra) # 80000c84 <release>
         return -1;
-    80006644:	b7f9                	j	80006612 <tget+0x92>
+    80006754:	bfc1                	j	80006724 <tget+0xb6>
 	...
 
 0000000080007000 <_trampoline>:
