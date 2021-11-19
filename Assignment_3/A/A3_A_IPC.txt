@@ -1,0 +1,219 @@
+/*
+Assignment 3 Part a.
+	
+Computer Science 332.3
+Prof: Dr. Derek Eager
+University of Saskatchewan - Arts & Science
+	Department of Computer Science
+A project by:Shantanu Mishra | Shm572 | 11255997 & Spencer Tracy | Spt631 | 11236962 
+__________________________________________________
+ */
+ 
+ 
+ 
+
+
+Features of IPC (Inter process communication) tweet:
+       1. It has 4 methods, 2 getters (btget and tget) and 2 putters (btput and btput)
+       2. putters can store a msg only if following conditions are met:
+          a. Space is available to store the tweet 
+          b. total tweets count in the system is below the MAXTWEETTOTAL
+       3. if the putters conditions are not met then:
+          a. btput will go to sleep until some other getter retrieves a msg and wakeup the btput
+             Also returns -1 if the strcpy fails 
+          b. tput will simply return -1 and immediately return to user program 
+       4. getter can retrieve the msg only if following conditons are met:
+          a. a tweet is store with a given tag and has some msg in it. 
+    
+       5. if the getters conditions are not met then:
+          a. btget will go to sleep until some other putter adds a msg and wakeup the btget
+              Also returns -1 if the copyout fails 
+          b. tget will simply return -1 and immediately return to user program 
+        
+       
+        
+                                          
+
+
+        
+How to run:
+
+    1. call make qemu 
+    2. once the shell is ready call test
+        example. test
+        Sample output 
+        $ test
+	    btget output: Tag A - Hello world!
+        
+ 
+     
+
+Known bugs:
+	-NA
+
+
+Known limitations:
+    - Msg of 140 chars can only be tweeted 
+  
+Changes made in xv6-riscv
+
+
+        kernel/defs.h
+          Added     int            btput(topic_t,char*);
+                    int             tput(topic_t,char*);
+                    int             btget(topic_t,uint64);
+                    int             tget(topic_t,uint64);
+                    void             inittweetlock(void);
+        
+       kernel/tweet.c
+	    Created a new file which contains all the getters and putters methods, data structures for storing the tweets
+        and variables for the channel, locks, and counter. 
+
+
+        kernel/syscall.c
+          added     [SYS_btput]   sys_btput,
+                    [SYS_tput]   sys_tput,
+                    [SYS_btget]   sys_btget,
+                    [SYS_tget]   sys_tget,
+                    
+                    extern uint64 sys_btput(void);
+                    extern uint64 sys_tput(void);
+                    extern uint64 sys_btget(void);
+                    extern uint64 sys_tget(void);
+
+        kernel/syscall.h
+          Added     #define SYS_btput  22
+                    #define SYS_tput   23
+                    #define SYS_btget  24
+                    #define SYS_tget   25
+
+        kernel/sysproc.c 
+            Added   sys_btput(void)
+                    sys_tput(void)
+                    sys_btget(void)
+                    sys_tget(void)
+
+        user/test.c
+            added user program to test the new sys call
+
+        user/user.h
+            added   int btput(topic_t,char*);
+                    int tput(topic_t,char*);
+                    int btget(topic_t,char*);
+                    int tget(topic_t,char*);
+
+
+        user/usys.pl
+           added    entry("btput");
+                    entry("tput");
+                    entry("btget");
+                    entry("tget");
+
+        Makefile 
+		added        $K/tweet.o  under  OBJS
+                    /_test       under  UPROGS
+	    
+        param.h
+        added       #define MAXTWEETTOTAL 10 //max number of tweets that can be stored in system 
+                    #define NUMTWEETTOPICS 3 //number of tweet topics 
+                    #define MAXTWEETLENGTH 140 //max char in the tweet msg 
+                    #define MAXTAGTWEET   8 //max number of tweet in a topic, this is used to define the size of list/array of a topic 
+
+	
+	
+
+Features of test.c a user program:
+        It runs 4 test cases to ensure that putters and getters are working concurrently, following are the test cases: 
+        1. Test case 1
+        Test case: Calling btput 45 times from the child process then in parent process calling btget 45 times.
+                   Also, while start 15 tweet will be for  tag A, next 15 will be tag B and the last 15 will be tag c. 
+        Expected output: All the sender (child process) tweet msg should be revied by the correct reciver (parent) tag.
+        
+        2. Test case 2
+        Test case: Calling tput and tget with tag a and a msg
+        Expected output: tget should report return the tput msg
+        
+        3. Test case 3
+        Test case: Calling tget for tag b which does not have any tweet stored for it
+        Expected output: tget should report that no tweet to read with tag b and return -1
+        
+        4. Test case 4
+        Test case: Calling tput 11 times and the maxtweet is set as 10
+        Expected output: so at the 11th tput program should report that no space is available to store the tweet and end the tput call with -1
+        
+
+		
+Results from testing :
+        xv6 kernel is booting
+
+hart 2 starting
+hart 1 starting
+init: starting sh
+$ test
+************** Test case 1*********
+Test case: Calling btput 45 times from the child process then in parent process calling btget 45 times.
+ Also, while start 15 tweet will be for tag A, next 15 will be tag B and the last 15 will be tag c.
+Expected output: All the sender (child process) tweet msg should be revied by the correct reciver (parent) tag
+
+Actual output:
+btget output: Tag A - Hello world!
+btget output: Tag A - Hello world!
+btget output: Tag A - Hello world!
+btget output: Tag A - Hello world!
+btget output: Tag A - Hello world!
+btget output: Tag A - Hello world!
+btget output: Tag A - Hello world!
+btget output: Tag A - Hello world!
+btget output: Tag A - Hello world!
+btget output: Tag A - Hello world!
+btget output: Tag A - Hello world!
+btget output: Tag A - Hello world!
+btget output: Tag A - Hello world!
+btget output: Tag A - Hello world!
+btget output: Tag B -   CMPT 332!!
+btget output: Tag A - Hello world!
+btget output: Tag B -   CMPT 332!!
+btget output: Tag B -   CMPT 332!!
+btget output: Tag B -   CMPT 332!!
+btget output: Tag B -   CMPT 332!!
+btget output: Tag B -   CMPT 332!!
+btget output: Tag B -   CMPT 332!!
+btget output: Tag B -   CMPT 332!!
+btget output: Tag B -   CMPT 332!!
+btget output: Tag B -   CMPT 332!!
+btget output: Tag B -   CMPT 332!!
+btget output: Tag B -   CMPT 332!!
+btget output: Tag B -   CMPT 332!!
+btget output: Tag B -   CMPT 332!!
+btget output: Tag B -   CMPT 332!!
+btget output: Tag C- Xv6 A 3 part A
+btget output: Tag C- Xv6 A 3 part A
+btget output: Tag C- Xv6 A 3 part A
+btget output: Tag C- Xv6 A 3 part A
+btget output: Tag C- Xv6 A 3 part A
+btget output: Tag C- Xv6 A 3 part A
+btget output: Tag C- Xv6 A 3 part A
+btget output: Tag C- Xv6 A 3 part A
+btget output: Tag C- Xv6 A 3 part A
+btget output: Tag C- Xv6 A 3 part A
+btget output: Tag C- Xv6 A 3 part A
+btget output: Tag C- Xv6 A 3 part A
+btget output: Tag C- Xv6 A 3 part A
+btget output: Tag C- Xv6 A 3 part A
+btget output: Tag C- Xv6 A 3 part A
+************** Test case 2*********
+Test case: Calling tput and tget with tag a and a msg
+Expected output: tget should report return the tput msg
+
+Actual output: tget output: Tag A - Hello world!
+************** Test case 3*********
+Test case: Calling tget for tag b which does not have any tweet stored for it
+Expected output: tget should report that no tweet to read with tag b and return -1
+
+Actual output: no tweet msg available to read  with provided tag returing -1
+************** Test case 3*********
+Test case: Calling tput 11 times and the maxtweet is set as 10
+Expected output: so at the 11th tput program should report that no space is available to store the tweet and end the tput call with -1
+
+Actual output: No space available to put new msg returing -1
+$
