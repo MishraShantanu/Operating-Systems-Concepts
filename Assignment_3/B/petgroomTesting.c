@@ -67,7 +67,7 @@ int main()
                                 //errors.
     int doSmallTest = 1; //Relatively short sample,
                             // 40 pets, 5 stations. 1 second delay between spawns, 5 seconds before petdone.
-    int doMediumTest = 0; //This test is larger than the first, and takes a good bit of time to complete.
+    int doMediumTest = 1; //This test is larger than the first, and takes a good bit of time to complete.
                             //100 pets, 15 stations. 2 second delay between spawns, 15 seconds before petdone.
     int doLargeTest = 0; //I don't recommend this unless you've got some serious time to kill.
                             //300 pets, 40 stations. 1 second delay between spawns, 12 seconds before petdone.

@@ -110,13 +110,14 @@ int newpet(pet_t pet)
         int typeWaiting = 4;
         while (blockedAttempts > MAX_BLOCKS)
         {  //Check if we've waited more than MAX_BLOCKS amount of time for adding new dog or new cat.
+
+            //THIS PARADIGM DID NOT SOLVE THE PROBLEM, but likely could be easily adapted.
             if (catCount > 0) typeWaiting=dog;
             if (dogCount > 0) typeWaiting=cat;
-
+            //Removed code that checks this in the future.
             char* output;
-            if (typeWaiting == cat) output = "cat";
-            if (typeWaiting == dog) output = "dog";
-
+            if (typeWaiting == dog) output = "cat";
+            if (typeWaiting == cat) output = "dog";
 
             printf("Too many blocks. Waiting for %s to clear. \n",output);
             pthread_cond_wait(&tooManyAttempts, &mutex); //Wait until all of typeWaiting have cleared.
@@ -133,39 +134,23 @@ int newpet(pet_t pet)
             while (dogCount != 0) pthread_cond_wait(&noDogs, &mutex);
         }
         while (openStations <= 0) pthread_cond_wait(&emptyBeds, &mutex); //Ensure there's an empty bed.
-        if (typeWaiting == cat && pet == cat)
-            //An attempt at forcing ordering, but when many blocked pets queued it sometimes
-            // fails especially if MAX_BLOCKS is high (MAX_BLOCKS achieved before all queued pets have been cleared).
+        if (pet == cat)
         {
-            //printf("CATS GIVEN PRIORITY.\n");
             catCount++;
             printf("cat given\t");
         }
-        else if (typeWaiting == dog && pet == dog)
+        if (pet == dog)
         {
-            //printf("DOGS GIVEN PRIORITY.\n");
             dogCount++;
             printf("dog given\t");
         }
-        else //Neither have been waiting for too long, regular addition of the pet.
-        {
-            if (pet == cat)
-            {
-                catCount++;
-                printf("cat given\t");
-            }
-            if (pet == dog)
-            {
-                dogCount++;
-                printf("dog given\t");
-            }
-        }
-
         openStations -= 1;
         //Optional print statement, useful in readability.
         printf("\topen stations: %d\t cats [%d] dogs [%d] other [%d]\n",openStations,catCount,dogCount,otherCount);
         pthread_mutex_unlock(&mutex); //End critical section.
     }
+
+
     return 0;
 }
 

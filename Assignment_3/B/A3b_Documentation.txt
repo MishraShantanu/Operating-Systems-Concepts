@@ -1,0 +1,105 @@
+/*
+Assignment 3 Part B.
+	petgroomsynch.c -- Documentation file.
+
+Computer Science 332.3
+Prof: Dr. Derek Eager
+University of Saskatchewan - Arts & Science
+	Department of Computer Science
+A project by: Spencer Tracy | Spt631 | 11236962 and Shantanu Mishra | Shm572 | 11255997
+__________________________________________________
+ */
+
+
+							Making of a synchronous pet grooming business.
+	
+	petgroomsync.c is a program designed to use pthreads in order to handle many threads to process an
+	unknown amount of pets for grooming. Designed such that no cats can be grooming while there are dogs being groomed 
+	and vice versa. 
+	
+	petgroomTesting.c is the test file to ensure the proper functioning of petgroomsynch.c.
+		NOTE: There are optional tests that can be enabled or disabled, see the beginning of int main().
+		
+	
+	To avoid starvation, petgroomsynch.c will count how many cats/dogs have been blocked due to the other type being
+	in grooming. If this exceeds MAX_BLOCKS (default: 5), the program will attempt to wait until all the current cats/dogs
+	are cleared before switching to the other type.
+	
+	petgroomsync.c uses mutexes and condition variables to check for things such as writing/updating global
+	counters, checking for free stations, no dogs or no cats, blockedAttempts, etc.
+
+	The locking method used in petgroomsynch.c is the "one-big-lock" approach, so that none of the global variables relied 
+	upon can be updated/reported falsely to a thread. As a result, concurrency is less powerful but results are more
+	reliable -- as well as significantly less complexity and overhead.
+
+	This program is somewhat similar to the consumer/producer problem of concurrency.
+	
+	
+	Functions contained: 
+	int petgroom_init(int numstations):
+		Called by user to initialize numstations amount of stations, and required
+		mutexes, condition variables, and global counters.
+	
+	int newpet(pet_t pet):
+		Will try to find the given pet a grooming station, and handles restrictions like:
+			-If it is a 'other' type of pet, will be queued as long as there is a free station.
+			-If there is a dog in grooming, no cats can be groomed (and vice versa).
+				-Waits until signaled that all cats/all dogs have been cleared, allowing the 
+					use of the other type.
+				-If a certain pet type is blocked more than MAX_BLOCKS amount of times, 
+					waits until that type is completely done(not enqueing more of that type)
+					to switch to the other type. Intent is to avoid starvation of any pet type.
+			
+			-If there are no empty beds.
+				-Waits until an empty bed is found.
+			
+	int petdone(pet_t pet)
+		Will remove the given pet type from a grooming station (assuming it exists).
+			Updates global counters and signals to newpet() when condition variables have
+			been updated.
+	
+	int petgroom_done();
+		De-initializes the pet grooming business from petgroom_init() by destroying all
+		condition variables & mutexes, and resets global variables.
+			-Must have no pets remaining in stations.
+			-Must have petgroom_init() called first. 
+		
+
+
+
+	Flow of execution:
+		-Call petgroom_init().
+		-Call newpet() on any pet (cat,dog,other)
+		-Call petdone() on any pet (that's previously been initialized by newpet()).
+		-Call petgroom_done() (when all newpet()s and petdone()s are complete)
+	
+
+	
+	Known bugs:
+		-Sometimes will continue to queue an animal during a wait, (eg, waiting on no cats but another cat is queued).
+			Happens due to threads being past the wait block [ie, waiting for empty room]
+			before max_blocks check is hit.
+			
+		-In extremely rare cases (~1 out of every 100 runs) can break the mutual exclusion of cats and dogs
+			by having at 1 of the illegal pets in grooming at the same time.
+		
+	Known weaknesses -
+		-When flooded with zero wait time for new threads, 1 second between petdone()'s,
+			can encounter failure to mutually exclude cats and dogs [~25% of runs], 
+			and some rare cases hang entirely [~20% of runs].
+			
+		-Starvation can occur if maxblocks is too high
+			as maxblocks determines fairness.
+		
+		-Sometimes, after maxblocks is cleared, it doesn't switch to the other type immediately.
+			--happens because number of blocked animals queued is greater than the amount processed before maxblocks is hit again.
+				-Attempted to ensure ordering, and fairness still obtained by switching on the next time maxblocks encountered,
+				but could be done better.
+		
+		-To avoid clutter, I removed the print for counting up blocked attempts.
+			So when there is a slight pause between spawns -- that's because it's trying to block an illegal
+			pet type (until 5 blocks is achieved). 
+		
+		-Concurrency suffers due to a one big lock approach as opposed to many locks.
+		
+	
