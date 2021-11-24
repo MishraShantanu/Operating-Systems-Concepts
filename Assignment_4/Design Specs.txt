@@ -1,0 +1,75 @@
+All:
+	Use TCP to communicate.
+	Use proper socket API functions for TCP clients & servers,
+		-See Beej's guide to network programming,
+			(eg, getaddrinfo() )
+	Use port numbers between 30000 and 40000
+		-Used by department machines.
+	
+	To test: Run server in one window, client for all other windows, 
+			(use multiple windows to make your life easier).
+	
+Server [Server side]
+	-Recieves lines of text from sender clients.
+	-Sends each line of text recieved to ALL CURRENTLY CONNECTED receivers.
+		-MUST be prefixed by respected order of:
+			Sender IP and port. 
+				Separated by a comma and space -- 
+					then a colon and a space at the end.
+			
+			
+			Example:
+				Server recieved "Hello world" from a sender client address with:
+					IP = 128.233.18.75
+					Port = 32993
+				Server sends to all currently connected receivers: 
+					"128.233.18.75, 32993: Hello world"
+				All recievers then print that line to stdout.
+				
+	- Must be able to accomodate many current sender and receiver clients.
+		-When a new receiver connects, it should start receiving all NEW lines of text
+			(not any previously sent lines prior to receiver connecting).
+	
+	-Handle new connections
+	-Handle disconnections of existing clients.
+	
+	-Uses a [thread-per-connection] approach 
+		-Each thread created as a detached thread, 
+		-locks and condition variables for synchronization among the threads.
+		
+	-Use two separate threads for accepting new connections:
+		One for sender clients
+		One for receiver clients.
+	
+	-When server starts to run, 
+		Print the port number for senders to use
+		Print the port number that receivers should use.
+		
+	
+	
+	
+Sender [Client side]
+	-Gets line of text from stdin.
+		[getline()]
+	-Sends each line to server.
+	
+Receiver
+	-Gets line(s) of text from server.
+	-Writes each line to stdout
+	
+	
+	
+
+Summary:
+	Server:
+		get connections handled (sender, reciever)
+			[New connection, disconnection][New thread, kill thread].
+		Get text line from sender.
+		Add padding.
+		send to all current recievers.
+	Sender/client:
+		Get input
+		Send to server.
+	Reciever: 
+		Get line from server
+		Print line to stdout.

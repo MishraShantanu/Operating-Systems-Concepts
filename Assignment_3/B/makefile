@@ -1,3 +1,5 @@
+CC=gcc
+
 petgroomsynch:
 	$(CC) -Wall petgroomTesting.c petgroomsynch.c petgroomsynch.h -o petgroomsynch -pthread
 	
