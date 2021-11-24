@@ -14,9 +14,10 @@
 #include <arpa/inet.h>
 #include <netdb.h>
 
-#define MYPORT "30002"	// the port users will be connecting to
 #define MAXBUFLEN 100
+#define SERVERPORT "30002"	// the port users will be connecting to
 
+struct addrinfo hints, *servinfo, *p;
 
 char* getInput()
 {
@@ -26,7 +27,7 @@ char* getInput()
 
     message = (char *) malloc(MAXBUFLEN+1);
 
-    puts("Please enter the message you wish to send to the server.\n");
+    puts("Please enter the message you wish to send to the server:\n");
     bytesRead = getline(&message, (size_t *) &size, stdin);
 
     if (bytesRead == -1)
@@ -41,28 +42,14 @@ char* getInput()
     return message;
 }
 
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <errno.h>
-#include <string.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <netdb.h>
-
-#define SERVERPORT "30002"	// the port users will be connecting to
-
-char* getHostname()
+char* getHostName()
 {
-    size_t size = 100;
-    char *hostname = malloc(size);
-    int err = gethostname(hostname, size);
+    char *hostname = malloc(MAXBUFLEN);
+    int err = gethostname(hostname, MAXBUFLEN);
     if (err != 0)
     {
-        printf("Fail! \n");
+        printf("Failed to get your host name!! \n");
+        exit(1);
     }
     else
     {
@@ -71,15 +58,11 @@ char* getHostname()
     return hostname;
 }
 
-int main(int argc, char *argv[])
+
+int createSocket(char* myName)
 {
     int sockfd;
-    struct addrinfo hints, *servinfo, *p;
     int rv;
-    int numbytes;
-
-    char* myName = getHostname();
-
 
     memset(&hints, 0, sizeof hints);
     hints.ai_family = AF_INET6; // set to AF_INET to use IPv4
@@ -90,9 +73,6 @@ int main(int argc, char *argv[])
         fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
         return 1;
     }
-
-
-
 
     // loop through all the results and make a socket
     for(p = servinfo; p != NULL; p = p->ai_next) {
@@ -110,18 +90,43 @@ int main(int argc, char *argv[])
         fprintf(stderr, "talker: failed to create socket\n");
         return 2;
     }
+    freeaddrinfo(servinfo);
+    return sockfd;
+}
 
-    if ((numbytes = sendto(sockfd, argv[1], strlen(argv[1]), 0,
+
+int inputLoop(char* myName, int sockfd)
+{
+    long numbytes;
+    char* messagebuf = getInput();
+
+
+    if ((numbytes = sendto(sockfd, messagebuf, strlen(messagebuf), 0,
                            p->ai_addr, p->ai_addrlen)) == -1)
     {
         perror("talker: sendto");
         exit(1);
     }
+    printf("talker: sent %ld bytes to %s\n", numbytes, myName);
 
-    freeaddrinfo(servinfo);
-    p;
-    printf("talker: sent %d bytes to %s\n", numbytes, myName);
-    //close(sockfd);
+    return 0;
+}
+
+
+
+int main(int argc, char *argv[])
+{
+    char* hostName = getHostName();
+    int sockfd = createSocket(hostName);
+
+    inputLoop(hostName,sockfd);
+    //inputLoop(hostName,sockfd);
+    //inputLoop(hostName,sockfd);
+    //inputLoop(hostName,sockfd);
+    //inputLoop(hostName,sockfd);
+
+
+    close(sockfd);
 
     return 0;
 }
