@@ -42,25 +42,26 @@ char* getInput()
     return message;
 }
 
-char* getHostName()
+void getHostName(char* host)
 {
-    char *hostname = malloc(MAXBUFLEN);
-    int err = gethostname(hostname, MAXBUFLEN);
+    int err = gethostname(host, MAXBUFLEN);
     if (err != 0)
     {
         printf("Failed to get your host name!! \n");
         exit(1);
     }
-    else
-    {
-        printf("Hi! Your hostname is: %s \n", hostname);
-    }
-    return hostname;
 }
 
 
-int createSocket(char* myName)
+
+
+int main(int argc, char *argv[])
 {
+    long numbytes;
+    char* host = malloc(MAXBUFLEN);
+    getHostName(host);
+    printf("Host: %s\n",host);
+
     int sockfd;
     int rv;
 
@@ -68,7 +69,7 @@ int createSocket(char* myName)
     hints.ai_family = AF_INET6; // set to AF_INET to use IPv4
     hints.ai_socktype = SOCK_DGRAM;
 
-    if ((rv = getaddrinfo(myName, SERVERPORT, &hints, &servinfo)) != 0)
+    if ((rv = getaddrinfo(host, SERVERPORT, &hints, &servinfo)) != 0)
     {
         fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
         return 1;
@@ -90,42 +91,19 @@ int createSocket(char* myName)
         fprintf(stderr, "talker: failed to create socket\n");
         return 2;
     }
-    freeaddrinfo(servinfo);
-    return sockfd;
-}
 
 
-int inputLoop(char* myName, int sockfd)
-{
-    long numbytes;
+
     char* messagebuf = getInput();
-
-
     if ((numbytes = sendto(sockfd, messagebuf, strlen(messagebuf), 0,
                            p->ai_addr, p->ai_addrlen)) == -1)
     {
         perror("talker: sendto");
         exit(1);
     }
-    printf("talker: sent %ld bytes to %s\n", numbytes, myName);
 
-    return 0;
-}
-
-
-
-int main(int argc, char *argv[])
-{
-    char* hostName = getHostName();
-    int sockfd = createSocket(hostName);
-
-    inputLoop(hostName,sockfd);
-    //inputLoop(hostName,sockfd);
-    //inputLoop(hostName,sockfd);
-    //inputLoop(hostName,sockfd);
-    //inputLoop(hostName,sockfd);
-
-
+    freeaddrinfo(servinfo);
+    printf("talker: sent %ld bytes to %s\n", numbytes, host);
     close(sockfd);
 
     return 0;
