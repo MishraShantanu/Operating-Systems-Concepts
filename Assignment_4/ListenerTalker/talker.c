@@ -15,6 +15,22 @@
 
 #define SERVERPORT "30002"	// the port users will be connecting to
 
+char* getHostname()
+{
+    size_t size = 100;
+    char *hostname = malloc(size);
+    int err = gethostname(hostname, size);
+    if (err != 0)
+    {
+        printf("Fail! \n");
+    }
+    else
+    {
+        printf("Hi! Your hostname is: %s \n", hostname);
+    }
+    return hostname;
+}
+
 int main(int argc, char *argv[])
 {
 	int sockfd;
@@ -22,13 +38,13 @@ int main(int argc, char *argv[])
 	int rv;
 	int numbytes;
 
-    char* hostname = "tux6";
+    char* myName = getHostname();
 
 	memset(&hints, 0, sizeof hints);
 	hints.ai_family = AF_INET6; // set to AF_INET to use IPv4
 	hints.ai_socktype = SOCK_DGRAM;
 
-	if ((rv = getaddrinfo(hostname, SERVERPORT, &hints, &servinfo)) != 0) {
+	if ((rv = getaddrinfo(myName, SERVERPORT, &hints, &servinfo)) != 0) {
 		fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
 		return 1;
 	}
@@ -57,7 +73,7 @@ int main(int argc, char *argv[])
 
 	freeaddrinfo(servinfo);
 
-	printf("talker: sent %d bytes to %s\n", numbytes, hostname);
+	printf("talker: sent %d bytes to %s\n", numbytes, myName);
 	close(sockfd);
 
 	return 0;
