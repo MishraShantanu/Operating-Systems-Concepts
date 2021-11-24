@@ -22,7 +22,7 @@ int main(int argc, char *argv[])
 	int rv;
 	int numbytes;
 
-    char* hostname = "LAPTOP-5QSMGF83";
+    char* hostname = "tux6";
 
 	memset(&hints, 0, sizeof hints);
 	hints.ai_family = AF_INET6; // set to AF_INET to use IPv4
