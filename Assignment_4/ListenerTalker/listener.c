@@ -14,8 +14,8 @@
 #include <netdb.h>
 
 #define MYPORT "30002"	// the port users will be connecting to
-
 #define MAXBUFLEN 100
+
 
 // get sockaddr, IPv4 or IPv6:
 void *get_in_addr(struct sockaddr *sa)
