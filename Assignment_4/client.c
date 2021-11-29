@@ -122,7 +122,7 @@ int main(int argc, char *argv[])
     }
     else
     {
-        printf("Connection successful!");
+        printf("Connection successful!\n");
     }
 
     unsigned long bytesSent;

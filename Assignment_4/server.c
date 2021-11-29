@@ -34,9 +34,35 @@
     //Queue sending the message to all current receivers.
     //Send to each.
 
+int startServer()
+{
+    printf("Server starting...\n");
+    printf("\tAll senders should use port %s.\n",SENDERPORT);
+    printf("\tAll receivers should use port %s.\n",RECEIVERPORT);
+
+    printf("Starting listeners...\n");
+
+    return 0;
+}
 
 int main(int argc, char* argv[])
 {
-    printf("Hello.");
+
+    startServer();
+
+    /*
+For each connection, do this in order:
+    1. getaddrinfo();
+        //    getaddrinfo(NULL, MYPORT, &hints, &res);
+    2. socket();
+        //    sockfd = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
+    3. bind();
+        //    bind(sockfd, res->ai_addr, res->ai_addrlen);
+    4. listen();
+        //    listen(sockfd, BACKLOG);
+    5. accept();
+        //    int new_fd = accept(sockfd, (struct sockaddr *)&their_addr, &addr_size);
+     */
+
     return 0;
 }
