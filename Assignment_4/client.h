@@ -14,7 +14,16 @@
 #include <sys/types.h>
 #include <netinet/in.h>
 #include <sys/socket.h>
-
 #include <arpa/inet.h>
+#include <netdb.h>
+
+typedef struct SocketInformation
+{
+    int fd;
+    struct addrinfo *serverInformation;
+}SocketInformation;
+
+int checkArgs(int argCount);
+void* attemptConnection(char* hostName);
 
 #endif //ASSIGNMENT_4_CLIENT_H

@@ -1,110 +1,154 @@
-//
-// Created by Spencer on 2021-11-23.
-//
-
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <errno.h>
-#include <string.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <netdb.h>
-
-#define MAXBUFLEN 100
+#include "client.h"
 #define SERVERPORT "30002"	// the port users will be connecting to
 
-struct addrinfo hints, *servinfo, *p;
 
-char* getInput()
+int checkArgs(int argCount)
 {
-    long bytesRead;
-    int size = 100;
-    char* message;
-
-    message = (char *) malloc(MAXBUFLEN+1);
-
-    puts("Please enter the message you wish to send to the server:\n");
-    bytesRead = getline(&message, (size_t *) &size, stdin);
-
-    if (bytesRead == -1)
+    if (argCount == 1)
     {
-        printf("Fail.\n");
+        printf("Error: You must specify the hostname and your message as cmdline args.\n");
+        exit(-1);
+    }
+    else if (argCount == 2)
+    {
+        printf("Error: The host name was not specified as command line argument (or desired message was not included).\n");
+    }
+    else if (argCount == 3)
+    {
+        return 0;
     }
     else
     {
-        puts ("You typed:");
-        puts (message);
+        printf("Error: Cannot parse the given command line arguments -- too many given!\n"
+               "(Did you forget to put your message in quotes?)\n");
     }
-    return message;
+    return -1;
 }
 
-void getHostName(char* host)
+void* attemptConnection(char* hostName)
 {
-    int err = gethostname(host, MAXBUFLEN);
-    if (err != 0)
-    {
-        printf("Failed to get your host name!! \n");
-        exit(1);
-    }
-}
+    printf("Attempting to connect to host %s on port %s...\n",hostName,SERVERPORT);
 
+    //Setup for printing IP Address.
+    char ipstr[INET6_ADDRSTRLEN + 11]; //IPv6 length + room for printing.
+    void *addr;
+    char *ipver;
+
+    int socketFileDescriptor;
+    int returnValue;
+    struct addrinfo hints, *serverInfo, *serverInfoIterator;
+    memset(&hints, 0, sizeof hints);
+
+    hints.ai_family = AF_UNSPEC; //IPv4 and IPv6 are fine.
+    hints.ai_socktype = SOCK_STREAM; //TCP connection
+
+    if ((returnValue = getaddrinfo(hostName, SERVERPORT, &hints, &serverInfo)) != 0)
+    {
+        fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(returnValue));
+        return NULL;
+    }
+    // loop through all the results and make a socket
+
+    //Populate and create a socket.
+    for(serverInfoIterator = serverInfo; serverInfoIterator != NULL; serverInfoIterator = serverInfoIterator->ai_next)
+    {
+        if (serverInfoIterator->ai_family == AF_INET)
+        { // IPv4
+            struct sockaddr_in *ipv4 = (struct sockaddr_in *)serverInfoIterator->ai_addr;
+            addr = &(ipv4->sin_addr);
+            ipver = "Host IPv4: ";
+        }
+        else
+        { // IPv6
+            struct sockaddr_in6 *ipv6 = (struct sockaddr_in6 *)serverInfoIterator->ai_addr;
+            addr = &(ipv6->sin6_addr);
+            ipver = "Host IPv6: ";
+        }
+        if ((socketFileDescriptor = socket(serverInfoIterator->ai_family,
+                             serverInfoIterator->ai_socktype,
+                             serverInfoIterator->ai_protocol)) == -1)
+        {
+            perror("talker: socket");
+            continue;
+        }
+        break;
+    }
+
+    //Did socket creation fail?
+    if (serverInfoIterator == NULL)
+    {
+        fprintf(stderr, "Error: failed to create socket for connection attempt.\n");
+        return NULL;
+    }
+
+    //Print host IP.
+    inet_ntop(serverInfoIterator->ai_family, addr, ipstr, sizeof ipstr);
+    printf("\t%s%s\n", ipver, ipstr);
+
+    //Attempt connection to server.
+    if (connect(socketFileDescriptor, serverInfo->ai_addr, serverInfo->ai_addrlen) != 0)
+    {
+        printf("Error: Connection refused by server.\n");
+        return NULL;
+    }
+    //Return socket file descriptor and server information.
+    struct SocketInformation *returnMe;
+    returnMe = malloc(sizeof(SocketInformation));
+    returnMe->fd = socketFileDescriptor;
+    returnMe->serverInformation = serverInfo;
+
+    return returnMe;
+}
 
 
 
 int main(int argc, char *argv[])
 {
-    long numbytes;
-    char* host = malloc(MAXBUFLEN);
-    getHostName(host);
-    printf("Host: %s\n",host);
-
-    int sockfd;
-    int rv;
-
-    memset(&hints, 0, sizeof hints);
-    hints.ai_family = AF_INET6; // set to AF_INET to use IPv4
-    hints.ai_socktype = SOCK_DGRAM;
-
-    if ((rv = getaddrinfo(host, SERVERPORT, &hints, &servinfo)) != 0)
+    //Ensure user has inputted a proper amount of command line arguments.
+    if (checkArgs(argc) != 0)
     {
-        fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
-        return 1;
+        exit(-1);
     }
 
-    // loop through all the results and make a socket
-    for(p = servinfo; p != NULL; p = p->ai_next) {
-        if ((sockfd = socket(p->ai_family, p->ai_socktype,
-                             p->ai_protocol)) == -1) {
-            perror("talker: socket");
-            continue;
-        }
+    char *desiredHost = argv[1];
+    char *desiredMessage = argv[2];
+    unsigned long messageLength = strlen(desiredMessage);
 
-        break;
-    }
+    SocketInformation *socketInfo = attemptConnection(desiredHost);
 
-    if (p == NULL)
+    if (socketInfo == NULL)
     {
-        fprintf(stderr, "talker: failed to create socket\n");
-        return 2;
+        exit(-1);
     }
-
-
-
-    char* messagebuf = getInput();
-    if ((numbytes = sendto(sockfd, messagebuf, strlen(messagebuf), 0,
-                           p->ai_addr, p->ai_addrlen)) == -1)
+    else
     {
-        perror("talker: sendto");
-        exit(1);
+        printf("Connection successful!");
     }
 
-    freeaddrinfo(servinfo);
-    printf("talker: sent %ld bytes to %s\n", numbytes, host);
-    close(sockfd);
-
-    return 0;
+    unsigned long bytesSent;
+    if ((bytesSent = sendto(socketInfo->fd, desiredMessage, messageLength, 0,
+                         socketInfo->serverInformation->ai_addr,
+                         socketInfo->serverInformation->ai_addrlen)) == -1)
+    {
+        printf("Error: sendto() failed to send your message!\n");
+        exit(-1);
+    }
+    printf("talker: sent %ld bytes to %s\n", bytesSent, desiredHost);
+    close(socketInfo->fd);
+    freeaddrinfo(socketInfo->serverInformation);
+    free(socketInfo);
 }
+
+//    if ((numbytes = sendto(sockfd, messagebuf, strlen(messagebuf), 0,
+//                           p->ai_addr, p->ai_addrlen)) == -1)
+//    {
+//        perror("talker: sendto");
+//        exit(1);
+//    }
+//
+//    freeaddrinfo(servinfo);
+//    printf("talker: sent %ld bytes to %s\n", numbytes, host);
+//    close(sockfd);
+//
+//    return 0;
+//}
