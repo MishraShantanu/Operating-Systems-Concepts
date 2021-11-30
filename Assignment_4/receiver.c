@@ -1,29 +1,23 @@
-#include "client.h"
-#define SERVERPORT "30002"	// the port users will be connecting to
+#include "receiver.h"
+#define SERVERPORT "30003"
 
-
-int checkArgs(int argCount)
+int startConnection()
 {
-    if (argCount == 1)
-    {
-        printf("Error: You must specify the hostname and your message as cmdline args.\n");
-        exit(-1);
-    }
-    else if (argCount == 2)
-    {
-        printf("Error: The host name was not specified as command line argument (or desired message was not included).\n");
-    }
-    else if (argCount == 3)
-    {
-        return 0;
-    }
-    else
-    {
-        printf("Error: Cannot parse the given command line arguments -- too many given!\n"
-               "(Did you forget to put your message in quotes?)\n");
-    }
-    return -1;
+    //get host
+    //create socket
+    //attempt to connect.
 }
+
+int waitingForMessage()
+{
+    //check if server sent message.
+}
+
+int printMessage(char* message)
+{
+    //print message to stdout
+}
+
 
 void* attemptConnection(char* hostName)
 {
@@ -47,7 +41,6 @@ void* attemptConnection(char* hostName)
         fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(returnValue));
         return NULL;
     }
-    // loop through all the results and make a socket
 
     //Populate and create a socket.
     for(serverInfoIterator = serverInfo; serverInfoIterator != NULL; serverInfoIterator = serverInfoIterator->ai_next)
@@ -65,8 +58,8 @@ void* attemptConnection(char* hostName)
             ipver = "Host IPv6: ";
         }
         if ((socketFileDescriptor = socket(serverInfoIterator->ai_family,
-                             serverInfoIterator->ai_socktype,
-                             serverInfoIterator->ai_protocol)) == -1)
+                                           serverInfoIterator->ai_socktype,
+                                           serverInfoIterator->ai_protocol)) == -1)
         {
             perror("talker: socket");
             continue;
@@ -100,9 +93,26 @@ void* attemptConnection(char* hostName)
     return returnMe;
 }
 
+int checkArgs(int argCount)
+{
+    if (argCount == 1)
+    {
+        printf("Error: You must specify the host you want to connect to as a command line argument.\n");
+        exit(-1);
+    }
+    else if (argCount == 2)
+    {
+        return 0;
+    }
+    else
+    {
+        printf("Error: too many commandline arguments! Only need hostname.\n");
+    }
+    return -1;
+}
 
 
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
     //Ensure user has inputted a proper amount of command line arguments.
     if (checkArgs(argc) != 0)
@@ -111,44 +121,12 @@ int main(int argc, char *argv[])
     }
 
     char *desiredHost = argv[1];
-    char *desiredMessage = argv[2];
-    unsigned long messageLength = strlen(desiredMessage);
 
     SocketInformation *socketInfo = attemptConnection(desiredHost);
+    if (socketInfo == NULL) exit(-1);
+    else printf("Connection successful!\n");
 
-    if (socketInfo == NULL)
-    {
-        exit(-1);
-    }
-    else
-    {
-        printf("Connection successful!\n");
-    }
-
-    unsigned long bytesSent;
-    if ((bytesSent = sendto(socketInfo->fd, desiredMessage, messageLength, 0,
-                         socketInfo->serverInformation->ai_addr,
-                         socketInfo->serverInformation->ai_addrlen)) == -1)
-    {
-        printf("Error: sendto() failed to send your message!\n");
-        exit(-1);
-    }
-    printf("talker: sent %ld bytes to %s\n", bytesSent, desiredHost);
     close(socketInfo->fd);
     freeaddrinfo(socketInfo->serverInformation);
     free(socketInfo);
 }
-
-//    if ((numbytes = sendto(sockfd, messagebuf, strlen(messagebuf), 0,
-//                           p->ai_addr, p->ai_addrlen)) == -1)
-//    {
-//        perror("talker: sendto");
-//        exit(1);
-//    }
-//
-//    freeaddrinfo(servinfo);
-//    printf("talker: sent %ld bytes to %s\n", numbytes, host);
-//    close(sockfd);
-//
-//    return 0;
-//}
