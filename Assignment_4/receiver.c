@@ -1,7 +1,37 @@
+/*
+Assignment 4 
+
+Computer Science 332.3
+Prof: Dr. Derek Eager
+University of Saskatchewan - Arts & Science
+	Department of Computer Science
+A project by: Spencer Tracy | Spt631 | 11236962 and Shantanu Mishra | Shm572 | 11255997
+__________________________________________________
+ */
+
+
+/*                Features of receiver:
+ *   - XYZ                   [Complete]
+ *   - ABC                  [Complete]
+ *  
+ */
+
+/*      Known bugs:
+ *         prints extra char if the previous msg length was longer then the current one. 
+ *
+ *  
+ */
+
+
 #include "receiver.h"
-#define SERVERPORT "30003"
+#define SERVERPORT "30003" // the port receiver uses to connect to the server 
 
-
+/* PURPOSE: Prints the broadcast msg
+ * PRE-CONDITIONS: - message -- the array of characters which holds the broadcast msg
+ *               
+ * POST-CONDITIONS: broadcast msg is printer in the print console 
+ * RETURN: None.
+ */
 void printMessage(char* message)
 {
     printf("Message recived: %s len : %ld \n",message, strlen(message));
@@ -9,6 +39,13 @@ void printMessage(char* message)
 }
 
 
+
+/* PURPOSE: Keep checking for the new incoming broadcast msg from the server and then call printmsg method 
+ * PRE-CONDITIONS: - socketInfo -- the socket info using which connection was made to the server earlier, it has the fd as well 
+ *               
+ * POST-CONDITIONS: receiver gets the msg and broadcast msg is printer in the print console 
+ * RETURN: None.
+ */
 int waitingForMessage(SocketInformation *socketInfo)
 {   char buf[MAXMSGLEN];
     int  numberofbytes;  
@@ -30,12 +67,18 @@ int waitingForMessage(SocketInformation *socketInfo)
             printMessage(buf);    
             numberofbytes = 0;
         }
-//       printf("MSG recived form: %s ",buf);
+
        
     }
 }
 
-
+/* PURPOSE: try connecting to the server by resoliving the host name creating sockets. Later tries to connect to the server and
+   gets a fd value to return
+ * PRE-CONDITIONS: - hostname -- name of the host to which receiver wants to connect
+ *               
+ * POST-CONDITIONS: receiver gets connected to the server. if error is generated in btw then it retuen null 
+ * RETURN: fd - on success and on failure returns null 
+ */
 void* attemptConnection(char* hostName)
 {
     printf("Attempting to connect to host %s on port %s...\n",hostName,SERVERPORT);
@@ -110,6 +153,12 @@ void* attemptConnection(char* hostName)
     return returnMe;
 }
 
+/* PURPOSE: Checks if user provided the right amount of arguments to run the program 
+ * PRE-CONDITIONS: - argCount -- the count of the arguments provided by the user while running the program  
+ *               
+ * POST-CONDITIONS: Continues to next step if successful
+ * RETURN: if successful then retuns 0 else return -1 or exits the program 
+ */
 int checkArgs(int argCount)
 {
     if (argCount == 1)
@@ -128,7 +177,13 @@ int checkArgs(int argCount)
     return -1;
 }
 
-
+/* PURPOSE: Run the user program to receive the broadcasted msgs
+ * PRE-CONDITIONS: - argv[] -- user needs to provide the host name while running the program  
+ *               
+ * POST-CONDITIONS: user program starts and if the connection to the server is successfull then gets and prints the 
+ * broadcasted msgs 
+ * RETURN: if successful then retuns 0 else return -1 or exits the program 
+ */
 int main(int argc, char* argv[])
 {   
     //Ensure user has inputted a proper amount of command line arguments.
