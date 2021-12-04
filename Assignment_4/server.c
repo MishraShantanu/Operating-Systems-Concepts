@@ -3,7 +3,7 @@
 #define SENDERPORT "30002"
 #define RECEIVERPORT "30003"
 #define BACKLOG 10
-
+#define MAXMESSAGELENGTH 1000
 //Start server
     //Print ports.
     //Start the listeners.
@@ -35,6 +35,16 @@
     //Queue sending the message to all current receivers.
     //Send to each.
 
+
+char* formatMessage(char* message, char* givenIP,char* messageBuffer)
+{
+    strcat(messageBuffer,givenIP);
+    strcat(messageBuffer,", ");
+    strcat(messageBuffer,SENDERPORT);
+    strcat(messageBuffer,": ");
+    strcat(messageBuffer,message);
+    return messageBuffer;
+}
 
 void sigchld_handler(int s)
 {
@@ -69,9 +79,15 @@ int startServer()
     return 0;
 }
 
-int startlistner(void *portnumber){
-    
-    
+int startListener(void *portnumber)
+{
+
+    int isSender = 0;
+    if (strcmp(portnumber,SENDERPORT) == 0)
+    {
+        isSender = 1;
+    }
+
      char *PORT = malloc(strlen(portnumber) + 1);;
      
      strncpy(PORT,portnumber , strlen(portnumber));
@@ -93,13 +109,15 @@ int startlistner(void *portnumber){
 	hints.ai_socktype = SOCK_STREAM;
 	hints.ai_flags = AI_PASSIVE; // use my IP
 
-	if ((rv = getaddrinfo(NULL, PORT, &hints, &servinfo)) != 0) {
+	if ((rv = getaddrinfo(NULL, PORT, &hints, &servinfo)) != 0)
+    {
 		fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
 		return 1;
 	}
 
 	// loop through all the results and bind to the first we can
-	for(p = servinfo; p != NULL; p = p->ai_next) {
+	for(p = servinfo; p != NULL; p = p->ai_next)
+    {
 		if ((sockfd = socket(p->ai_family, p->ai_socktype,
 				p->ai_protocol)) == -1) {
 			perror("server: socket");
@@ -123,7 +141,8 @@ int startlistner(void *portnumber){
 
 	freeaddrinfo(servinfo); // all done with this structure
 
-	if (p == NULL)  {
+	if (p == NULL)
+    {
 		fprintf(stderr, "server: failed to bind\n");
 		exit(1);
 	}
@@ -143,10 +162,12 @@ int startlistner(void *portnumber){
 
 	printf("server: waiting for connections at %s...\n",PORT);
 
-	while(1) {  // main accept() loop
+	while(1)
+    {  // main accept() loop
 		sin_size = sizeof their_addr;
 		new_fd = accept(sockfd, (struct sockaddr *)&their_addr, &sin_size);
-		if (new_fd == -1) {
+		if (new_fd == -1)
+        {
 			perror("accept");
 			continue;
 		}
@@ -156,10 +177,37 @@ int startlistner(void *portnumber){
 			s, sizeof s);
 		printf("server: got connection from %s\n", s);
 
-		if (!fork()) { // this is the child process
+		if (!fork())
+        { // this is the child process
 			close(sockfd); // child doesn't need the listener
-			if (send(new_fd, "Hello, world!", 13, 0) == -1)
-				perror("send");
+
+
+            if (isSender == 1) //Handle receiving messages from sender clients.
+            {
+                long unsigned numBytes;
+                char buf[MAXMESSAGELENGTH];
+
+                int fromLength = sizeof(struct sockaddr_storage);
+                if ((numBytes = recv(new_fd,buf,MAXMESSAGELENGTH-1,fromLength)) == -1)
+                {
+                    perror("recv");
+                    exit(1);
+                }
+                else
+                {
+                    char messageBuffer[INET6_ADDRSTRLEN + 12 + numBytes];
+                    strcpy(messageBuffer,"");
+                    char* paddedMessage = formatMessage(buf,s,messageBuffer);
+                    printf("server: received '%s' [Consisting of %lu bytes.]\n"
+                           ,paddedMessage,strlen(paddedMessage));
+                }
+            }
+            else
+            {
+                if (send(new_fd, "Hello, world!", 13, 0) == -1)
+                    perror("send");
+            }
+
 			close(new_fd);
 			exit(0);
 		}
@@ -167,7 +215,6 @@ int startlistner(void *portnumber){
 	}
     
 }
-
 
 
 int main(void)
@@ -181,10 +228,13 @@ int main(void)
     
     int rc = fork();
     
-    if(rc==0){
-        startlistner(RECEIVERPORT);
-    }else{
-        startlistner(SENDERPORT);
+    if(rc==0)
+    {
+        startListener(SENDERPORT);
+    }
+    else
+    {
+        startListener(RECEIVERPORT);
     }
     
     
