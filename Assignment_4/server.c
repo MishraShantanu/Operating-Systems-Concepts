@@ -1,3 +1,4 @@
+#include <time.h>
 #include "server.h"
 
 #define SENDERPORT "30002"
@@ -35,7 +36,7 @@
     //Queue sending the message to all current receivers.
     //Send to each.
 
-int handleSender(int new_fd, char* givenIP)
+void* handleSender(int new_fd, char* givenIP)
 {
     long unsigned numBytes;
     char buf[MAXMESSAGELENGTH];
@@ -44,10 +45,11 @@ int handleSender(int new_fd, char* givenIP)
     if ((numBytes = recv(new_fd,buf,MAXMESSAGELENGTH-1,fromLength)) == -1)
     {
         perror("recv");
-        return -1;
+        return NULL;
     }
     else
     {
+
         buf[numBytes] = '\0';
         char messageBuffer[INET6_ADDRSTRLEN + 12 + numBytes];
         strcpy(messageBuffer,"");
@@ -57,10 +59,15 @@ int handleSender(int new_fd, char* givenIP)
         strcat(messageBuffer,": ");
         strcat(messageBuffer,buf);
         strcat(messageBuffer,"\0");
-        printf("server: received '%s' [Consisting of %lu bytes.]\n"
-                ,messageBuffer,strlen(messageBuffer));
+
+        struct tm * timeinfo;
+        time_t receivedAt;
+        time(&receivedAt);
+        timeinfo = localtime(&receivedAt);
+        printf("server: received '%s' [Consisting of %lu bytes] at %02d:%02d:%02d.\n"
+                ,messageBuffer,strlen(messageBuffer),timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec);
+        return (void*) receivedAt;
     }
-    return 0;
 }
 
 
@@ -101,15 +108,9 @@ int startListener(void *portnumber)
 {
 
     int isSender = 0;
-    if (strcmp(portnumber,SENDERPORT) == 0)
-    {
-        isSender = 1;
-    }
-
-     char *PORT = malloc(strlen(portnumber) + 1);;
-     
-     strncpy(PORT,portnumber , strlen(portnumber));
-     
+    if (strcmp(portnumber,SENDERPORT) == 0)   isSender = 1;
+    char *PORT = malloc(strlen(portnumber) + 1);;
+    strncpy(PORT,portnumber , strlen(portnumber));
 
     
     int sockfd, new_fd;  // listen on sock_fd, new connection on new_fd
@@ -153,7 +154,6 @@ int startListener(void *portnumber)
 			perror("server: bind");
 			continue;
 		}
-
 		break;
 	}
 
@@ -165,7 +165,8 @@ int startListener(void *portnumber)
 		exit(1);
 	}
 
-	if (listen(sockfd, BACKLOG) == -1) {
+	if (listen(sockfd, BACKLOG) == -1)
+    {
 		perror("listen");
 		exit(1);
 	}
@@ -173,7 +174,8 @@ int startListener(void *portnumber)
 	sa.sa_handler = sigchld_handler; // reap all dead processes
 	sigemptyset(&sa.sa_mask);
 	sa.sa_flags = SA_RESTART;
-	if (sigaction(SIGCHLD, &sa, NULL) == -1) {
+	if (sigaction(SIGCHLD, &sa, NULL) == -1)
+    {
 		perror("sigaction");
 		exit(1);
 	}
@@ -193,23 +195,29 @@ int startListener(void *portnumber)
 		inet_ntop(their_addr.ss_family,
 			get_in_addr((struct sockaddr *)&their_addr),
 			s, sizeof s);
-		printf("server: got connection from %s\n", s);
+		//printf("server: got connection from %s\n", s);
 
 		if (!fork())
         { // this is the child process
 			close(sockfd); // child doesn't need the listener
 
-
             if (isSender == 1) //Handle receiving messages from sender clients.
             {
-                if (handleSender(new_fd,s) !=0)
+                long unsigned timeSent;
+                if ((void*)(timeSent = (time_t) handleSender(new_fd,s)) == NULL)
                 {
                     perror("handleSender");
+                }
+                else
+                {
+                    printf("RECEIVED MESSAGE AT: %lu",timeSent);
+                    //TODO: Use the time returned by handleSender to determine which receivers to send to.
                 }
             }
             else
             {
                 //Wait for a message.
+                //TODO: Use a condition variable here for waiting and broadcasting.
                 if (send(new_fd, "Hello, world!", 13, 0) == -1)
                     perror("send");
             }
@@ -219,21 +227,13 @@ int startListener(void *portnumber)
 		}
 		close(new_fd);  // parent doesn't need this
 	}
-    
 }
 
 
 int main(void)
-{   
-  
-
+{
     startServer();
-    
-    
-    
-    
     int rc = fork();
-    
     if(rc==0)
     {
         startListener(SENDERPORT);
@@ -242,8 +242,6 @@ int main(void)
     {
         startListener(RECEIVERPORT);
     }
-    
-    
 
     /*
 For each connection, do this in order:
