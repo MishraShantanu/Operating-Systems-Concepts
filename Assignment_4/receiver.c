@@ -1,22 +1,46 @@
 #include "receiver.h"
 #define SERVERPORT "30003"
 
-int startConnection()
+// int startConnection()
+// {
+//     //get host
+//     //create socket
+//     //attempt to connect.
+    
+// }
+
+void printMessage(char* message)
 {
-    //get host
-    //create socket
-    //attempt to connect.
+    printf("Message recived: %s\n",message);
+    
+    exit(0);
 }
 
-int waitingForMessage()
-{
+
+int waitingForMessage(SocketInformation *socketInfo)
+{   char buf[140];
+    int  numbytes;  
     //check if server sent message.
+    
+        while(1) {
+       
+    
+	    if ((numbytes = recv(socketInfo->fd, buf, 140-1, 0)) == -1) {
+	        perror("recv");
+	        exit(1);
+	    }
+        
+        
+        if(strlen(buf)>0){
+            buf[numbytes] = '\0';
+            printMessage(buf);
+            
+        }
+        
+       
+    }
 }
 
-int printMessage(char* message)
-{
-    //print message to stdout
-}
 
 
 void* attemptConnection(char* hostName)
@@ -113,7 +137,7 @@ int checkArgs(int argCount)
 
 
 int main(int argc, char* argv[])
-{
+{   
     //Ensure user has inputted a proper amount of command line arguments.
     if (checkArgs(argc) != 0)
     {
@@ -125,8 +149,17 @@ int main(int argc, char* argv[])
     SocketInformation *socketInfo = attemptConnection(desiredHost);
     if (socketInfo == NULL) exit(-1);
     else printf("Connection successful!\n");
+    
+    freeaddrinfo(socketInfo->serverInformation);
+    
+    
+     waitingForMessage(socketInfo);
+    
 
     close(socketInfo->fd);
-    freeaddrinfo(socketInfo->serverInformation);
+    
     free(socketInfo);
+    
+    return 0;
 }
+
