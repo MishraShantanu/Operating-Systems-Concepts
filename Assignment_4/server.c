@@ -35,13 +35,6 @@
     //Queue sending the message to all current receivers.
     //Send to each.
 
-
-char* formatMessage(char* message, char* givenIP,char* messageBuffer)
-{
-
-    return messageBuffer;
-}
-
 int handleSender(int new_fd, char* givenIP)
 {
     long unsigned numBytes;
@@ -64,7 +57,6 @@ int handleSender(int new_fd, char* givenIP)
         strcat(messageBuffer,": ");
         strcat(messageBuffer,buf);
         strcat(messageBuffer,"\0");
-
         printf("server: received '%s' [Consisting of %lu bytes.]\n"
                 ,messageBuffer,strlen(messageBuffer));
     }
@@ -210,7 +202,10 @@ int startListener(void *portnumber)
 
             if (isSender == 1) //Handle receiving messages from sender clients.
             {
-                handleSender(new_fd,s);
+                if (handleSender(new_fd,s) !=0)
+                {
+                    perror("handleSender");
+                }
             }
             else
             {
