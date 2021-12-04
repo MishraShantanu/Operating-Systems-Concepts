@@ -26,5 +26,5 @@ typedef struct SocketInformation
     struct addrinfo *serverInformation;
 }SocketInformation;
 
-
+#define MAXMSGLEN 500 //max length of a msg
 #endif //ASSIGNMENT_4_RECEIVER_H

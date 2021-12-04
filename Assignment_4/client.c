@@ -1,24 +1,20 @@
 #include "client.h"
-#define SERVERPORT "30003"	// the port users will be connecting to
+#define SERVERPORT "30002"	// the port users will be connecting to
 
 
 int checkArgs(int argCount)
-{
-    if (argCount == 1)
+{   printf("%d", argCount);
+  
+    if (argCount == 1) //if the host name is not provided as arg 
     {
-        printf("Error: You must specify the hostname and your message as cmdline args.\n");
-        exit(-1);
+        printf("Error: The host name was not specified as command line argument.\n");
     }
-    else if (argCount == 2)
-    {
-        printf("Error: The host name was not specified as command line argument (or desired message was not included).\n");
-    }
-    else if (argCount == 3)
+    else if(argCount == 2) //host name is provided as arg 
     {
         return 0;
     }
     else
-    {
+    {   
         printf("Error: Cannot parse the given command line arguments -- too many given!\n"
                "(Did you forget to put your message in quotes?)\n");
     }
@@ -26,7 +22,7 @@ int checkArgs(int argCount)
 }
 
 void* attemptConnection(char* hostName)
-{
+{  
     printf("Attempting to connect to host %s on port %s...\n",hostName,SERVERPORT);
 
     //Setup for printing IP Address.
@@ -111,9 +107,11 @@ int main(int argc, char *argv[])
     }
 
     char *desiredHost = argv[1];
-    char *desiredMessage = argv[2];
-    unsigned long messageLength = strlen(desiredMessage);
 
+    int userinput;
+    size_t userinput_size = MAXMSGLEN;
+    char *userinput_string = (char *) malloc (userinput_size*sizeof(char));
+ 
     SocketInformation *socketInfo = attemptConnection(desiredHost);
 
     if (socketInfo == NULL)
@@ -124,32 +122,33 @@ int main(int argc, char *argv[])
     {
         printf("Connection successful!\n");
     }
-
-    unsigned long bytesSent;
-    if ((bytesSent = sendto(socketInfo->fd, desiredMessage, messageLength, 0,
-                         socketInfo->serverInformation->ai_addr,
-                         socketInfo->serverInformation->ai_addrlen)) == -1)
-    {
-        printf("Error: sendto() failed to send your message!\n");
-        exit(-1);
+    
+    
+    while(1){ //keep looping in infinite loop 
+         
+         memset(userinput_string,'\0',MAXMSGLEN*sizeof(char));
+         printf("Please enter a msg to broadcast: ");
+         
+         //gets broadcast msg from the user 
+         userinput = getline(&userinput_string, &userinput_size, stdin);
+//          printf("user input len %ld: ",strlen(userinput_string));
+        
+        if( userinput>-1){ //if user input was successfull 
+             unsigned long bytesSent;
+            if ((bytesSent = sendto(socketInfo->fd,userinput_string, strlen(userinput_string), 0,socketInfo->serverInformation->ai_addr,
+                             socketInfo->serverInformation->ai_addrlen)) == -1){
+                 //the sentto server failed 
+                printf("Error: sendto() failed to send your message!\n");
+               exit(-1);
+            }
+            
+             printf("talker: sent %ld bytes to %s\n", bytesSent, desiredHost);
+        }
     }
-    printf("talker: sent %ld bytes to %s\n", bytesSent, desiredHost);
+   
+   //close the fd and relase the memory 
     close(socketInfo->fd);
     freeaddrinfo(socketInfo->serverInformation);
     free(socketInfo);
 }
-
-//    if ((numbytes = sendto(sockfd, messagebuf, strlen(messagebuf), 0,
-//                           p->ai_addr, p->ai_addrlen)) == -1)
-//    {
-//        perror("talker: sendto");
-//        exit(1);
-//    }
-//
-//    freeaddrinfo(servinfo);
-//    printf("talker: sent %ld bytes to %s\n", numbytes, host);
-//    close(sockfd);
-//
-//    return 0;
-//}
 

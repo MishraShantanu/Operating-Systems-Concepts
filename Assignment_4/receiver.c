@@ -1,46 +1,39 @@
 #include "receiver.h"
 #define SERVERPORT "30003"
 
-// int startConnection()
-// {
-//     //get host
-//     //create socket
-//     //attempt to connect.
-    
-// }
 
 void printMessage(char* message)
 {
-    printf("Message recived: %s\n",message);
+    printf("Message recived: %s len : %ld \n",message, strlen(message));
     
-    exit(0);
 }
 
 
 int waitingForMessage(SocketInformation *socketInfo)
-{   char buf[140];
-    int  numbytes;  
-    //check if server sent message.
+{   char buf[MAXMSGLEN];
+    int  numberofbytes;  
     
-        while(1) {
-       
+        while(1) { //run a infinite loop to keep checking for new msgs 
+        
+            memset(buf,'\0',MAXMSGLEN*sizeof(char));
     
-	    if ((numbytes = recv(socketInfo->fd, buf, 140-1, 0)) == -1) {
-	        perror("recv");
-	        exit(1);
-	    }
-        
-        
-        if(strlen(buf)>0){
-            buf[numbytes] = '\0';
-            printMessage(buf);
-            
+       if ((numberofbytes = recv(socketInfo->fd, buf, MAXMSGLEN-1, 0)) == -1) { //receive the msg and check if its successfully received 
+                       perror("recv");
+                     exit(1);
+       }
+       if(numberofbytes==0){ //check if the connection is lost from the server 
+            perror("Receiver: Connection Lost.\n");
         }
-        
+        if(strlen(buf)>0){ //if the msg length is greater then 0 the print the msg
+            print("msg found %d ",numberofbytes);
+            buf[numberofbytes] = '\0';
+            printMessage(buf);    
+            numberofbytes = 0;
+        }
+//       printf("MSG recived form: %s ",buf);
        
     }
 }
-
 
 
 void* attemptConnection(char* hostName)
@@ -85,7 +78,7 @@ void* attemptConnection(char* hostName)
                                            serverInfoIterator->ai_socktype,
                                            serverInfoIterator->ai_protocol)) == -1)
         {
-            perror("talker: socket");
+            perror("listner: socket");
             continue;
         }
         break;
@@ -140,24 +133,33 @@ int main(int argc, char* argv[])
 {   
     //Ensure user has inputted a proper amount of command line arguments.
     if (checkArgs(argc) != 0)
-    {
-        exit(-1);
+    { 
+        printf("Error: The host name was not specified as command line argument.\n");
+        return -1;
     }
-
+      
+    //get the hostname from args 
     char *desiredHost = argv[1];
-
+    
+    //attempt a connectio, try to resolve the hostname and create a socket connection 
+    // to the host 
     SocketInformation *socketInfo = attemptConnection(desiredHost);
+    
+    //if connetion failed exit the program
     if (socketInfo == NULL) exit(-1);
+    
     else printf("Connection successful!\n");
     
+    //if connection was successfull the free the serverinfo
     freeaddrinfo(socketInfo->serverInformation);
     
+    //loop in a infinite to keep checking if server fwd any msg 
+    waitingForMessage(socketInfo);
     
-     waitingForMessage(socketInfo);
-    
-
+    //close the fd
     close(socketInfo->fd);
     
+    //releas the memory accquire by the socket
     free(socketInfo);
     
     return 0;
