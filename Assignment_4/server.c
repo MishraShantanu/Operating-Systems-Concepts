@@ -38,13 +38,39 @@
 
 char* formatMessage(char* message, char* givenIP,char* messageBuffer)
 {
-    strcat(messageBuffer,givenIP);
-    strcat(messageBuffer,", ");
-    strcat(messageBuffer,SENDERPORT);
-    strcat(messageBuffer,": ");
-    strcat(messageBuffer,message);
+
     return messageBuffer;
 }
+
+int handleSender(int new_fd, char* givenIP)
+{
+    long unsigned numBytes;
+    char buf[MAXMESSAGELENGTH];
+
+    int fromLength = sizeof(struct sockaddr_storage);
+    if ((numBytes = recv(new_fd,buf,MAXMESSAGELENGTH-1,fromLength)) == -1)
+    {
+        perror("recv");
+        return -1;
+    }
+    else
+    {
+        buf[numBytes] = '\0';
+        char messageBuffer[INET6_ADDRSTRLEN + 12 + numBytes];
+        strcpy(messageBuffer,"");
+        strcat(messageBuffer,givenIP);
+        strcat(messageBuffer,", ");
+        strcat(messageBuffer,SENDERPORT);
+        strcat(messageBuffer,": ");
+        strcat(messageBuffer,buf);
+        strcat(messageBuffer,"\0");
+
+        printf("server: received '%s' [Consisting of %lu bytes.]\n"
+                ,messageBuffer,strlen(messageBuffer));
+    }
+    return 0;
+}
+
 
 void sigchld_handler(int s)
 {
@@ -184,26 +210,11 @@ int startListener(void *portnumber)
 
             if (isSender == 1) //Handle receiving messages from sender clients.
             {
-                long unsigned numBytes;
-                char buf[MAXMESSAGELENGTH];
-
-                int fromLength = sizeof(struct sockaddr_storage);
-                if ((numBytes = recv(new_fd,buf,MAXMESSAGELENGTH-1,fromLength)) == -1)
-                {
-                    perror("recv");
-                    exit(1);
-                }
-                else
-                {
-                    char messageBuffer[INET6_ADDRSTRLEN + 12 + numBytes];
-                    strcpy(messageBuffer,"");
-                    char* paddedMessage = formatMessage(buf,s,messageBuffer);
-                    printf("server: received '%s' [Consisting of %lu bytes.]\n"
-                           ,paddedMessage,strlen(paddedMessage));
-                }
+                handleSender(new_fd,s);
             }
             else
             {
+                //Wait for a message.
                 if (send(new_fd, "Hello, world!", 13, 0) == -1)
                     perror("send");
             }

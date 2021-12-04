@@ -1,5 +1,5 @@
 #include "client.h"
-#define SERVERPORT "30003"	// the port users will be connecting to
+#define SERVERPORT "30002"	// the port users will be connecting to
 
 
 int checkArgs(int argCount)
