@@ -1,7 +1,35 @@
+/*
+Assignment 4.
+
+Computer Science 332.3
+Prof: Dr. Derek Eager
+University of Saskatchewan - Arts & Science
+	Department of Computer Science
+A project by: Spencer Tracy | Spt631 | 11236962 and Shantanu Mishra | Shm572 | 11255997
+__________________________________________________
+ */
+
+/*                Features of client:
+ *   - XYZ                   [Complete]
+ *   - ABC                  [Complete]
+ *  
+ */
+
+/*      Known bugs:
+ *         NA
+ *
+ *  
+ */
+
 #include "client.h"
 #define SERVERPORT "30002"	// the port users will be connecting to
 
-
+/* PURPOSE: Checks if user provided the right amount of arguments to run the program 
+ * PRE-CONDITIONS: - argCount -- the count of the arguments provided by the user while running the program  
+ *               
+ * POST-CONDITIONS: Continues to next step if successful
+ * RETURN: if successful then retuns 0 else return -1 or exits the program 
+ */
 int checkArgs(int argCount)
 {   printf("%d", argCount);
   
@@ -21,6 +49,15 @@ int checkArgs(int argCount)
     return -1;
 }
 
+
+
+/* PURPOSE: try connecting to the server by resoliving the host name creating sockets. Later tries to connect to the server and
+   gets a fd value to return
+ * PRE-CONDITIONS: - hostname -- name of the host to which receiver wants to connect
+ *               
+ * POST-CONDITIONS: receiver gets connected to the server. if error is generated in btw then it retuen null 
+ * RETURN: fd - on success and on failure returns null 
+ */
 void* attemptConnection(char* hostName)
 {  
     printf("Attempting to connect to host %s on port %s...\n",hostName,SERVERPORT);
@@ -97,7 +134,14 @@ void* attemptConnection(char* hostName)
 }
 
 
-
+/* PURPOSE: Run the user program to send the broadcasted msgs
+ * PRE-CONDITIONS: - argv[] -- user needs to provide the host name while running the program  
+ *               
+ * POST-CONDITIONS: user program starts and if the connection to the server is successfull then ask user for  broadcasted msg
+ * and fwd it to the server 
+ * 
+ * RETURN: if successful then retuns 0 else return -1 or exits the program 
+ */
 int main(int argc, char *argv[])
 {
     //Ensure user has inputted a proper amount of command line arguments.
