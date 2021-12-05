@@ -94,7 +94,6 @@ void* handleSender(int new_fd, char* givenIP)
     }
 }
 
-
 void sigchld_handler(int s)
 {
     (void)s; // quiet unused variable warning
@@ -128,18 +127,15 @@ int startServer()
     return 0;
 }
 
-
-void* createNewConnectionSocket(void *portnumber)
+void* createNewConnectionSocket(void *portNumber)
 {
     struct addrinfo hints, *serverInfo, *serverInfoIterator;
     struct sockaddr_storage their_addr; // connector's address information
     struct sigaction sa;
 
-    int currentFD, newSocketFileDescriptor;
+    int newSocketFileDescriptor;
     int yes=1;
     int returnValue;
-
-    char* incomingIPAddress[INET6_ADDRSTRLEN];
 
 
     memset(&hints, 0, sizeof hints);
@@ -148,7 +144,7 @@ void* createNewConnectionSocket(void *portnumber)
     hints.ai_flags = AI_PASSIVE; // use my IP
 
 
-    if ((returnValue = getaddrinfo(NULL, portnumber, &hints, &serverInfo)) != 0)
+    if ((returnValue = getaddrinfo(NULL, portNumber, &hints, &serverInfo)) != 0)
     {
         fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(returnValue));
         return NULL;
@@ -159,20 +155,20 @@ void* createNewConnectionSocket(void *portnumber)
     // loop through all the results and bind to the first we can
     for(serverInfoIterator = serverInfo; serverInfoIterator != NULL; serverInfoIterator = serverInfoIterator->ai_next)
     {
-        if ((currentFD = socket(serverInfoIterator->ai_family, serverInfoIterator->ai_socktype,
+        if ((newSocketFileDescriptor = socket(serverInfoIterator->ai_family, serverInfoIterator->ai_socktype,
                              serverInfoIterator->ai_protocol)) == -1) {
             perror("server: socket");
             continue;
         }
 
-        if (setsockopt(currentFD, SOL_SOCKET, SO_REUSEADDR, &yes,
+        if (setsockopt(newSocketFileDescriptor, SOL_SOCKET, SO_REUSEADDR, &yes,
                        sizeof(int)) == -1) {
             perror("setsockopt");
             exit(1);
         }
 
-        if (bind(currentFD, serverInfoIterator->ai_addr, serverInfoIterator->ai_addrlen) == -1) {
-            close(currentFD);
+        if (bind(newSocketFileDescriptor, serverInfoIterator->ai_addr, serverInfoIterator->ai_addrlen) == -1) {
+            close(newSocketFileDescriptor);
             perror("server: bind");
             continue;
         }
@@ -186,7 +182,7 @@ void* createNewConnectionSocket(void *portnumber)
         exit(1);
     }
 
-    if (listen(currentFD, BACKLOG) == -1)
+    if (listen(newSocketFileDescriptor, BACKLOG) == -1)
     {
         perror("listen");
         exit(1);
@@ -205,97 +201,32 @@ void* createNewConnectionSocket(void *portnumber)
 
     struct SocketInformation *returnMe;
     returnMe = malloc(sizeof(SocketInformation));
-    returnMe->fd = currentFD;
+    returnMe->fd = newSocketFileDescriptor;
     returnMe->serverInformation = serverInfo;
     freeaddrinfo(serverInfo);
 
     return returnMe;
 }
 
-
-
 int startListener(void *portNumber)
 {
-
     int isSender = 0;
     if (strcmp(portNumber, SENDERPORT) == 0) isSender = 1;
-    char *PORT = malloc(strlen(portNumber) + 1);;
+    char *PORT = malloc(strlen(portNumber) + 1);
     strncpy(PORT, portNumber , strlen(portNumber));
 
 
-    int sockfd, new_fd;  // listen on sock_fd, new connection on new_fd
-    struct addrinfo hints, *serverInfo, *serverInfoIterator;
     struct sockaddr_storage their_addr; // connector's address information
     socklen_t sin_size;
-    struct sigaction sa;
-    int yes=1;
     char connectingIP[INET6_ADDRSTRLEN];
-    int returnValue;
-
-
-    memset(&hints, 0, sizeof hints);
-    hints.ai_family = AF_UNSPEC;
-    hints.ai_socktype = SOCK_STREAM;
-    hints.ai_flags = AI_PASSIVE; // use my IP
-
-    if ((returnValue = getaddrinfo(NULL, PORT, &hints, &serverInfo)) != 0)
-    {
-        fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(returnValue));
-        return 1;
-    }
-
-    // loop through all the results and bind to the first we can
-    for(serverInfoIterator = serverInfo; serverInfoIterator != NULL; serverInfoIterator = serverInfoIterator->ai_next)
-    {
-        if ((sockfd = socket(serverInfoIterator->ai_family, serverInfoIterator->ai_socktype,
-                             serverInfoIterator->ai_protocol)) == -1) {
-            perror("server: socket");
-            continue;
-        }
-
-        if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &yes,
-                       sizeof(int)) == -1) {
-            perror("setsockopt");
-            exit(1);
-        }
-
-        if (bind(sockfd, serverInfoIterator->ai_addr, serverInfoIterator->ai_addrlen) == -1) {
-            close(sockfd);
-            perror("server: bind");
-            continue;
-        }
-        break;
-    }
-
-    freeaddrinfo(serverInfo); // all done with this structure
-
-    if (serverInfoIterator == NULL)
-    {
-        fprintf(stderr, "server: failed to bind\n");
-        exit(1);
-    }
-
-    if (listen(sockfd, BACKLOG) == -1)
-    {
-        perror("listen");
-        exit(1);
-    }
-
-    sa.sa_handler = sigchld_handler; // reap all dead processes
-    sigemptyset(&sa.sa_mask);
-    sa.sa_flags = SA_RESTART;
-    if (sigaction(SIGCHLD, &sa, NULL) == -1)
-    {
-        perror("sigaction");
-        exit(1);
-    }
 
     printf("server: waiting for connections at %s...\n",PORT);
-
+    SocketInformation *socketInfo = createNewConnectionSocket(portNumber);
+    int new_fd;
     while(1)
     {  // main accept() loop
         sin_size = sizeof their_addr;
-        new_fd = accept(sockfd, (struct sockaddr *)&their_addr, &sin_size);
+        new_fd = accept(socketInfo->fd, (struct sockaddr *)&their_addr, &sin_size);
         if (new_fd == -1)
         {
             perror("accept");
@@ -309,7 +240,7 @@ int startListener(void *portNumber)
 
         if (!fork())
         { // this is the child process
-            close(sockfd); // child doesn't need the listener
+            close(socketInfo->fd); // child doesn't need the listener
 
             if (isSender == 1) //Handle receiving messages from sender clients.
             {

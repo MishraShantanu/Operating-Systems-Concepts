@@ -24,5 +24,16 @@ __________________________________________________
 #include <arpa/inet.h>
 #include <sys/wait.h>
 #include <signal.h>
+#include <time.h>
+#include <pthread.h>
+#include "server.h"
+
+
+
+typedef struct SocketInformation
+{
+    int fd;//stores the file descriptor number which is used for read/write of info
+    struct addrinfo *serverInformation; //info of the host server
+}SocketInformation;
 
 #endif //ASSIGNMENT_4_SERVER_H
