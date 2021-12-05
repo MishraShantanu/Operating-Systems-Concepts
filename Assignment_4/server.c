@@ -21,16 +21,14 @@ __________________________________________________
  *
  *  
  */
-
-
-#include <time.h>
-#include <pthread.h>
 #include "server.h"
 
 #define SENDERPORT "30002"
 #define RECEIVERPORT "30003"
 #define BACKLOG 10
 #define MAXMESSAGELENGTH 1000
+
+
 //Start server
 //Print ports.
 //Start the listeners.
@@ -130,23 +128,18 @@ int startServer()
     return 0;
 }
 
-int startListener(void *portnumber)
+
+void* createNewConnectionSocket(void *portnumber)
 {
-
-    int isSender = 0;
-    if (strcmp(portnumber,SENDERPORT) == 0)   isSender = 1;
-    char *PORT = malloc(strlen(portnumber) + 1);;
-    strncpy(PORT,portnumber , strlen(portnumber));
-
-
-    int sockfd, new_fd;  // listen on sock_fd, new connection on new_fd
-    struct addrinfo hints, *servinfo, *p;
+    struct addrinfo hints, *serverInfo, *serverInfoIterator;
     struct sockaddr_storage their_addr; // connector's address information
-    socklen_t sin_size;
     struct sigaction sa;
+
+    int currentFD, newSocketFileDescriptor;
     int yes=1;
-    char s[INET6_ADDRSTRLEN];
-    int rv;
+    int returnValue;
+
+    char* incomingIPAddress[INET6_ADDRSTRLEN];
 
 
     memset(&hints, 0, sizeof hints);
@@ -154,17 +147,108 @@ int startListener(void *portnumber)
     hints.ai_socktype = SOCK_STREAM;
     hints.ai_flags = AI_PASSIVE; // use my IP
 
-    if ((rv = getaddrinfo(NULL, PORT, &hints, &servinfo)) != 0)
+
+    if ((returnValue = getaddrinfo(NULL, portnumber, &hints, &serverInfo)) != 0)
     {
-        fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
+        fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(returnValue));
+        return NULL;
+    }
+
+
+
+    // loop through all the results and bind to the first we can
+    for(serverInfoIterator = serverInfo; serverInfoIterator != NULL; serverInfoIterator = serverInfoIterator->ai_next)
+    {
+        if ((currentFD = socket(serverInfoIterator->ai_family, serverInfoIterator->ai_socktype,
+                             serverInfoIterator->ai_protocol)) == -1) {
+            perror("server: socket");
+            continue;
+        }
+
+        if (setsockopt(currentFD, SOL_SOCKET, SO_REUSEADDR, &yes,
+                       sizeof(int)) == -1) {
+            perror("setsockopt");
+            exit(1);
+        }
+
+        if (bind(currentFD, serverInfoIterator->ai_addr, serverInfoIterator->ai_addrlen) == -1) {
+            close(currentFD);
+            perror("server: bind");
+            continue;
+        }
+        break;
+    }
+
+
+    if (serverInfoIterator == NULL)
+    {
+        fprintf(stderr, "server: failed to bind\n");
+        exit(1);
+    }
+
+    if (listen(currentFD, BACKLOG) == -1)
+    {
+        perror("listen");
+        exit(1);
+    }
+
+
+    sa.sa_handler = sigchld_handler; // reap all dead processes
+    sigemptyset(&sa.sa_mask);
+    sa.sa_flags = SA_RESTART;
+    if (sigaction(SIGCHLD, &sa, NULL) == -1)
+    {
+        perror("sigaction");
+        exit(1);
+    }
+
+
+    struct SocketInformation *returnMe;
+    returnMe = malloc(sizeof(SocketInformation));
+    returnMe->fd = currentFD;
+    returnMe->serverInformation = serverInfo;
+    freeaddrinfo(serverInfo);
+
+    return returnMe;
+}
+
+
+
+int startListener(void *portNumber)
+{
+
+    int isSender = 0;
+    if (strcmp(portNumber, SENDERPORT) == 0) isSender = 1;
+    char *PORT = malloc(strlen(portNumber) + 1);;
+    strncpy(PORT, portNumber , strlen(portNumber));
+
+
+    int sockfd, new_fd;  // listen on sock_fd, new connection on new_fd
+    struct addrinfo hints, *serverInfo, *serverInfoIterator;
+    struct sockaddr_storage their_addr; // connector's address information
+    socklen_t sin_size;
+    struct sigaction sa;
+    int yes=1;
+    char connectingIP[INET6_ADDRSTRLEN];
+    int returnValue;
+
+
+    memset(&hints, 0, sizeof hints);
+    hints.ai_family = AF_UNSPEC;
+    hints.ai_socktype = SOCK_STREAM;
+    hints.ai_flags = AI_PASSIVE; // use my IP
+
+    if ((returnValue = getaddrinfo(NULL, PORT, &hints, &serverInfo)) != 0)
+    {
+        fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(returnValue));
         return 1;
     }
 
     // loop through all the results and bind to the first we can
-    for(p = servinfo; p != NULL; p = p->ai_next)
+    for(serverInfoIterator = serverInfo; serverInfoIterator != NULL; serverInfoIterator = serverInfoIterator->ai_next)
     {
-        if ((sockfd = socket(p->ai_family, p->ai_socktype,
-                             p->ai_protocol)) == -1) {
+        if ((sockfd = socket(serverInfoIterator->ai_family, serverInfoIterator->ai_socktype,
+                             serverInfoIterator->ai_protocol)) == -1) {
             perror("server: socket");
             continue;
         }
@@ -175,7 +259,7 @@ int startListener(void *portnumber)
             exit(1);
         }
 
-        if (bind(sockfd, p->ai_addr, p->ai_addrlen) == -1) {
+        if (bind(sockfd, serverInfoIterator->ai_addr, serverInfoIterator->ai_addrlen) == -1) {
             close(sockfd);
             perror("server: bind");
             continue;
@@ -183,9 +267,9 @@ int startListener(void *portnumber)
         break;
     }
 
-    freeaddrinfo(servinfo); // all done with this structure
+    freeaddrinfo(serverInfo); // all done with this structure
 
-    if (p == NULL)
+    if (serverInfoIterator == NULL)
     {
         fprintf(stderr, "server: failed to bind\n");
         exit(1);
@@ -220,8 +304,8 @@ int startListener(void *portnumber)
 
         inet_ntop(their_addr.ss_family,
                   get_in_addr((struct sockaddr *)&their_addr),
-                  s, sizeof s);
-        printf("server: got connection from %s\n", s);
+                  connectingIP, sizeof connectingIP);
+        printf("server: got connection from %s\n", connectingIP);
 
         if (!fork())
         { // this is the child process
@@ -230,7 +314,7 @@ int startListener(void *portnumber)
             if (isSender == 1) //Handle receiving messages from sender clients.
             {
                 long unsigned timeSent;
-                if ((void*)(timeSent = (time_t) handleSender(new_fd,s)) == NULL)
+                if ((void*)(timeSent = (time_t) handleSender(new_fd, connectingIP)) == NULL)
                 {
                     perror("handleSender");
                 }
