@@ -1,4 +1,5 @@
 #include <time.h>
+#include <pthread.h>
 #include "server.h"
 
 #define SENDERPORT "30002"
@@ -195,7 +196,7 @@ int startListener(void *portnumber)
         inet_ntop(their_addr.ss_family,
                   get_in_addr((struct sockaddr *)&their_addr),
                   s, sizeof s);
-        //printf("server: got connection from %s\n", s);
+        printf("server: got connection from %s\n", s);
 
         if (!fork())
         { // this is the child process
@@ -236,11 +237,15 @@ int main(void)
     int rc = fork();
     if(rc==0)
     {
-        startListener(SENDERPORT);
+        pthread_t senderListener;
+        pthread_create(&senderListener,NULL,(void*) startListener,(void*) SENDERPORT);
+        pthread_join(senderListener,NULL);
     }
     else
     {
-        startListener(RECEIVERPORT);
+        pthread_t receiverListener;
+        pthread_create(&receiverListener,NULL,(void*) startListener,(void*) RECEIVERPORT);
+        pthread_join(receiverListener,NULL);
     }
 
     /*
