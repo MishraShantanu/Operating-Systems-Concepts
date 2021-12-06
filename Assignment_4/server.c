@@ -311,7 +311,6 @@ int startListener(void *portNumber)
                 if (send(new_fd, "hello, world!", strlen("hello, world!"),0) == -1)
                 {
                     printf("Error: sendto() failed to send your message to the receiver!\n");
-                    return (time_t) NULL;
                 }
             }
 
