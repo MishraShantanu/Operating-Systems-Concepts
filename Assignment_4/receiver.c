@@ -58,10 +58,13 @@ int waitingForMessage(SocketInformation *socketInfo)
                        perror("recv");
                      exit(1);
        }
-       if(numberofbytes==0){ //check if the connection is lost from the server 
+       if(numberofbytes==0)
+       { //check if the connection is lost from the server
             perror("Receiver: Connection Lost.\n");
+            exit(-1);
         }
-        if(strlen(buf)>0){ //if the msg length is greater then 0 the print the msg
+        if(strlen(buf)>0)
+        { //if the msg length is greater then 0 the print the msg
             printf("msg found %d ",numberofbytes);
             buf[numberofbytes] = '\0';
             printMessage(buf);    

@@ -187,7 +187,8 @@ int main(int argc, char *argv[])
             unsigned long bytesSent;
             userinput_string[strlen(userinput_string+1)] = '\0';
             if ((bytesSent = sendto(socketInfo->fd,userinput_string, strlen(userinput_string), 0,socketInfo->serverInformation->ai_addr,
-                             socketInfo->serverInformation->ai_addrlen)) == -1){
+                             socketInfo->serverInformation->ai_addrlen)) == -1)
+            {
                  //the sentto server failed 
                 printf("Error: sendto() failed to send your message!\n");
                exit(-1);

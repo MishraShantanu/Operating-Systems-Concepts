@@ -61,11 +61,6 @@ __________________________________________________
 //Send to each.
 
 
-struct receiverClient
-{
-    long unsigned connectionTime;
-    //Socket or fd?
-};
 
 void* handleSender(int new_fd, char* givenIP)
 {
@@ -102,14 +97,26 @@ void* handleSender(int new_fd, char* givenIP)
 }
 
 
+time_t handleReceiver()
+{
+    time_t connectedAt;
+    time(&connectedAt);
+
+    struct receiverClient *receiverInfo = malloc(sizeof(receiverClient));
+    receiverInfo->connectionTime = connectedAt;
+
+    printf("receiver connected at: %s\n",ctime(&connectedAt));
+    return connectedAt;
+}
+
 int compareTimes(time_t messageReceivedTime, time_t receiverConnectionTime)
 {
     printf("Comparing connection times...\n");
     //time_t recv = receiverConnectionTime + 1;
     //printf("Receiver connected to server at: at %s",ctime(&recv));
 
-    printf("Receiver connected to server at: at %s",ctime(&receiverConnectionTime));
-    printf("Message received by server at: %s",ctime(&messageReceivedTime));
+    printf("Receiver connected to server at: at %s\n",ctime(&receiverConnectionTime));
+    printf("Message received by server at: %s\n",ctime(&messageReceivedTime));
     //if (difftime(messageReceivedTime, recv) >= 0)
     if (difftime(messageReceivedTime, receiverConnectionTime) >= 0)
     {
@@ -239,8 +246,7 @@ void* createNewConnectionSocket(void *portNumber)
 
 int startListener(void *portNumber)
 {
-    int isSender = 0;
-    if (strcmp(portNumber, SENDERPORT) == 0) isSender = 1;
+
     char *PORT = malloc(strlen(portNumber) + 1);
     strncpy(PORT, portNumber , strlen(portNumber));
 
@@ -267,21 +273,26 @@ int startListener(void *portNumber)
                   connectingIP, sizeof connectingIP);
         printf("server: got connection from %s\n", connectingIP);
 
+        time_t timeSent = (time_t) NULL;
+        time_t timeConnected = (time_t) NULL;
+        int isSender = 0;
+        if (strcmp(portNumber, SENDERPORT) == 0) isSender = 1;
         if (!fork())
         { // this is the child process
-            close(socketInfo->fd); // child doesn't need the listener
+            //close(socketInfo->fd); // child doesn't need the listener
 
             if (isSender == 1) //Handle receiving messages from sender clients.
             {
-                time_t timeSent;
+
                 if ((void*)(timeSent = (time_t) handleSender(new_fd, connectingIP)) == NULL)
                 {
                     perror("handleSender");
                 }
                 else
                 {
-                    //printf("RECEIVED MESSAGE AT: %lu\n",timeSent);
-                    compareTimes(timeSent,timeSent);
+
+                    printf("RECEIVED MESSAGE AT: %lu\n",timeSent);
+                    //compareTimes(timeSent,timeSent);
                     //TODO: Use the time returned by handleSender to determine which receivers to send to.
                 }
             }
@@ -289,10 +300,25 @@ int startListener(void *portNumber)
             {
                 //Wait for a message.
                 //TODO: Use a condition variable here for waiting and broadcasting.
-                if (send(new_fd, "Hello, world!", 13, 0) == -1)
-                    perror("send");
+                printf("Attempting to get time of receiver connection...");
+
+                //timeConnected = handleReceiver();
+                if (send(new_fd, "hello, world!", strlen("hello, world!"),0) == -1)
+                {
+                    printf("Error: sendto() failed to send your message to the receiver!\n");
+                    //return (time_t) NULL;
+                }
             }
 
+            if ((void *) timeSent != NULL && (void *) timeConnected != NULL)
+            {
+                compareTimes(timeSent,timeConnected);
+            }
+            else
+            {
+                printf("Error -- one or more times was null.\n");
+                exit(-1);
+            }
             close(new_fd);
             exit(0);
         }
