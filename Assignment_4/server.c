@@ -27,7 +27,17 @@ __________________________________________________
 #define RECEIVERPORT "30003"
 #define BACKLOG 10
 #define MAXMESSAGELENGTH 1000
+#define MAXCONNECTIONS 10
 
+char buf[MAXMESSAGELENGTH];
+int socket_arr[MAXCONNECTIONS];
+
+int recevercount = 0,receverremaining = 0;
+
+struct clientinfo {
+    char fd[1000];
+    char ip[MAXMESSAGELENGTH + INET_ADDRSTRLEN];
+} allclientinfo[MAXCONNECTIONS];
 
 //Start server
 //Print ports.
@@ -62,74 +72,6 @@ __________________________________________________
 
 
 
-void* handleSender(int new_fd, char* givenIP)
-{
-    long unsigned numBytes;
-    char buf[MAXMESSAGELENGTH];
-
-    int fromLength = sizeof(struct sockaddr_storage);
-    if ((numBytes = recv(new_fd,buf,MAXMESSAGELENGTH-1,fromLength)) == -1)
-    {
-        perror("recv");
-        return NULL;
-    }
-    else
-    {
-
-        char messageBuffer[INET6_ADDRSTRLEN + 12 + numBytes];
-        strcpy(messageBuffer,"");
-        strcat(messageBuffer,givenIP);
-        strcat(messageBuffer,", ");
-        strcat(messageBuffer,SENDERPORT);
-        strcat(messageBuffer,": ");
-        strcat(messageBuffer,buf);
-
-
-
-        struct tm * timeinfo;
-        time_t receivedAt;
-        time(&receivedAt);
-        timeinfo = localtime(&receivedAt);
-        printf("server: received '%s' [Consisting of %lu bytes] at %02d:%02d:%02d.\n"
-                ,messageBuffer,strlen(messageBuffer),timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec);
-        return (void*) receivedAt;
-    }
-}
-
-
-time_t handleReceiver()
-{
-    time_t connectedAt;
-    time(&connectedAt);
-
-    struct receiverClient *receiverInfo = malloc(sizeof(receiverClient));
-    receiverInfo->connectionTime = connectedAt;
-
-    printf("receiver connected at: %s\n",ctime(&connectedAt));
-    return connectedAt;
-}
-
-int compareTimes(time_t messageReceivedTime, time_t receiverConnectionTime)
-{
-    printf("Comparing connection times...\n");
-    //time_t recv = receiverConnectionTime + 1;
-    //printf("Receiver connected to server at: at %s",ctime(&recv));
-
-    printf("Receiver connected to server at: at %s\n",ctime(&receiverConnectionTime));
-    printf("Message received by server at: %s\n",ctime(&messageReceivedTime));
-    //if (difftime(messageReceivedTime, recv) >= 0)
-    if (difftime(messageReceivedTime, receiverConnectionTime) >= 0)
-    {
-        printf("Message should be sent to receiver.\n");
-        return 0;
-    }
-    else
-    {
-        printf("Message should not be sent to receiver.\n");
-        return -1;
-    }
-}
-
 void sigchld_handler(int s)
 {
     (void)s; // quiet unused variable warning
@@ -142,15 +84,6 @@ void sigchld_handler(int s)
     errno = saved_errno;
 }
 
-// get sockaddr, IPv4 or IPv6:
-void *get_in_addr(struct sockaddr *sa)
-{
-    if (sa->sa_family == AF_INET) {
-        return &(((struct sockaddr_in*)sa)->sin_addr);
-    }
-
-    return &(((struct sockaddr_in6*)sa)->sin6_addr);
-}
 
 int startServer()
 {
@@ -163,10 +96,80 @@ int startServer()
     return 0;
 }
 
+// get sockaddr, IPv4 or IPv6:
+void *get_in_addr(struct sockaddr *sa)
+{
+    if (sa->sa_family == AF_INET) {
+        return &(((struct sockaddr_in*)sa)->sin_addr);
+    }
+
+    return &(((struct sockaddr_in6*)sa)->sin6_addr);
+}
+
+void* handleSender(void *socketinfo)
+{
+    struct SocketInformation *tmpsocketinfo = (struct SocketInformation*) socketinfo;
+    char tempBuf[MAXMESSAGELENGTH];
+    int numBytes;
+    int fromLength = sizeof(struct sockaddr_storage);
+    while(1)
+    {
+        if ((numBytes = recv(tmpsocketinfo->fd,buf,MAXMESSAGELENGTH-1,fromLength)) == -1)
+        {
+            perror("recv");
+            exit(1);
+        }
+        else if(numBytes==0)
+        {
+            perror("Server: Sender Connection Lost.\n");
+        }
+        else
+        {
+            tempBuf[numBytes] = '\0';
+            char messageBuffer[INET6_ADDRSTRLEN + 12 + numBytes];
+            strcpy(messageBuffer,"");
+            strcat(messageBuffer,tmpsocketinfo->serverInformation->ai_canonname);
+            strcat(messageBuffer,", ");
+            strcat(messageBuffer,SENDERPORT);
+            strcat(messageBuffer,": ");
+            strcat(messageBuffer,tempBuf);
+            strcpy(buf,messageBuffer);
+        }
+    }
+
+    //TODO: No idea how to reach this code, nor where socket is defined...
+    //close(socket);
+}
+
+void *handleReceiver(void *socketinfo)
+{
+    int counter_send;
+    int socket = *(int *)socketinfo;
+
+
+
+    pthread_detach(pthread_self());
+
+    //TODO: This is a temporary placeholder for the message to be sent, and will need to be replaced!
+    char buffer[100];
+    strcpy(buffer,"I AM A TEMPORARY PLACEHOLDER");
+
+    long numBytes;
+
+    while(1)
+    {
+        if((numBytes = send(socket,buffer,MAXMESSAGELENGTH,0)) != 0 )
+        {
+            printf("Error: sendto() failed to send your message to the receiver!\n");
+            exit(1);
+        }
+    }
+}
+
 void* createNewConnectionSocket(void *portNumber)
 {
     struct addrinfo hints, *serverInfo, *serverInfoIterator;
-    struct sockaddr_storage their_addr; // connector's address information
+    //   struct sockaddr_storage their_addr; // connector's address information
     struct sigaction sa;
 
     int newSocketFileDescriptor;
@@ -192,7 +195,7 @@ void* createNewConnectionSocket(void *portNumber)
     for(serverInfoIterator = serverInfo; serverInfoIterator != NULL; serverInfoIterator = serverInfoIterator->ai_next)
     {
         if ((newSocketFileDescriptor = socket(serverInfoIterator->ai_family, serverInfoIterator->ai_socktype,
-                             serverInfoIterator->ai_protocol)) == -1) {
+                                              serverInfoIterator->ai_protocol)) == -1) {
             perror("server: socket");
             continue;
         }
@@ -244,124 +247,86 @@ void* createNewConnectionSocket(void *portNumber)
     return returnMe;
 }
 
-int startListener(void *portNumber)
-{
 
-    if ((strcmp(portNumber,SENDERPORT) != 0) || (strcmp(portNumber,RECEIVERPORT) != 0))
+
+int main(void){
+
+    SocketInformation *sendersocketInfo = createNewConnectionSocket(SENDERPORT);
+    SocketInformation *receiversocketInfo = createNewConnectionSocket(RECEIVERPORT);
+
+    freeaddrinfo(sendersocketInfo->serverInformation);
+    freeaddrinfo(receiversocketInfo->serverInformation);
+
+    fd_set client_fdlist;
+    if(listen(sendersocketInfo->fd,BACKLOG)!=0 && listen(receiversocketInfo->fd,BACKLOG)!=0)
     {
-        printf("Failure! port number was not the specified listener or sender port.");
+        perror("Server failed to listen sender or receiver port \n");
     }
+    pthread_t listner;
 
-    char *PORT = malloc(strlen(portNumber) + 1);
-    strncpy(PORT, portNumber , strlen(portNumber));
-
-
-    struct sockaddr_storage their_addr; // connector's address information
-    socklen_t sin_size;
-    char connectingIP[INET6_ADDRSTRLEN];
-
-    printf("server: waiting for connections at %s...\n",PORT);
-    SocketInformation *socketInfo = createNewConnectionSocket(portNumber);
-    int new_fd;
+    int clientid = 0;
     while(1)
-    {  // main accept() loop
-        sin_size = sizeof their_addr;
-        new_fd = accept(socketInfo->fd, (struct sockaddr *)&their_addr, &sin_size);
-        if (new_fd == -1)
-        {
-            perror("accept");
-            continue;
+    {
+        FD_ZERO(&client_fdlist);
+        FD_SET(sendersocketInfo->fd,&client_fdlist);
+        FD_SET(receiversocketInfo->fd,&client_fdlist);
+
+        if(select(sendersocketInfo->fd+1,&client_fdlist,NULL,NULL,NULL)<0){
+            perror("Server failed to select \n");
+        }else{
+            struct sockaddr_storage their_addr; // connector's address information
+            socklen_t sin_size;
+            char connectingIP[INET6_ADDRSTRLEN];
+
+            if(FD_ISSET(receiversocketInfo->fd,&client_fdlist)){
+
+                socket_arr[clientid] = accept(receiversocketInfo->fd, (struct sockaddr *)&their_addr, &sin_size);
+                if (receiversocketInfo->fd == -1)
+                {
+                    perror("receiver\n");
+
+                }else
+                {
+                    inet_ntop(their_addr.ss_family,
+                              get_in_addr((struct sockaddr *)&their_addr),
+                              connectingIP, sizeof connectingIP);
+                    printf("server: got connection from %s\n", connectingIP);
+
+                    recevercount += 1;
+                    if(pthread_create(&listner,NULL,(void*) handleReceiver,(void*) &socket_arr[clientid]) != 0)
+                    {
+                        perror("Error creating a new receiver handler thread \n");
+                    }
+                    clientid +=1;
+
+
+                }
+            }
+            if(FD_ISSET(sendersocketInfo->fd,&client_fdlist))
+            {
+                socket_arr[clientid] = accept(sendersocketInfo->fd, (struct sockaddr *)&their_addr, &sin_size);
+                if (sendersocketInfo->fd == -1)
+                {
+                    perror("sender\n");
+
+                }else{
+                    inet_ntop(their_addr.ss_family,
+                              get_in_addr((struct sockaddr *)&their_addr),
+                              connectingIP, sizeof connectingIP);
+                    printf("server: got connection from %s\n", connectingIP);
+
+                    //TODO: I have no idea what's going on here.
+                    allclientinfo[clientid].fd = socket_arr[clientid];
+                    strcpy(allclientinfo[clientid].ip,connectingIP);
+
+                    recevercount += 1;
+                    if(pthread_create(&listner,NULL,(void*) handleSender,(void*) &allclientinfo[clientid]) != 0)
+                    {
+                        perror("Error creating a new receiver handler thread \n");
+                    }
+                    clientid +=1;
+                }
+            }
         }
-
-        inet_ntop(their_addr.ss_family,
-                  get_in_addr((struct sockaddr *)&their_addr),
-                  connectingIP, sizeof connectingIP);
-        printf("server: got connection from %s\n", connectingIP);
-
-        time_t timeSent = (time_t) NULL;
-        time_t timeConnected = (time_t) NULL;
-        int isSender = 0;
-        if (strcmp(portNumber, SENDERPORT) == 0) isSender = 1;
-        if (!fork())
-        { // this is the child process
-            //close(socketInfo->fd); // child doesn't need the listener
-
-            if (isSender == 1) //Handle receiving messages from sender clients.
-            {
-
-                if ((void*)(timeSent = (time_t) handleSender(new_fd, connectingIP)) == NULL)
-                {
-                    perror("handleSender");
-                }
-                else
-                {
-
-                    printf("RECEIVED MESSAGE AT: %lu\n",timeSent);
-                    //compareTimes(timeSent,timeSent);
-                    //TODO: Use the time returned by handleSender to determine which receivers to send to.
-                }
-            }
-            else
-            {
-                //Wait for a message.
-                //TODO: Use a condition variable here for waiting and broadcasting.
-                printf("Attempting to get time of receiver connection...");
-
-                //timeConnected = handleReceiver();
-                if (send(new_fd, "hello, world!", strlen("hello, world!"),0) == -1)
-                {
-                    printf("Error: sendto() failed to send your message to the receiver!\n");
-                }
-            }
-
-            if ((void *) timeSent != NULL && (void *) timeConnected != NULL)
-            {
-                compareTimes(timeSent,timeConnected);
-            }
-            else
-            {
-                printf("Error -- one or more times was null.\n");
-                //exit(-1);
-            }
-            close(new_fd);
-            exit(0);
-        }
-        close(new_fd);  // parent doesn't need this
     }
 }
-
-
-int main(void)
-{
-    startServer();
-    int rc = fork();
-    if(rc==0)
-    {
-        pthread_t senderListener;
-        pthread_create(&senderListener,NULL,(void*) startListener,(void*) SENDERPORT);
-        pthread_join(senderListener,NULL);
-    }
-    else
-    {
-        pthread_t receiverListener;
-        pthread_create(&receiverListener,NULL,(void*) startListener,(void*) RECEIVERPORT);
-        pthread_join(receiverListener,NULL);
-    }
-
-    /*
-For each connection, do this in order:
-    1. getaddrinfo();
-        //    getaddrinfo(NULL, MYPORT, &hints, &res);
-    2. socket();
-        //    sockfd = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
-    3. bind();
-        //    bind(sockfd, res->ai_addr, res->ai_addrlen);
-    4. listen();
-        //    listen(sockfd, BACKLOG);
-    5. accept();
-        //    int new_fd = accept(sockfd, (struct sockaddr *)&their_addr, &addr_size);
-     */
-
-    return 0;
-}
-
