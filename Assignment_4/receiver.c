@@ -24,7 +24,7 @@ __________________________________________________
 
 
 #include "receiver.h"
-#define SERVERPORT "30003" // the port receiver uses to connect to the server
+//#define SERVERPORT "30003" // the port receiver uses to connect to the server
 
 /* PURPOSE: Prints the broadcast msg
  * PRE-CONDITIONS: - message -- the array of characters which holds the broadcast msg
@@ -58,10 +58,13 @@ int waitingForMessage(SocketInformation *socketInfo)
             perror("recv");
             exit(1);
         }
-        if(numberofbytes==0){ //check if the connection is lost from the server
+        if(numberofbytes==0)
+        { //check if the connection is lost from the server
             perror("Receiver: Connection Lost.\n");
+            exit(-1);
         }
-        if(strlen(buf)>0){ //if the msg length is greater then 0 the print the msg
+        if(strlen(buf)>0)
+        { //if the msg length is greater then 0 the print the msg
             printf("msg found %d ",numberofbytes);
             buf[numberofbytes] = '\0';
             printMessage(buf);
@@ -79,7 +82,7 @@ int waitingForMessage(SocketInformation *socketInfo)
  * POST-CONDITIONS: receiver gets connected to the server. if error is generated in btw then it retuen null
  * RETURN: fd - on success and on failure returns null
  */
-void* attemptConnection(char* hostName)
+void* attemptConnection(char* hostName, char* SERVERPORT)
 {
     printf("Attempting to connect to host %s on port %s...\n",hostName,SERVERPORT);
 
@@ -163,16 +166,21 @@ int checkArgs(int argCount)
 {
     if (argCount == 1)
     {
-        printf("Error: You must specify the host you want to connect to as a command line argument.\n");
-        exit(-1);
+        printf("Error: You must specify the host and port you want to connect to as a command line argument.\n");
+        return -1;
     }
     else if (argCount == 2)
+    {
+        printf("Error: You must provide the port used to communicate with the server.");
+        return -1;
+    }
+    else if (argCount == 3)
     {
         return 0;
     }
     else
     {
-        printf("Error: too many commandline arguments! Only need hostname.\n");
+        printf("Error: too many commandline arguments! Only need hostname and port.\n");
     }
     return -1;
 }
@@ -189,32 +197,31 @@ int main(int argc, char* argv[])
     //Ensure user has inputted a proper amount of command line arguments.
     if (checkArgs(argc) != 0)
     {
-        printf("Error: The host name was not specified as command line argument.\n");
-        return -1;
+        exit(-1);
     }
 
     //get the hostname from args
     char *desiredHost = argv[1];
-
-    //attempt a connectio, try to resolve the hostname and create a socket connection
+    char *desiredPort = argv[2];
+    //attempt a connection, try to resolve the hostname and create a socket connection
     // to the host
-    SocketInformation *socketInfo = attemptConnection(desiredHost);
+    SocketInformation *socketInfo = attemptConnection(desiredHost,desiredPort);
 
-    //if connetion failed exit the program
+    //if connection failed exit the program
     if (socketInfo == NULL) exit(-1);
 
     else printf("Connection successful!\n");
 
-    //if connection was successfull the free the serverinfo
+    //if connection was successful, free the serverinfo.
     freeaddrinfo(socketInfo->serverInformation);
 
-    //loop in a infinite to keep checking if server fwd any msg
+    //Infinite loop to keep checking if server fwd any msg
     waitingForMessage(socketInfo);
 
     //close the fd
     close(socketInfo->fd);
 
-    //releas the memory accquire by the socket
+    //release the memory acquired by the socket
     free(socketInfo);
 
     return 0;
