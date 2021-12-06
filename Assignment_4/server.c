@@ -105,13 +105,22 @@ void* handleSender(int new_fd, char* givenIP)
 int compareTimes(time_t messageReceivedTime, time_t receiverConnectionTime)
 {
     printf("Comparing connection times...\n");
+    //time_t recv = receiverConnectionTime + 1;
+    //printf("Receiver connected to server at: at %s",ctime(&recv));
 
-    printf("Message received by server at: %s",ctime(&messageReceivedTime));
     printf("Receiver connected to server at: at %s",ctime(&receiverConnectionTime));
-
-    //printf("Message received by server at: at %02d:%02d:%02d.\n",messageReceivedTime.tm_hour, messageReceivedTime.tm_min,messageReceivedTime.tm_sec);
-    //printf("Receiver connected to server at: at %02d:%02d:%02d.\n",receiverConnectionTime.tm_hour, receiverConnectionTime.tm_min,receiverConnectionTime.tm_sec);
-    return 0;
+    printf("Message received by server at: %s",ctime(&messageReceivedTime));
+    //if (difftime(messageReceivedTime, recv) >= 0)
+    if (difftime(messageReceivedTime, receiverConnectionTime) >= 0)
+    {
+        printf("Message should be sent to receiver.\n");
+        return 0;
+    }
+    else
+    {
+        printf("Message should not be sent to receiver.\n");
+        return -1;
+    }
 }
 
 void sigchld_handler(int s)
