@@ -182,8 +182,10 @@ int main(int argc, char *argv[])
          userinput = getline(&userinput_string, &userinput_size, stdin);
 //          printf("user input len %ld: ",strlen(userinput_string));
         
-        if( userinput>-1){ //if user input was successfull 
-             unsigned long bytesSent;
+        if( userinput>-1)
+        { //if user input was successfull
+            unsigned long bytesSent;
+            userinput_string[strlen(userinput_string+1)] = '\0';
             if ((bytesSent = sendto(socketInfo->fd,userinput_string, strlen(userinput_string), 0,socketInfo->serverInformation->ai_addr,
                              socketInfo->serverInformation->ai_addrlen)) == -1){
                  //the sentto server failed 

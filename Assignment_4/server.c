@@ -60,6 +60,13 @@ __________________________________________________
 //Queue sending the message to all current receivers.
 //Send to each.
 
+
+struct receiverClient
+{
+    long unsigned connectionTime;
+    //Socket or fd?
+};
+
 void* handleSender(int new_fd, char* givenIP)
 {
     long unsigned numBytes;
@@ -74,7 +81,6 @@ void* handleSender(int new_fd, char* givenIP)
     else
     {
 
-        buf[numBytes] = '\0';
         char messageBuffer[INET6_ADDRSTRLEN + 12 + numBytes];
         strcpy(messageBuffer,"");
         strcat(messageBuffer,givenIP);
@@ -82,7 +88,8 @@ void* handleSender(int new_fd, char* givenIP)
         strcat(messageBuffer,SENDERPORT);
         strcat(messageBuffer,": ");
         strcat(messageBuffer,buf);
-        strcat(messageBuffer,"\0");
+
+
 
         struct tm * timeinfo;
         time_t receivedAt;
@@ -92,6 +99,19 @@ void* handleSender(int new_fd, char* givenIP)
                 ,messageBuffer,strlen(messageBuffer),timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec);
         return (void*) receivedAt;
     }
+}
+
+
+int compareTimes(time_t messageReceivedTime, time_t receiverConnectionTime)
+{
+    printf("Comparing connection times...\n");
+
+    printf("Message received by server at: %s",ctime(&messageReceivedTime));
+    printf("Receiver connected to server at: at %s",ctime(&receiverConnectionTime));
+
+    //printf("Message received by server at: at %02d:%02d:%02d.\n",messageReceivedTime.tm_hour, messageReceivedTime.tm_min,messageReceivedTime.tm_sec);
+    //printf("Receiver connected to server at: at %02d:%02d:%02d.\n",receiverConnectionTime.tm_hour, receiverConnectionTime.tm_min,receiverConnectionTime.tm_sec);
+    return 0;
 }
 
 void sigchld_handler(int s)
@@ -244,14 +264,15 @@ int startListener(void *portNumber)
 
             if (isSender == 1) //Handle receiving messages from sender clients.
             {
-                long unsigned timeSent;
+                time_t timeSent;
                 if ((void*)(timeSent = (time_t) handleSender(new_fd, connectingIP)) == NULL)
                 {
                     perror("handleSender");
                 }
                 else
                 {
-                    printf("RECEIVED MESSAGE AT: %lu",timeSent);
+                    //printf("RECEIVED MESSAGE AT: %lu\n",timeSent);
+                    compareTimes(timeSent,timeSent);
                     //TODO: Use the time returned by handleSender to determine which receivers to send to.
                 }
             }
