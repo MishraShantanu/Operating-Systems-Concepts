@@ -36,4 +36,12 @@ typedef struct SocketInformation
     struct addrinfo *serverInformation; //info of the host server
 }SocketInformation;
 
+
+struct receiverClient
+{
+    time_t connectionTime;
+    SocketInformation socketInfo;
+
+}receiverClient;
+
 #endif //ASSIGNMENT_4_SERVER_H

@@ -22,7 +22,7 @@ __________________________________________________
  */
 
 #include "client.h"
-#define SERVERPORT "30002"	// the port users will be connecting to
+//#define SERVERPORT "30002"	// the port users will be connecting to
 
 /* PURPOSE: Checks if user provided the right amount of arguments to run the program 
  * PRE-CONDITIONS: - argCount -- the count of the arguments provided by the user while running the program  
@@ -31,20 +31,24 @@ __________________________________________________
  * RETURN: if successful then retuns 0 else return -1 or exits the program 
  */
 int checkArgs(int argCount)
-{   printf("%d", argCount);
-  
-    if (argCount == 1) //if the host name is not provided as arg 
+{
+    if (argCount == 1)
     {
-        printf("Error: The host name was not specified as command line argument.\n");
+        printf("Error: You must specify the host and port you want to connect to as a command line argument.\n");
+        return -1;
     }
-    else if(argCount == 2) //host name is provided as arg 
+    else if (argCount == 2)
+    {
+        printf("Error: You must provide the port used to communicate with the server.");
+        return -1;
+    }
+    else if (argCount == 3)
     {
         return 0;
     }
     else
-    {   
-        printf("Error: Cannot parse the given command line arguments -- too many given!\n"
-               "(Did you forget to put your message in quotes?)\n");
+    {
+        printf("Error: too many commandline arguments! Only need hostname and port.\n");
     }
     return -1;
 }
@@ -58,8 +62,8 @@ int checkArgs(int argCount)
  * POST-CONDITIONS: receiver gets connected to the server. if error is generated in btw then it retuen null 
  * RETURN: fd - on success and on failure returns null 
  */
-void* attemptConnection(char* hostName)
-{  
+void* attemptConnection(char* hostName, char* SERVERPORT)
+{
     printf("Attempting to connect to host %s on port %s...\n",hostName,SERVERPORT);
 
     //Setup for printing IP Address.
@@ -151,12 +155,13 @@ int main(int argc, char *argv[])
     }
 
     char *desiredHost = argv[1];
+    char *desiredPort = argv[2];
 
     int userinput;
     size_t userinput_size = MAXMSGLEN;
     char *userinput_string = (char *) malloc (userinput_size*sizeof(char));
  
-    SocketInformation *socketInfo = attemptConnection(desiredHost);
+    SocketInformation *socketInfo = attemptConnection(desiredHost,desiredPort);
 
     if (socketInfo == NULL)
     {
@@ -177,10 +182,13 @@ int main(int argc, char *argv[])
          userinput = getline(&userinput_string, &userinput_size, stdin);
 //          printf("user input len %ld: ",strlen(userinput_string));
         
-        if( userinput>-1){ //if user input was successfull 
-             unsigned long bytesSent;
+        if( userinput>-1)
+        { //if user input was successfull
+            unsigned long bytesSent;
+            userinput_string[strlen(userinput_string+1)] = '\0';
             if ((bytesSent = sendto(socketInfo->fd,userinput_string, strlen(userinput_string), 0,socketInfo->serverInformation->ai_addr,
-                             socketInfo->serverInformation->ai_addrlen)) == -1){
+                             socketInfo->serverInformation->ai_addrlen)) == -1)
+            {
                  //the sentto server failed 
                 printf("Error: sendto() failed to send your message!\n");
                exit(-1);

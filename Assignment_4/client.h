@@ -35,7 +35,7 @@ typedef struct SocketInformation
 }SocketInformation;
 
 int checkArgs(int argCount);
-void* attemptConnection(char* hostName);
+void* attemptConnection(char* hostName,char* desiredPort);
 
 #define MAXMSGLEN 500 //max length of a msg
 
