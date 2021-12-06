@@ -247,6 +247,11 @@ void* createNewConnectionSocket(void *portNumber)
 int startListener(void *portNumber)
 {
 
+    if ((strcmp(portNumber,SENDERPORT) != 0) || (strcmp(portNumber,RECEIVERPORT) != 0))
+    {
+        printf("Failure! port number was not the specified listener or sender port.");
+    }
+
     char *PORT = malloc(strlen(portNumber) + 1);
     strncpy(PORT, portNumber , strlen(portNumber));
 
